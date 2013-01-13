@@ -5,3 +5,10 @@ output/
 
 # Temporary file directory
 tmp/
+
+# Generic files to ignore
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
