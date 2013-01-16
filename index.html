@@ -43,7 +43,7 @@
 			var animation;
 
 			function animation() {
-
+				console.log("loll")
 			}
 
 			function linePath(x1, y1, x2, y2) { 
@@ -103,10 +103,15 @@
 				return {'shortpath': shortpath, 'longpath': longpath};
 			}
 
+			function rangeRandom(a, b) {
+				console.log((b - a))
+				return Math.floor((Math.random() * (b - a)) + a)
+			}
+
 			Raphael.fn.randomPoint = function() {
 				return {
-					"x": this.canvas.clientWidth * Math.random(),
-					"y": this.canvas.clientHeight * Math.random() 
+					"x": rangeRandom(0, this.canvas.clientWidth),
+					"y": rangeRandom(0, this.canvas.clientHeight) 
 				}
 			};
 
@@ -252,9 +257,24 @@
 		<div id="background"></div>
 		<div id="foreground">
 			<h1>Nicolas Hillegeer // Web developer and software engineer</h1>
+			<nav>
+				<ul>
+					<li>About Me</li>
+					<li>Portfolio</li>
+					<li>Curriculum</li>
+					<li>Contact</li>
+				</ul>
+			</nav>
 			<p>
 				Nothing to see here folks, move along.
 			</p>
 		</div>		
+		
+		<script>
+		    var _gaq=[['_setAccount','UA-37726728-1'],['_trackPageview']];
+		    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+		    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+		    s.parentNode.insertBefore(g,s)}(document,'script'));
+		</script>
 	</body>
 </html>
