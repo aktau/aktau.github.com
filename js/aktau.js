@@ -60,6 +60,71 @@ function rangeRandom(a, b) {
 	return Math.floor((Math.random() * (b - a)) + a);
 }
 
+function hexagon(radius) {
+	var path = "",
+		startAngle = 90,
+		deg2rad = Math.PI / 180;
+
+	for (var i = 0; i <= 6; ++i) {
+		var degrees = startAngle + (i * 60),
+			radians = degrees * deg2rad,
+			x = radius * Math.cos(radians),
+			y = radius * Math.sin(radians);
+		
+		path += (i === 0 ? "M" : "L") + x + "," + y;
+	}
+
+	path += "Z";
+
+	return path;
+}
+
+// returns 3 SVG paths representing the faces of the cube
+// r.cube(50).forEach(function(e) { e.attr({"transform": "T100,100","fill": "red"}) })
+function cube(length) {
+	var faces = [],
+		faceIndex = 0,
+		startAngle = 90,
+		deg2rad = Math.PI / 180;
+
+	for (var i = 0; i < 3; ++i) {
+		var face = "";
+
+		for (var j = 0; j <= 2; ++j) {
+			var degrees = startAngle + (((i * 2) + j) * 60),
+				radians = degrees * deg2rad,
+				x = length * Math.cos(radians),
+				y = length * Math.sin(radians);
+
+			console.log(degrees, radians, length);
+
+			face += (j === 0 ? "M" : "L") + x + "," + y;
+		}
+
+		console.log("setting " + faceIndex);
+		face += "L0,0";
+		faces[faceIndex++] = face + "Z";
+	}
+
+	return faces;
+}
+
+Raphael.fn.hexagon = function(radius) {
+	return this.path(hexagon(radius));
+};
+
+// cube is actually based on a hexagon, returns 3 faces.
+Raphael.fn.cube = function(length) {
+	var facePaths = cube(length),
+		faces = [];
+
+	for (var i = 0; i < facePaths.length; i++) {
+		faces.push(this.path(facePaths[i]));
+	}
+
+	return faces;
+};
+
 Raphael.fn.randomPoint = function() {
 	return {
 		"x": rangeRandom(0, backgroundElem.width()),
@@ -91,7 +156,7 @@ Raphael.fn.line = function(x1, y1, x2, y2, attr) {
 
 Raphael.fn.connection = function (obj1, obj2, attr) {
 	var pathspec = smoothPath(obj1, obj2).shortpath;
-	
+
 	return this.path(pathspec).attr(attr);
 };
 
@@ -112,6 +177,8 @@ Raphael.fn.connection = function (obj1, obj2, attr) {
 
 // smoother curve - http://jsfiddle.net/gyeSf/17/
 
+// clip images according to svg path: https://coderwall.com/p/blx8kw
+
 window.onload = function () {
 	console.log("Starting up...");
 
@@ -127,6 +194,10 @@ window.onload = function () {
 		var rp = r.randomPoint();
 
 		circles.push(r.randomCircle(rp.x, rp.y, 50));
+
+		r.hexagon(60)
+			.attr({"stroke-width": 10, "stroke": "white", "fill": "white"})
+			.animate({"transform": "t" + rp.x + "," + rp.y}, 3000);
 	}
 
 	for (i = 0, len = circles.length; i < len; ++i) {
@@ -138,6 +209,29 @@ window.onload = function () {
 		console.log("animating from " + circle.getBBox().x + " to "  + (circle.getBBox().x + 40));
 
 		circle.animate({"cx": cx + 80, "cy": cy + 80}, 1000);				
+	}
+
+	var radius = 50,
+		startx = 100,
+		starty = 100,
+		xstep = radius * Math.sqrt(3),
+		ystep = radius * (1.5), // radius
+		steps = 7,
+		alternate = 0,
+		cubes = []; 
+
+	for (i = 0; i <= steps; ++i) {
+		var dy = starty + i * ystep;
+
+		for (j = 0; j <= steps; ++j) {
+			var dx = startx + j * xstep,
+				c = r.cube(50)
+				.forEach(function(e) { e.attr({"transform": "T" + dx + "," + dy, "fill": "red"}) });
+
+			cubes.push(c);
+		}
+
+		startx += ((++alternate % 2 === 0) ? 1 : -1) * (xstep / 2);
 	}
 
 	// animation = window.setInterval(animate, 10);
