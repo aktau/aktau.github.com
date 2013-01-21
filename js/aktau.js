@@ -1,49 +1,26 @@
-/* Colors */
+/* global variables */
 
-var solarized = {
-	"background": "#002b36",
-	"background2": "#073642"
+var globalCubes = [];
+
+/* object system, javascript.info */
+
+var aktau = {
+	inherit: function(proto) {
+		function F() {}
+		F.prototype = proto;
+		return new F();
+	},
+
+	extend: function(child, parent) {
+		child.prototype = inherit(parent.prototype);
+		child.prototype.constructor = child;
+		child.parent = parent.prototype;
+	}
 };
 
-var palette = solarized;
+/* objects */
 
-function brighten(hex, percent){
-    // strip the leading # if it's there
-    hex = hex.replace(/^\s*#|\s*$/g, '');
-
-    // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
-    if(hex.length == 3){
-        hex = hex.replace(/(.)/g, '$1$1');
-    }
-
-    var r = parseInt(hex.substr(0, 2), 16),
-        g = parseInt(hex.substr(2, 2), 16),
-        b = parseInt(hex.substr(4, 2), 16);
-
-    return '#' +
-       ((0|(1<<8) + r + (256 - r) * percent / 100).toString(16)).substr(1) +
-       ((0|(1<<8) + g + (256 - g) * percent / 100).toString(16)).substr(1) +
-       ((0|(1<<8) + b + (256 - b) * percent / 100).toString(16)).substr(1);
-}
-
-function darken(hex, percent){
-    // strip the leading # if it's there
-    hex = hex.replace(/^\s*#|\s*$/g, '');
-
-    // convert 3 char codes --> 6, e.g. `E0F` --> `EE00FF`
-    if(hex.length == 3){
-        hex = hex.replace(/(.)/g, '$1$1');
-    }
-
-    var r = parseInt(hex.substr(0, 2), 16),
-        g = parseInt(hex.substr(2, 2), 16),
-        b = parseInt(hex.substr(4, 2), 16);
-
-    return '#' +
-       ((0|(1<<8) + r * (100 - percent) / 100).toString(16)).substr(1) +
-       ((0|(1<<8) + g + (100 - percent) / 100).toString(16)).substr(1) +
-       ((0|(1<<8) + b + (100 - percent) / 100).toString(16)).substr(1);
-}
+// none yet
 
 /* Raphael */
 
@@ -111,73 +88,99 @@ function rangeRandom(a, b) {
 	return Math.floor((Math.random() * (b - a)) + a);
 }
 
-function hexagon(radius) {
-	var path = "",
-		startAngle = 90,
-		deg2rad = Math.PI / 180;
+/*
 
-	for (var i = 0; i <= 6; ++i) {
-		var degrees = startAngle + (i * 60),
-			radians = degrees * deg2rad,
-			x = radius * Math.cos(radians),
-			y = radius * Math.sin(radians);
+You can copy and paste the below into your codebase somewhere.
+As long as Raphael is a global object, it'll just work.
 
-		path += (i === 0 ? "M" : "L") + x + "," + y;
-	}
+USAGE (same default values for optional parameters as Raphaël's "animate" method)
+=====
+element.animateAlong({
+	path: REQUIRED - Path data string or path element,
+	rotate: OPTIONAL - Boolean whether to rotate element with the direction it is moving
+	                   (this is a beta feature - currently kills existing transformations
+	                    and rotation may not be perfect),
+	duration: OPTIONAL - Number in milliseconds,
+	easing: OPTIONAL - String (see Raphaël's docs),
+	debug: OPTIONAL - Boolean, when set to true, paints the animating path, which is
+					  helpful if it isn't already rendered to the screen
+},
+props - Object literal containing other properties to animate,
+callback - Function where the "this" object refers to the element itself
+);
 
-	path += "Z";
+EXAMPLE
+=======
+var rect = paper.rect(0,0,50,50);
+rect.animateAlong({
+	path: "M0,0L100,100",
+	rotate: true,
+	duration: 5000,
+	easing: 'ease-out',
+	debug: true
+},
+{
+	transform: 's0.25',
+	opacity: 0
+},
+function() {
+	alert("Our opacity is now:" + this.attr('opacity'));
+});
 
-	return path;
-}
+*/
 
-// returns 3 SVG paths representing the faces of the cube
-// r.cube(50).forEach(function(e) { e.attr({"transform": "T100,100","fill": "red"}) })
-function cube(length, startAngle) {
-	var faces = [],
-		faceIndex = 0,
-		deg2rad = Math.PI / 180;
+Raphael.el.animateAlong = function(params, props, callback) {
+	var element = this,
+		paper = element.paper,
+		path = params.path,
+		rotate = params.rotate,
+		duration = params.duration,
+		easing = params.easing,
+		debug = params.debug,
+		isElem = typeof path !== 'string';
 
-	startAngle = startAngle || 90;
+	element.path = isElem ? path : paper.path(path);
+	element.pathLen = element.path.getTotalLength();
+	element.rotateWith = rotate;
 
-	for (var i = 0; i < 3; ++i) {
-		var face = "";
+	element.path.attr({
+		stroke: debug ? 'red' : isElem ? path.attr('stroke') : 'rgba(0,0,0,0)',
+		'stroke-width': debug ? 2 : isElem ? path.attr('stroke-width') : 0
+	});
 
-		for (var j = 0; j <= 2; ++j) {
-			var degrees = startAngle + (((i * 2) + j) * 60),
-				radians = degrees * deg2rad,
-				x = length * Math.cos(radians),
-				y = length * Math.sin(radians);
+	paper.customAttributes.along = function(v) {
+		var point = this.path.getPointAtLength(v * this.pathLen),
+			attrs = {
+				x: point.x,
+				y: point.y
+			};
 
-			console.log(degrees, radians, length);
-
-			face += (j === 0 ? "M" : "L") + x + "," + y;
+		if (this.rotateWith) {
+			attrs.transform = 'r' + point.alpha;
 		}
 
-		console.log("setting " + faceIndex);
-		face += "L0,0";
-		faces[faceIndex++] = face + "Z";
-	}
-
-	return faces;
-}
-
-Raphael.fn.hexagon = function(radius) {
-	return this.path(hexagon(radius));
-};
-
-// cube is actually based on a hexagon, returns 3 faces.
-Raphael.fn.cube = function(length) {
-	var facePaths = cube(length),
-		faces = [];
-
-	for (var i = 0; i < facePaths.length; i++) {
-		faces.push(this.path(facePaths[i]));
-	}
-
-	return {
-		"faces": faces,
-		"cube": this.set().push(faces[0], faces[1], faces[2])
+		return attrs;
 	};
+
+	if(props instanceof Function) {
+		callback = props;
+		props = null;
+	}
+	if(!props) {
+		props = {
+			along: 1
+		};
+	} else {
+		props.along = 1;
+	}
+
+	var startAlong = element.attr('along') || 0;
+
+	element.attr({along: startAlong}).animate(props, duration, easing, function() {
+		!isElem && element.path.remove();
+
+		callback && callback.call(element);
+	});
 };
 
 Raphael.fn.randomPoint = function() {
@@ -266,33 +269,7 @@ window.onload = function () {
 		circle.animate({"cx": cx + 80, "cy": cy + 80}, 1000);
 	}
 
-	var radius = 50,
-		startx = 500,
-		starty = 200,
-		xstep = radius * Math.sqrt(3),
-		ystep = radius * (1.5), // radius
-		steps = 6,
-		alternate = 0,
-		cubes = [];
-
-	for (i = 0; i <= steps; ++i) {
-		var dy = starty + i * ystep;
-
-		for (j = 0; j <= steps; ++j) {
-			var dx = startx + j * xstep,
-				c = r.cube(50);
-
-			console.log("going for it...");
-			console.log(c);
-			c.cube.attr({"transform": "T" + dx + "," + dy, "fill": ((i + j) % 2 === 0) ? "red" : "orange"});
-			c.faces[0].attr({"fill": darken(palette.background2, 25)});
-			c.faces[1].attr({"fill": brighten(palette.background2, 25)});
-
-			cubes.push(c);
-		}
-
-		startx += ((++alternate % 2 === 0) ? 1 : -1) * (xstep / 2);
-	}
+	globalCubes = setupCubes();
 
 	/*
 	var cubeAngle = 0;
@@ -316,4 +293,18 @@ window.onload = function () {
 	var animation = window.setInterval(animate, 2000);
 
 	*/
+
+	$(document).keydown(function(e) {
+		console.log("keypress: " + e.which);
+
+		switch (e.which) {
+			// user presses "c"
+			case 67:
+				console.log("changing colors...");
+				globalCubes.forEach(function(container) {
+					container.cube.animate({"cubeColor": nextPaletteColor() }, 1000);
+				});
+			break;
+		}
+	});
 }
