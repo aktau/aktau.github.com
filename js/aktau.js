@@ -2,6 +2,13 @@
 
 var globalCubes = [];
 
+/* config */
+
+// tie color.js into design.js
+
+PaletteModifier.palettes.solarized = solarized;
+PaletteModifier.palettes.zenburn = zenburn;
+
 /* object system, javascript.info */
 
 var aktau = {
@@ -18,7 +25,7 @@ var aktau = {
 	}
 };
 
-/* objects */
+/* helper functions */
 
 // none yet
 
@@ -245,31 +252,27 @@ window.onload = function () {
 
 	backgroundElem = $("#background");
 
-	var circles = [],
-		i;
+	// var circles = [],
+	// 	i;
 
-	for (i = 0; i < 30; ++i) {
-		var rp = r.randomPoint();
+	// for (i = 0; i < 30; ++i) {
+	// 	var rp = r.randomPoint();
 
-		circles.push(r.randomCircle(rp.x, rp.y, 50));
+	// 	circles.push(r.randomCircle(rp.x, rp.y, 50));
+	// }
 
-		// r.hexagon(60)
-		// 	.attr({"stroke-width": 10, "stroke": "white", "fill": "white"})
-		// 	.animate({"transform": "t" + rp.x + "," + rp.y}, 3000);
-	}
+	// for (i = 0, len = circles.length; i < len; ++i) {
+	// 	var circle = circles[i];
 
-	for (i = 0, len = circles.length; i < len; ++i) {
-		var circle = circles[i];
+	// 	var cx = circle.attr("cx"),
+	// 		cy = circle.attr("cy");
 
-		var cx = circle.attr("cx"),
-			cy = circle.attr("cy");
+	// 	console.log("animating from " + circle.getBBox().x + " to "  + (circle.getBBox().x + 40));
 
-		console.log("animating from " + circle.getBBox().x + " to "  + (circle.getBBox().x + 40));
+	// 	circle.animate({"cx": cx + 80, "cy": cy + 80}, 1000);
+	// }
 
-		circle.animate({"cx": cx + 80, "cy": cy + 80}, 1000);
-	}
-
-	globalCubes = setupCubes();
+	// globalCubes = setupCubes();
 
 	/*
 	var cubeAngle = 0;
@@ -293,18 +296,4 @@ window.onload = function () {
 	var animation = window.setInterval(animate, 2000);
 
 	*/
-
-	$(document).keydown(function(e) {
-		console.log("keypress: " + e.which);
-
-		switch (e.which) {
-			// user presses "c"
-			case 67:
-				console.log("changing colors...");
-				globalCubes.forEach(function(container) {
-					container.cube.animate({"cubeColor": nextPaletteColor() }, 1000);
-				});
-			break;
-		}
-	});
 }

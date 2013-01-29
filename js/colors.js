@@ -40,7 +40,7 @@ var zenburn = {
 	"color15":		"#ffffff"
 };
 
-var palette = zenburn;
+var palette = solarized;
 
 // make palette easy to enumerate
 var colorNames = (function() {
