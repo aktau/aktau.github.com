@@ -51,22 +51,43 @@
 				z-index: -1;
 			}
 
+			header {
+				padding: 20px 0 20px 0;
+				margin: 50px 0 50px 0;
+				background-color: #586e75;
+				box-shadow: 5px 5px 25px -2px #222;
+			}
+
 			nav {
-				overflow: hidden; /* avoid collapsing margins problem */
+				/* overflow: hidden; *//* avoid collapsing margins problem */
+				background-color: #eee8d5;
+				box-shadow: 5px 5px 25px -2px #333;
 			}
 
 			nav ul {
 				margin: 0;
 				padding: 0;
+				text-align: center;
+				font-size: 1.618em;
 			}
 
 			nav ul li {
 				display: inline;
+				list-style-type: none;
+				margin: 0 2.5em 0 2.5em;
 				/*font-family: 'Lobster';*/
 			}
 
 			nav ul li a {
-				color: #FFFFFF;
+				text-decoration: none;
+				color: #002b36;
+
+				padding: 5px;
+				border-radius: 5px;
+			}
+
+			nav ul li a:hover {
+				background-color: #eee8d5;
 			}
 
 			h1 {
@@ -82,14 +103,14 @@
 				position: absolute;
 				bottom: 0;
 
+				padding-bottom: 5px;
+
 				display: block;
 				width: 100%;
 				text-align: center;
 
-				background-color: #000;
-				color: #586e75;
+				color: #93a1a1;
 				font-size: 10px;
-
 
 				margin: 0 auto;
 			}
@@ -120,22 +141,17 @@
 	<body>
 		<div id="background"></div>
 
-		<header>
-			<nav>
-				<ul>
-					<li><a href="./about.html">About Me</a></li>
-					<li><a href="./portfolio.html">Portfolio</a></li>
-					<li><a href="./cv.html">Curriculum</a></li>
-					<li><a href="./contact.html">Contact</a></li>
-				</ul>
-			</nav>
-		</header>
-
 		<section>
 			<h1>Hi, I'm Nicolas Hillegeer,<br /> I <span class="job">develop websites</span> &amp; <span class="job">engineer software</span></h1>
 		</section>
 
-		<h1>bla</h1>
+		<header>
+			<nav>
+				<ul>
+					<li><a href="./cv-alt/cv.pdf">Curriculum</a></li>
+				</ul>
+			</nav>
+		</header>
 
 		<footer>
 			Copyright &copy; 2013 Nicolas Hillegeer. All Rights Reserved.
