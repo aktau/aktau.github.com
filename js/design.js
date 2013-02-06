@@ -30,6 +30,11 @@
  *			ul li a		-> [color, background-color] -> [color, random-color]
  */
 
+define(["design.core", "design.selection", "design.controllers"], function(CORE) {
+	return CORE;
+});
+
+/*
 var util = util || {
 	inherit: function(proto) {
 		function F() {}
@@ -113,6 +118,7 @@ function PaletteModifier(palette) {
 PaletteModifier.palettes = {};
 
 PaletteModifier.prototype = util.inherit(OrdinalModifier.prototype);
+*/
 
 /**
  * A modifier is an object that has the following properties:
@@ -140,6 +146,7 @@ PaletteModifier.prototype = util.inherit(OrdinalModifier.prototype);
  *		-> edit height, width, font, line-height, color, background-color, ...
  * modifier functions define: next(), previous(), current(), reset(), wrap(<true|false>)
  */
+/*
 var design = (function($) {
 	console.log("Welcome to design.js");
 	console.log("--------------------");
@@ -166,15 +173,6 @@ var design = (function($) {
 		"background-color": "palette"
 	};
 
-	/**
-	 *
-	 * selector: f.ex: "div.myForeground"
-	 *
-	 * properties: f.ex: {
-	 *		"line-height": "default",
-	 *		"background-color": "palette"
-	 * }
-	 */
 	d.register = function(selector, properties) {
 		// console.log("d.register called");
 
@@ -443,27 +441,4 @@ var design = (function($) {
 
 	return d;
 })(jQuery);
-
-/**
- * Palette module - palette modifier and management
- *
- * design.palette.current: the current palette
- * design.palette.list()
- * design.palette.add(palette, [name]) (palette is an object which only contains the names and the hex values of the colors)
- * design.palette.cycle() (all colors + 1)
- */
-var design = (function(d) {
-	// define submodule
-	var p = d.palette = d.palette || {};
-
-	//Palette.prototype.
-
-	// add palette modifier to modifiers array
-	//d.modifiers.push(Palette);
-
-	//var palettes = [];
-
-	//p.current = [];
-
-	return d;
-})(design);
+*/
