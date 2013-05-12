@@ -1,0 +1,18 @@
+* {
+  font-family: georgia;
+}
+
+body {
+  margin: 0;
+  padding: 5em 20em;
+}
+
+h1 {
+  font-weight: normal;
+}
+
+p {
+  font-size: 1.2em;
+  line-height: 1.5;
+  color: #333;
+}
