@@ -1,25 +1,24 @@
 <!DOCTYPE HTML>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Nicolas Hillegeer - <%= @item[:title] %></title>
-    <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="/stylesheets/pygments.css">
+    <head>
+        <meta charset="utf-8">
 
-    <!-- you don't need to keep this, but it's cool for stats! -->
-    <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
-  </head>
-  <body>
-    <div id="main">
-      <%= yield %>
-    </div>
-    <div id="sidebar">
-      <h2>Nicolas Hillegeer</h2>
-      <ul>
-        <li><a href="http://www.aktau.be/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
-        <li><a href="https://github.com/Aktau/">Github</a></li>
-        <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
-      </ul>
-    </div>
-  </body>
+        <title>Nicolas Hillegeer - <%= @item[:title] %></title>
+
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/stylesheets/pygments.css">
+
+        <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
+    </head>
+    <body>
+        <div id="main"><%= yield %></div>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="http://www.aktau.be/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+            </ul>
+        </div>
+    </body>
 </html>
