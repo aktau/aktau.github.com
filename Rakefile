@@ -16,7 +16,7 @@ NANOC_BRANCH = 'nanoc'
 PAGES_BRANCH = 'master'
 # A list of files to include in the deployment that are not in the output/ directory.
 ADDITIONAL_FILES = [
-  # 'CNAME'
+  'CNAME'
 ]
 
 ##
