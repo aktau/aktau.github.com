@@ -3,7 +3,7 @@ title: Introduction
 created_at: 2013-08-06
 description: Introduction
 kind: article
-tags: [introduction]
+tags: [introduction, nanoc, pygments, github]
 ---
 Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?
 
