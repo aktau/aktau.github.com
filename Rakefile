@@ -12,8 +12,8 @@ require 'yaml'
 #
 BASE_URL = 'https://aktau.github.io'
 # Switch PAGES_BRANCH to master for a Pages repo (e.g. username.github.com) and make NANOC_BRANCH something else.
-NANOC_BRANCH = 'master'
-PAGES_BRANCH = 'gh-pages'
+NANOC_BRANCH = 'nanoc'
+PAGES_BRANCH = 'master'
 # A list of files to include in the deployment that are not in the output/ directory.
 ADDITIONAL_FILES = [
   # 'CNAME'
