@@ -1,0 +1,9 @@
+<% render "default" do %>
+    <div class="post">
+        <h1><%= item[:title] %></h1>
+        <article>
+            <%= yield %>
+        </article>
+        <p>Tags: <%= tags_for(@item) %></p>
+    </div>
+<% end %>

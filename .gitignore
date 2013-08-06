@@ -12,3 +12,4 @@ tmp/
 *.DS_Store
 *.swp
 *.out
+*.log

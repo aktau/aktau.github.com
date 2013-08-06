@@ -1,0 +1,13 @@
+---
+title: The most awesome article!
+---
+<% sorted_articles[0, 3].each do |post| %>
+    <div class="post-list">
+        <h2><%= link_to post[:title], post.path %></h2>
+        <aside>Posted at: <%= post[:created_at] %></aside>
+        <article>
+            <%= post.compiled_content %>
+        </article>
+    </div>
+<% end %>
+<p><a href="/archive">&larr; Archive</a></p>
