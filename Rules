@@ -15,6 +15,10 @@
 
 require 'to_slug'
 
+compile '/CNAME/' do
+    # don’t filter or layout
+end
+
 compile '/stylesheet/' do
     # don’t filter or layout
 end
@@ -39,6 +43,11 @@ compile '*' do
                 layout 'default'
         end
     end
+end
+
+# for github pages...
+route '/CNAME/' do
+  '/CNAME'
 end
 
 route '/stylesheet/' do
