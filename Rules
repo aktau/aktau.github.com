@@ -26,7 +26,7 @@ preprocess do
     end
 
     tags.each do |tag|
-        @items << Nanoc::Item.new("", { :tag => tag }, "/tag/#{tag}/")
+        @items << Nanoc::Item.new("", { :tag => tag, :title => 'tag: ' + tag }, "/tag/#{tag}/")
     end
 end
 
