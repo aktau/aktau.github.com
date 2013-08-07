@@ -20,19 +20,45 @@ but thanks to the [erasmus programme](https://en.wikipedia.org/wiki/Erasmus_Prog
 to study for a year at the [Universitat Autònoma de Barcelona](http://en.wikipedia.org/wiki/Autonomous_University_of_Barcelona)
 in Spain.
 
-Professionally, I tend to do freelancing but have also worked full-time as an employee.
+Professionally, I tend to do **freelancing** but have also worked **full-time as an employee**.
 I've performed a variety of interesting roles, you can read more about it in my
-[résumé](/cv-alt/cv.pdf). In case of doubt, don't hesitate to shoot me a mail to see
-if I'm free or want to work with you on the next big thing.
+[résumé](/cv-alt/cv.pdf). In short, I do full-stack web development, server software,
+desktop software, database operations, deployment, anything except for embedded
+development really (though I would like to get into that as well at some point).
+
+I believe that in the world of software, having a perspective from many
+sub-disciplines is a very good thing. Having ever done one thing has
+its specialization advantages but also suffers from diminishing returns.
+In case of doubt, don't hesitate to shoot me a mail to see
+if I'm free or could work with you on the next big thing.
 
 In my spare time I also enjoy hacking on side-projects, such as a tiny [3D engine](https://github.com/warfare/prototype) or
 some [optimization algorithm](https://github.com/Aktau/Scalaga) experiments (with [ants](https://github.com/Aktau/Scalants)!).
 (or some really tiny things, like a little executable that [hides your mouse pointer on linux](https://github.com/Aktau/hhpc) when you haven't moved it
 in a while).
 
-I like to play soccer, run, ski, program, travel,
-learn languages, get to know new people and too many
+I like to play soccer, run, ski, program, travel, listening to music
+, learn languages, get to know new people and too many
 other things to sum up.
+
+As for reading, I usually read fiction since I find that it calms my mind
+and I end up feeling refreshed after finishing a good fiction book.
+The vast space of books makes it hard for me to choose, so I tend to go
+for the classics because they've been vetted by a lot of people.
+The last few fiction books I read were:
+
+- **Lord of the Flies**, *by William Golding*
+- **Ender's Game**, *by Orson Scott Card*
+- **Journey to the Centre of the Earth**, *by Jules Verne*
+- **The Hitchhiker's Guide to the Galaxy**, *by Douglas Adams*
+- **A few short stories**, *by Isaac Asimov* (who never ceases to amaze me)
+
+That said I enjoy books related to development as well, some that
+I plan to read or am reading right now:
+
+- **Graphics Programming Black Book**, *by Michael Abrash*
+- **[SICP](https://github.com/sarabander/sicp-pdf), Structure and Interpretation of Computer Programs**, *by Abelson, Sussman, and Sussman*
+- **[HTDP](http://www.ccs.neu.edu/home/matthias/HtDP2e/), How to Design Programs**, *by Felleisen, Findler, Flatt and Krishnamurthi*
 
 # Copyright
 
