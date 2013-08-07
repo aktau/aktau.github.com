@@ -38,8 +38,12 @@ compile '/stylesheet/' do
     # don’t filter or layout
 end
 
+compile '/stylesheets/*/' do
+    # don’t filter or layout
+end
+
 compile '/images/*/', :rep => :thumbnail do
-  filter :thumbnailize, :width => 500
+    filter :thumbnailize, :width => 500
 end
 
 compile 'posts/*' do
