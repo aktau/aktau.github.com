@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
 
-        <title>Nicolas Hillegeer - Home</title>
+        <title>Nicolas Hillegeer - Portfolio and blog</title>
 
         <link rel="stylesheet" href="/style.css">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
@@ -12,65 +12,40 @@
     </head>
     <body>
         <div id="main">
-    <div class="post-list">
-        <h2><a href="/2013/08/06/introduction/">Introduction</a></h2>
-        <aside>Posted at: 2013-08-06</aside>
-        <article>
-            <p>Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?</p>
+    
 
-<ul>
-<li>
-<strong>programming</strong>: when I’ve got something to say about the open-source software I write, or want to illustrate a technique I utilised while writing closed-source software.</li>
-</ul><p>The blog is hosted (for now) on <a href="https://github.com/">github</a>, and statically generated with <a href="http://nanoc.ws/">nanoc</a>. At first I thought that – not exactly being a rubyist – it would be quite hard to get started, but I managed to set it all up in a day. It’s not that difficult after all. The most difficult thing was probably to get <a href="http://pygments.org/">pygments</a> to work for code highlighting and choosing an apprioprate style, I chose to emulate github.</p>
+    
+        <div class="post-list">
+            <h2><a href="/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/">A makefile for modern C programming on UNIX-like operating systems</a></h2>
+            <aside>Posted on August 7, 2013</aside>
 
-<p>There are plenty of tutorials on how to get started, but here’s a nudge if you’re on OSX:</p>
+            <article>
+                <p>Looking for an easy to use build tool? Project not yet large enough to warrant cmake? Downright scared of autotools (which generates the scariest kind of makefiles)? May I present… make!</p>
 
-<pre><code class="language-bash"><span class="c"># get the latest and greatest ruby</span>
-<span class="nv">$ </span>brew install ruby
+<div class='read-more'><a href="/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/">Continue reading &rsaquo;</a></div>
+            </article>
+        </div>
+    
 
-<span class="c"># make sure the local ruby and gem paths are added to $PAH, make sure</span>
-<span class="c"># `which gem` gives the local gem executable</span>
-<span class="c"># instead of the system default</span>
-<span class="nv">$ </span>edit ~/.zshrc <span class="c"># or ~/.bashrc ...</span>
+    
+        <div class="post-list">
+            <h2><a href="/2013/08/06/introduction/">Introduction</a></h2>
+            <aside>Posted on August 6, 2013</aside>
 
-<span class="nv">$ </span>gem install bundler
+            <article>
+                <p>Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?</p>
 
-<span class="c"># clone this repo or your own or start from scratch</span>
-<span class="c"># the repo has a gemfile with most of the things you</span>
-<span class="c"># need to get started</span>
-<span class="nv">$ </span>git clone ...
-
-<span class="c"># if you want code highlighting, install pygments</span>
-<span class="c"># (alternatively you can use the built-in CodeRay)</span>
-<span class="nv">$ </span>sudo easy_install Pygments
-
-<span class="nv">$ </span><span class="nb">cd </span>aktau.github.com
-
-<span class="c"># make sure bundler exports its executables to /usr/local/bin</span>
-<span class="nv">$ </span><span class="nb">export </span><span class="nv">BUNDLE_BIN</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span>
-<span class="nv">$ </span>bundle install
-
-<span class="c"># compile with nanoc</span>
-<span class="nv">$ </span>nanoc <span class="c"># (or bundle exec nanoc, if you want to be specific about versions)</span>
-
-<span class="c"># if you want to have guard watch your folders and automatically</span>
-<span class="c"># recompile while you're editing, which is really handy, just</span>
-<span class="c"># do this once:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard init nanoc
-
-<span class="c">#start watching:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard
-
-<span class="c"># run nanoc's internal webserver to preview what you just did</span>
-<span class="nv">$ </span>nanoc view</code></pre>
-        </article>
-    </div>
+<div class='read-more'><a href="/2013/08/06/introduction/">Continue reading &rsaquo;</a></div>
+            </article>
+        </div>
+    
 
 <p><a href="/archive">&larr; Archive</a></p></div>
         <div id="sidebar">
             <h2>Nicolas Hillegeer</h2>
             <ul>
                 <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
                 <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
                 <li><a href="/contact">About Me &amp; Contact</a></li>
             </ul>
@@ -79,6 +54,7 @@
                 <li><a href="https://github.com/Aktau/">Github</a></li>
                 <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
                 <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
             </ul>
         </div>
 
