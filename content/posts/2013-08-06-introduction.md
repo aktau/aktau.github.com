@@ -7,6 +7,8 @@ tags: [introduction, nanoc, pygments, github]
 ---
 Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?
 
+<!-- more -->
+
 - **programming**: when I've got something to say about the open-source software I write, or want to illustrate a technique I utilised while writing closed-source software.
 
 The blog is hosted (for now) on [github](https://github.com/), and statically generated with [nanoc](http://nanoc.ws/). At first I thought that -- not exactly being a rubyist -- it would be quite hard to get started, but I managed to set it all up in a day. It's not that difficult after all. The most difficult thing was probably to get [pygments](http://pygments.org/) to work for code highlighting and choosing an apprioprate style, I chose to emulate github.
