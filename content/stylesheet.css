@@ -40,6 +40,10 @@ a:hover {
   letter-spacing: -1px;
 }
 
+#main h2 a {
+  color: #000;
+}
+
 #main p {
   margin: 20px 0;
 
@@ -60,6 +64,10 @@ a:hover {
 
 #main ul li {
   list-style-type: square;
+}
+
+#main .post-list {
+  padding-bottom: 1em;
 }
 
 #sidebar {
