@@ -22,17 +22,25 @@ in Spain.
 
 Professionally, I tend to do **freelancing** but have also worked **full-time as an employee**.
 I've performed a variety of interesting roles, you can read more about it in my
-[résumé](/cv-alt/cv.pdf). In short, I do full-stack web development, server software,
-desktop software, database operations, deployment, anything except for embedded
+[résumé](/cv-alt/cv.pdf). In short, I do **full-stack web development, server software,
+desktop software, database operations, deployment**, anything except for embedded
 development really (though I would like to get into that as well at some point).
 
 I believe that in the world of software, having a perspective from many
-sub-disciplines is a very good thing. Having ever done one thing has
+subdisciplines is a good thing. Having ever done one thing has
 its specialization advantages but also suffers from diminishing returns.
+While exploring different subdisciplines in this field in my experience has
+a positive feedback effect on the other subdisciplines. In other
+words, the adage "jack of all trades, master of none" is even less applicable
+in the software business than in others. Learning isn't a zero-sum game.
+(of course you shouldn't take this to extremes, learning how to declare
+a variable in one language won't make you a better programmer in another nor
+teach you how to manage a project).
+
 In case of doubt, don't hesitate to shoot me a mail to see
 if I'm free or could work with you on the next big thing.
 
-In my spare time I also enjoy hacking on side-projects, such as a tiny [3D engine](https://github.com/warfare/prototype) or
+In my spare time I enjoy hacking on side-projects, such as a tiny [3D engine](https://github.com/warfare/prototype) or
 some [optimization algorithm](https://github.com/Aktau/Scalaga) experiments (with [ants](https://github.com/Aktau/Scalants)!).
 (or some really tiny things, like a little executable that [hides your mouse pointer on linux](https://github.com/Aktau/hhpc) when you haven't moved it
 in a while).

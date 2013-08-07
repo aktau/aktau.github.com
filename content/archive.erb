@@ -6,8 +6,7 @@ title: Archive
 <ul>
 <% sorted_articles.each do |post| %>
     <li>
-        <%= link_to post[:title], post.path %>
-        <aside>Posted at: <%= post[:created_at] %></aside>
+        <%= post[:created_at] %> - <%= link_to post[:title], post.path %>
     </li>
 <% end %>
 </ul>
