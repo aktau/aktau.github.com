@@ -20,6 +20,8 @@ but thanks to the [erasmus programme](https://en.wikipedia.org/wiki/Erasmus_Prog
 to study for a year at the [Universitat Autònoma de Barcelona](http://en.wikipedia.org/wiki/Autonomous_University_of_Barcelona)
 in Spain.
 
+## Work
+
 Professionally, I tend to do **freelancing** but have also worked **full-time as an employee**.
 I've performed a variety of interesting roles, you can read more about it in my
 [résumé](/cv-alt/cv.pdf). In short, I do **full-stack web development, server software,
@@ -39,6 +41,8 @@ teach you how to manage a project).
 
 In case of doubt, don't hesitate to shoot me a mail to see
 if I'm free or could work with you on the next big thing.
+
+## Leisure
 
 In my spare time I enjoy hacking on side-projects, such as a tiny [3D engine](https://github.com/warfare/prototype) or
 some [optimization algorithm](https://github.com/Aktau/Scalaga) experiments (with [ants](https://github.com/Aktau/Scalants)!).
