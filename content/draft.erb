@@ -1,8 +1,8 @@
 ---
-title: Portfolio and blog
+title: Drafts
 ---
-<% sorted_articles[0, 3].each do |post| %>
-    <% unless post[:draft] %>
+<% sorted_articles.each do |post| %>
+    <% if post[:draft] %>
         <div class="post-list">
             <h2><%= link_to post[:title], post.path %></h2>
             <aside>Posted on <%= get_pretty_date(post) %></aside>

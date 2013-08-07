@@ -77,7 +77,13 @@ route '/posts/*' do
 
     slug = item[:title].to_slug
 
-    date.strftime("/%Y/%m/%d/") + "#{slug}/index.html"
+    prefix = ''
+
+    if item[:draft]
+        prefix = '/draft'
+    end
+
+    prefix + date.strftime("/%Y/%m/%d/") + "#{slug}/index.html"
     # "/#{date.year}/#{date.month}/#{date.day}/#{slug}/index.html"
 end
 

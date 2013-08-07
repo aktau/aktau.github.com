@@ -5,9 +5,11 @@ title: Archive
 
 <ul>
 <% sorted_articles.each do |post| %>
-    <li>
-        <%= post[:created_at] %> - <%= link_to post[:title], post.path %>
-    </li>
+    <% unless post[:draft] %>
+        <li>
+            <%= post[:created_at] %> - <%= link_to post[:title], post.path %>
+        </li>
+    <% end %>
 <% end %>
 </ul>
 
