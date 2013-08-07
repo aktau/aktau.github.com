@@ -14,6 +14,21 @@
 #   because “*” matches zero or more characters.
 
 require 'to_slug'
+require 'set'
+
+preprocess do
+    tags = Set.new
+
+    @items.each do |item|
+        if item[:tags]
+            item[:tags].each { |t| tags.add(t.downcase) }
+        end
+    end
+
+    tags.each do |tag|
+        @items << Nanoc::Item.new("", { :tag => tag }, "/tag/#{tag}/")
+    end
+end
 
 compile '/CNAME/' do
     # don’t filter or layout
@@ -34,6 +49,10 @@ compile 'posts/*' do
     layout 'post'
 end
 
+compile '/tag/*' do
+    layout 'tag'
+end
+
 compile '*' do
     if item.binary?
         # don’t filter binary items
@@ -41,11 +60,11 @@ compile '*' do
         case item[:extension]
             when 'md'
                 filter :kramdown
-                layout 'default'
             when 'erb'
                 filter :erb
-                layout 'default'
         end
+
+        layout 'default'
     end
 end
 
