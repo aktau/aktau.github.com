@@ -16,9 +16,12 @@ Hi, I'm Nicolas and I'm a software engineer. I was born in
 Beveren-Waas, [Belgium](https://en.wikipedia.org/wiki/Belgium) but
 have since been to many places in the world. I studied engineering at
 the [Katholieke Universiteit Leuven](http://en.wikipedia.org/wiki/Katholieke_Universiteit_Leuven),
-but thanks to the [erasmus programme](https://en.wikipedia.org/wiki/Erasmus_Programme) I was able
+Belgium's leading university, which ranks among the foremost in the world. [^1]
+
+Thanks to the [erasmus programme](https://en.wikipedia.org/wiki/Erasmus_Programme) I was able
 to study for a year at the [Universitat Autònoma de Barcelona](http://en.wikipedia.org/wiki/Autonomous_University_of_Barcelona)
-in Spain.
+in Spain, where I learned to adapt to another culture, learn a new language, make lots of new friends and got
+some computer science done while I was at it.
 
 ## Work
 
@@ -76,3 +79,5 @@ I plan to read or am reading right now:
 # Copyright
 
 I retain copyright for all original content on this site. It cannot be reused without my permission. The source code for the site and the code samples within the articles on this site are released under the MIT License unless specified otherwise and can be found on Github.
+
+[^1]: The Katholieke Universeit Leuven ranks 58th in the world (2012-2013).
