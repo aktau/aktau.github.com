@@ -80,4 +80,4 @@ I plan to read or am reading right now:
 
 I retain copyright for all original content on this site. It cannot be reused without my permission. The source code for the site and the code samples within the articles on this site are released under the MIT License unless specified otherwise and can be found on Github.
 
-[^1]: The Katholieke Universeit Leuven ranks 58th in the world (2012-2013).
+[^1]: The Katholieke Universiteit Leuven ranks 58th in the world (2012-2013).
