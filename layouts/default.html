@@ -8,6 +8,9 @@
         <link rel="stylesheet" href="/style.css">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
 
+        <meta name="description" content="The personal blog of Nicolas Hillegeer, developer and engineer">
+        <meta name="keywords" content="Blog, development, c, c++, lua, freelance, hire, AI">
+        <meta name="author" content="Nicolas Hillegeer">
         <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
     </head>
     <body>
@@ -30,7 +33,7 @@
             <h2>Tags</h2>
             <ul>
                 <% get_all_tags(@items).each do |name, tag| %>
-                    <li><a href="/tag/<%= name %>"><%= name + ' (' + tag[:count].to_s + ')' %></a></li>
+                <li><a href="/tag/<%= name %>"><%= name + ' (' + tag[:count].to_s + ')' %></a></li>
                 <% end %>
             </ul>
         </div>
