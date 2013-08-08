@@ -5,8 +5,8 @@ title: About me and get in touch
 # Get in touch
 
 If you want to get in touch, the best way to contact me is by sending
-mail to **nicolas [[at]] hillegeer [[dot]] com**, replace the words with
-the symbols they represent and you're good to go.
+mail to **nicolas@<span style="display: none">HIDDEN</span>hillegeer.com**, I'll
+try to get back to you as soon as possible.
 
 # About me
 
@@ -14,8 +14,8 @@ the symbols they represent and you're good to go.
 
 Hi, I'm Nicolas and I'm a software engineer. I was born in
 Beveren-Waas, [Belgium](https://en.wikipedia.org/wiki/Belgium) but
-have since been to many places in the world. I studied primarily
-at the [Katholieke Universiteit Leuven](http://en.wikipedia.org/wiki/Katholieke_Universiteit_Leuven),
+have since been to many places in the world. I studied engineering at
+the [Katholieke Universiteit Leuven](http://en.wikipedia.org/wiki/Katholieke_Universiteit_Leuven),
 but thanks to the [erasmus programme](https://en.wikipedia.org/wiki/Erasmus_Programme) I was able
 to study for a year at the [Universitat Autònoma de Barcelona](http://en.wikipedia.org/wiki/Autonomous_University_of_Barcelona)
 in Spain.
@@ -63,6 +63,7 @@ The last few fiction books I read were:
 - **Ender's Game**, *by Orson Scott Card*
 - **Journey to the Centre of the Earth**, *by Jules Verne*
 - **The Hitchhiker's Guide to the Galaxy**, *by Douglas Adams*
+- **Heart of Darkness**, *by Joseph Conrad*
 - **A few short stories**, *by Isaac Asimov* (who never ceases to amaze me)
 
 That said I enjoy books related to development as well, some that
