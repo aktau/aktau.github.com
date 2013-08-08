@@ -3,7 +3,7 @@ title: Clean integration of Lua and C
 created_at: 2013-08-08
 description: A small, self-contained tutorial for how to get your C code to talk to Lua and vice versa
 kind: article
-tags: [lua, c, scripting, game-engine]
+tags: [lua, c, scripting, game-engine, ffi]
 draft: true
 ---
 
@@ -26,6 +26,11 @@ By the way, I think it's good practice to look for ideas in other projects. The 
 The other side of the coin though is that it can stifle your creativity. So maybe a good middle ground is to only start looking at things if you can't find a solution in 20 minutes or so.
 
 Let's take the redis scripting code as an example:
+
+### Sandboxing
+
+This section is based on an answer from [stack overflow](http://stackoverflow.com/questions/966162/best-way-to-omit-lua-standard-libraries), and if we look
+carefully we can see that the developers of redis took the same approach in *scripting.c*.
 
 Some other tutorials if you still have questions:
 
