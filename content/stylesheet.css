@@ -9,6 +9,10 @@ body {
   font-family: Georgia, Palatino, Times, 'Times New Roman', sans-serif;
 }
 
+sup {
+  line-height: 0;
+}
+
 a {
   text-decoration: none;
 }
