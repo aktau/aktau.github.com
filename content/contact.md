@@ -54,9 +54,8 @@ some [optimization algorithm](https://github.com/Aktau/Scalaga) experiments (wit
 (or some really tiny things, like a little executable that [hides your mouse pointer on linux](https://github.com/Aktau/hhpc) when you haven't moved it
 in a while).
 
-I like to play soccer, run, ski, program, travel, listening to music
-, learn languages, get to know new people and too many
-other things to sum up.
+I like to play soccer, run, ski, program, travel, listen to music,
+learn languages, get to know new people and too many other things to sum up.
 
 As for reading, I usually read fiction since I find that it calms my mind
 and I end up feeling refreshed after finishing a good fiction book.
