@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://aktau.github.io/</loc>
+    <loc>https://www.aktau.be/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/archive/</loc>
+    <loc>https://www.aktau.be/archive/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/contact/</loc>
+    <loc>https://www.aktau.be/contact/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/draft/</loc>
+    <loc>https://www.aktau.be/draft/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
+    <loc>https://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/2013/08/06/introduction/</loc>
+    <loc>https://www.aktau.be/2013/08/06/introduction/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
+    <loc>https://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/c/</loc>
+    <loc>https://www.aktau.be/tag/c/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/ffi/</loc>
+    <loc>https://www.aktau.be/tag/ffi/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/game-engine/</loc>
+    <loc>https://www.aktau.be/tag/game-engine/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/github/</loc>
+    <loc>https://www.aktau.be/tag/github/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/introduction/</loc>
+    <loc>https://www.aktau.be/tag/introduction/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/linux/</loc>
+    <loc>https://www.aktau.be/tag/linux/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/lua/</loc>
+    <loc>https://www.aktau.be/tag/lua/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/make/</loc>
+    <loc>https://www.aktau.be/tag/make/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/nanoc/</loc>
+    <loc>https://www.aktau.be/tag/nanoc/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/osx/</loc>
+    <loc>https://www.aktau.be/tag/osx/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/pygments/</loc>
+    <loc>https://www.aktau.be/tag/pygments/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/scripting/</loc>
+    <loc>https://www.aktau.be/tag/scripting/</loc>
   </url>
   <url>
-    <loc>https://aktau.github.io/tag/unix/</loc>
+    <loc>https://www.aktau.be/tag/unix/</loc>
   </url>
 </urlset>
