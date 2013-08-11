@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.aktau.be/</loc>
+    <loc>http://www.aktau.be/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/archive/</loc>
+    <loc>http://www.aktau.be/archive/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/contact/</loc>
+    <loc>http://www.aktau.be/contact/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/draft/</loc>
+    <loc>http://www.aktau.be/draft/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
+    <loc>http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/2013/08/06/introduction/</loc>
+    <loc>http://www.aktau.be/2013/08/06/introduction/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
+    <loc>http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
     <lastmod>2013-08-11</lastmod>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/c/</loc>
+    <loc>http://www.aktau.be/tag/c/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/ffi/</loc>
+    <loc>http://www.aktau.be/tag/ffi/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/game-engine/</loc>
+    <loc>http://www.aktau.be/tag/game-engine/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/github/</loc>
+    <loc>http://www.aktau.be/tag/github/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/introduction/</loc>
+    <loc>http://www.aktau.be/tag/introduction/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/linux/</loc>
+    <loc>http://www.aktau.be/tag/linux/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/lua/</loc>
+    <loc>http://www.aktau.be/tag/lua/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/make/</loc>
+    <loc>http://www.aktau.be/tag/make/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/nanoc/</loc>
+    <loc>http://www.aktau.be/tag/nanoc/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/osx/</loc>
+    <loc>http://www.aktau.be/tag/osx/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/pygments/</loc>
+    <loc>http://www.aktau.be/tag/pygments/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/scripting/</loc>
+    <loc>http://www.aktau.be/tag/scripting/</loc>
   </url>
   <url>
-    <loc>https://www.aktau.be/tag/unix/</loc>
+    <loc>http://www.aktau.be/tag/unix/</loc>
   </url>
 </urlset>
