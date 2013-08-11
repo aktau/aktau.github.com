@@ -17,6 +17,8 @@ require 'to_slug'
 require 'set'
 
 preprocess do
+    create_sitemap
+
     tags = Set.new
 
     @items.each do |item|
@@ -44,6 +46,16 @@ end
 
 compile %r{^/(google|robots)} do
     # Don't filter or layout any google files, robots.txt, error pages .
+end
+
+compile %r{^/(sitemap)/$} do
+    # sitemap does get filtered with erb, but get no layout.
+    filter :erb
+end
+
+compile '/sitemap/', :rep => 'gzip' do
+    filter :erb
+    filter :shellcmd, :cmd => 'gzip'
 end
 
 compile '/images/*/', :rep => :thumbnail do
@@ -82,8 +94,16 @@ route '/CNAME/' do
 end
 
 # for google webmaster tools
-route %r{^/(google|robots)} do
+route %r{^/(google|robots|sitemap)} do
   item.identifier.chop + '.' + item[:extension]
+end
+
+route '/sitemap/' do
+    '/sitemap.xml'
+end
+
+route '/sitemap/', :rep => 'gzip' do
+    '/sitemap.xml.gz'
 end
 
 route '/stylesheet/' do

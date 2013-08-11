@@ -11,3 +11,6 @@ gem "systemu"
 gem "mime-types"
 gem "yui-compressor"
 gem "rake"
+
+# Dependency for XML Sitemap generation
+gem 'builder'
