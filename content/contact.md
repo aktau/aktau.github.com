@@ -31,16 +31,18 @@ I've performed a variety of interesting roles, you can read more about it in my
 desktop software, database operations, deployment**, anything except for embedded
 development really (though I would like to get into that as well at some point).
 
-I believe that in the world of software, having a perspective from many
-subdisciplines is a good thing. Having ever done one thing has
+I believe that in the world of software, having a broad experience with many technologies
+is a good thing. Focusing on one specific language and paradigm has
 its specialization advantages but also suffers from diminishing returns.
-While exploring different subdisciplines -- in this field -- has
-a positive feedback effect on the other subdisciplines, in my experience. In other
-words, the adage "jack of all trades, master of none" is even less applicable
-in the software business than in others. Learning isn't a zero-sum game.
-(of course you shouldn't take this to extremes, learning how to declare
-a variable in one language won't make you a better programmer in another nor
-teach you how to manage a project).
+While exploring different things has -- in my experience --
+a positive feedback effect on other skills. Case in point,
+my attempts at learning [Scheme](http://en.wikipedia.org/wiki/Scheme_(programming_language)) and the functional side of
+[Scala](http://www.scala-lang.org/), where immutability is encouraged, have made me a better
+programmer (especially where multithreading is concerned). At the same time, programming in C
+has made me appreciate the finer points of performance-oriented programming, and so on.
+
+In other words, the adage "*jack of all trades, master of none*" is even less applicable
+in the software business than in others. Learning isn't a zero-sum game. [^2]
 
 In case of doubt, don't hesitate to shoot me a mail to see
 if I'm free or could work with you on the next big thing.
@@ -81,3 +83,5 @@ I plan to read or am reading right now:
 I retain copyright for all original content on this site. It cannot be reused without my permission. The source code for the site and the code samples within the articles on this site are released under the MIT License unless specified otherwise and can be found on Github.
 
 [^1]: The Katholieke Universiteit Leuven ranks 58th in the world (2012-2013).
+[^2]: Of course you shouldn't take this to extremes, learning how to declare a variable in one language won't make you a better programmer in another nor teach you how to manage a project.
+
