@@ -34,8 +34,8 @@ development really (though I would like to get into that as well at some point).
 I believe that in the world of software, having a perspective from many
 subdisciplines is a good thing. Having ever done one thing has
 its specialization advantages but also suffers from diminishing returns.
-While exploring different subdisciplines in this field in my experience has
-a positive feedback effect on the other subdisciplines. In other
+While exploring different subdisciplines -- in this field -- has
+a positive feedback effect on the other subdisciplines, in my experience. In other
 words, the adage "jack of all trades, master of none" is even less applicable
 in the software business than in others. Learning isn't a zero-sum game.
 (of course you shouldn't take this to extremes, learning how to declare
