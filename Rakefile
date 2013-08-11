@@ -10,7 +10,7 @@ require 'yaml'
 ##
 # Configurable Constants
 #
-BASE_URL = 'https://www.aktau.be'
+BASE_URL = 'http://www.aktau.be'
 # Switch PAGES_BRANCH to master for a Pages repo (e.g. username.github.com) and make NANOC_BRANCH something else.
 NANOC_BRANCH = 'nanoc'
 PAGES_BRANCH = 'master'
