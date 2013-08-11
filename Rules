@@ -42,6 +42,10 @@ compile '/stylesheets/*/' do
     # don’t filter or layout
 end
 
+compile %r{^/(google|robots)} do
+    # Don't filter or layout any google files, robots.txt, error pages .
+end
+
 compile '/images/*/', :rep => :thumbnail do
     filter :thumbnailize, :width => 500
 end
@@ -77,6 +81,11 @@ route '/CNAME/' do
   '/CNAME'
 end
 
+# for google webmaster tools
+route %r{^/(google|robots)} do
+  item.identifier.chop + '.' + item[:extension]
+end
+
 route '/stylesheet/' do
     '/style.css'
 end
@@ -90,24 +99,13 @@ route '/images/*/', :rep => :thumbnail do
 end
 
 route '/posts/*' do
-    # y,m,d,slug = /([0-9]+)\-([0-9]+)\-([0-9]+)\-([^\/]+)/
-    #     .match(item.identifier).captures
-
-    # "/#{y}/#{m}/#{d}/#{slug}/index.html"
-
+    slug = item[:title].to_slug
     date = item[:created_at]
     raise "No Posted Date!" if date.nil?
 
-    slug = item[:title].to_slug
-
-    prefix = ''
-
-    if item[:draft]
-        prefix = '/draft'
-    end
+    prefix = item[:draft] ? '/draft' : ''
 
     prefix + date.strftime("/%Y/%m/%d/") + "#{slug}/index.html"
-    # "/#{date.year}/#{date.month}/#{date.day}/#{slug}/index.html"
 end
 
 route '*' do
