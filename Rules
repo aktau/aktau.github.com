@@ -44,7 +44,7 @@ compile '/stylesheets/*/' do
     # don’t filter or layout
 end
 
-compile %r{^/(google|robots)} do
+compile %r{^/(google|robots|Bing)} do
     # Don't filter or layout any google files, robots.txt, error pages .
 end
 
@@ -94,7 +94,7 @@ route '/CNAME/' do
 end
 
 # for google webmaster tools
-route %r{^/(google|robots|sitemap)} do
+route %r{^/(google|robots|sitemap|Bing)} do
   item.identifier.chop + '.' + item[:extension]
 end
 
