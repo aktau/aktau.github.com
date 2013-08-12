@@ -151,10 +151,20 @@ myapp: main.o helper.o
     $(CC) -c $< $(CFLAGS)
 ~~~~~~~~
 
-That cranks the warnings up to 11, which is almost always
-a good things. If you find that some warning are just
-bogus for your particular codebase, you can turn them off
-sparingly.
+That cranks the warnings up to 11, which is often
+a good thing. It's a good idea to turn the warnings on when
+you start your project. Solving the deluge of warnings that
+can come out of a mature project when going from no flags
+to very pedantic is not fun.
+
+Of course, there are some flags
+that might be a little bit too pedantic. For example, when
+doing game development it's often useful to do some
+[bit twiddling](http://graphics.stanford.edu/~seander/bithacks.html),
+compare disparate number types and do dirty things with pointers.
+In that case it might not be worth it or even possible to
+prevent all the warnings by casting to the appropriate type. In
+that case, feel free to disable some flags.
 
 ### Debug and release builds
 
