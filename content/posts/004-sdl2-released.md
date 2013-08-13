@@ -14,12 +14,42 @@ For those of you who don't know, SDL helps developers create cross-platform game
 networking (with extension libraries), et cetera. In this way, there doesn't need to be icky conditional compilation based on OS, nor different
 input subsystems according to different capabilities and so forth.
 
+Copied from the mailing list, here are the most important new features:
+
+These are the most important new features in SDL 2.0:
+
+- Full 3D hardware acceleration
+- Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)
+- Support for OpenGL ES
+- Support for multiple windows
+- Support for multiple displays
+- Support for multiple audio devices
+- Android and iOS support
+- Simple 2D rendering API that can use Direct3D, OpenGL, OpenGL ES, or software rendering behind the scenes
+- Force Feedback available on Windows, Mac OS X and Linux
+- XInput and XAudio2 support for Windows
+- Atomic operations
+- Power management (exposes battery life remaining, etc)
+- Shaped windows
+- 32-bit audio (int and float)
+- Simplified Game Controller API (the Joystick API is still here, too!)
+- Touch support (multitouch, gestures, etc)
+- Better fullscreen support
+- Better keyboard support (scancodes vs keycodes, etc).
+- Message boxes
+- Clipboard support
+- Basic Drag'n'Drop support
+- Proper unicode input and IME support
+- A really powerful assert macro
+- Lots of old annoyances from 1.2 are gone
+- Many other things!
+
 If you develop your code with just SDL, (optionally) OpenGL and the standard
 C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. [^1]
 So it pays off to use it, especially if you're in the market to develop games commercially: **write once, run on your toaster**.
 
 SDL also features a drawing API, which is now hardware accelerated when possible thanks to SDL2. They worked very hard on this feature, though I
-hardly use it. This is because I choose to perform my drawing with OpenGL. So in short, I just use SDL to open my OpenGL window(s). [^2]
+hardly use it. This is because I choose to perform my drawing with OpenGL. So in short, I just use SDL to open my OpenGL window(s).
 
 I'm using SDL in my own [toy weekend-project](https://github.com/warfare/prototype) as well. Since I only started it a month ago I decided
 to go with SDL2 even though it was still in release candidate status. It has worked perfectly up until now and has proved that it deserved it's **rc** status.
@@ -225,5 +255,4 @@ int main(int argc, char* argv[]) {
 ~~~~~~~~~
 
 [^1]: Okay, you might have to add a bit of effort for iPhone and Android, especially if you're developing with OpenGL and you haven't restricted yourself to the OpenGL ES subset. The plaforms' respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those.
-[^2]: SDL now supports multiple windows, which is awesome.
-[^3]: I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give me first creation a real name.
+[^2]: I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give me first creation a real name.
