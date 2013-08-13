@@ -1,7 +1,7 @@
 ---
 title: Portfolio and blog
 ---
-<% sorted_articles[0, 3].each do |post| %>
+<% sorted_articles[0, 5].each do |post| %>
     <% unless post[:draft] %>
         <div class="post-list">
             <h2><%= link_to post[:title], post.path %></h2>
