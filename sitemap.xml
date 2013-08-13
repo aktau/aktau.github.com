@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://www.aktau.be/</loc>
-    <lastmod>2013-08-12</lastmod>
+    <lastmod>2013-08-13</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/archive/</loc>
@@ -19,6 +19,10 @@
   <url>
     <loc>http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
     <lastmod>2013-08-12</lastmod>
+  </url>
+  <url>
+    <loc>http://www.aktau.be/2013/08/13/sdl2-2-0-0-released-at-last/</loc>
+    <lastmod>2013-08-13</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/06/introduction/</loc>
@@ -56,6 +60,9 @@
     <loc>http://www.aktau.be/tag/nanoc/</loc>
   </url>
   <url>
+    <loc>http://www.aktau.be/tag/open-source/</loc>
+  </url>
+  <url>
     <loc>http://www.aktau.be/tag/osx/</loc>
   </url>
   <url>
@@ -63,6 +70,9 @@
   </url>
   <url>
     <loc>http://www.aktau.be/tag/scripting/</loc>
+  </url>
+  <url>
+    <loc>http://www.aktau.be/tag/sdl/</loc>
   </url>
   <url>
     <loc>http://www.aktau.be/tag/unix/</loc>
