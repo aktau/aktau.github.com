@@ -6,7 +6,7 @@ kind: article
 tags: [sdl, game-engine, open-source]
 ---
 
-For the impatient: [get it here](http://www.libsdl.org/). SDL is an open-source game development library. It's been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.
+For the impatient: [get it here](http://www.libsdl.org/) and read the [migration guide](http://wiki.libsdl.org/moin.fcg/MigrationGuide). SDL is an open-source game development library. It's been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.
 
 <!-- more -->
 
