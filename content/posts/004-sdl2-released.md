@@ -16,8 +16,6 @@ input subsystems according to different capabilities and so forth.
 
 Copied from the mailing list, here are the most important new features:
 
-These are the most important new features in SDL 2.0:
-
 - Full 3D hardware acceleration
 - Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)
 - Support for OpenGL ES
