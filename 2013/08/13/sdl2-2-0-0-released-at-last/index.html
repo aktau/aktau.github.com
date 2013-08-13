@@ -28,19 +28,49 @@
 networking (with extension libraries), et cetera. In this way, there doesn’t need to be icky conditional compilation based on OS, nor different
 input subsystems according to different capabilities and so forth.</p>
 
-<p>If you develop your code with just SDL, (optionally) OpenGL and the standard
+<p>Copied from the mailing list, here are the most important new features:</p>
+
+<p>These are the most important new features in SDL 2.0:</p>
+
+<ul>
+<li>Full 3D hardware acceleration</li>
+  <li>Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)</li>
+  <li>Support for OpenGL ES</li>
+  <li>Support for multiple windows</li>
+  <li>Support for multiple displays</li>
+  <li>Support for multiple audio devices</li>
+  <li>Android and iOS support</li>
+  <li>Simple 2D rendering API that can use Direct3D, OpenGL, OpenGL ES, or software rendering behind the scenes</li>
+  <li>Force Feedback available on Windows, Mac OS X and Linux</li>
+  <li>XInput and XAudio2 support for Windows</li>
+  <li>Atomic operations</li>
+  <li>Power management (exposes battery life remaining, etc)</li>
+  <li>Shaped windows</li>
+  <li>32-bit audio (int and float)</li>
+  <li>Simplified Game Controller API (the Joystick API is still here, too!)</li>
+  <li>Touch support (multitouch, gestures, etc)</li>
+  <li>Better fullscreen support</li>
+  <li>Better keyboard support (scancodes vs keycodes, etc).</li>
+  <li>Message boxes</li>
+  <li>Clipboard support</li>
+  <li>Basic Drag’n’Drop support</li>
+  <li>Proper unicode input and IME support</li>
+  <li>A really powerful assert macro</li>
+  <li>Lots of old annoyances from 1.2 are gone</li>
+  <li>Many other things!</li>
+</ul><p>If you develop your code with just SDL, (optionally) OpenGL and the standard
 C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>
 So it pays off to use it, especially if you’re in the market to develop games commercially: <strong>write once, run on your toaster</strong>.</p>
 
 <p>SDL also features a drawing API, which is now hardware accelerated when possible thanks to SDL2. They worked very hard on this feature, though I
-hardly use it. This is because I choose to perform my drawing with OpenGL. So in short, I just use SDL to open my OpenGL window(s). <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
+hardly use it. This is because I choose to perform my drawing with OpenGL. So in short, I just use SDL to open my OpenGL window(s).</p>
 
 <p>I’m using SDL in my own <a href="https://github.com/warfare/prototype">toy weekend-project</a> as well. Since I only started it a month ago I decided
 to go with SDL2 even though it was still in release candidate status. It has worked perfectly up until now and has proved that it deserved it’s <strong>rc</strong> status.
 I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
 were minor (except for haptics support, which I don’t use).</p>
 
-<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup></p>
+<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). [^3]</p>
 
 <pre><code class="language-c"><span class="cp">#include &lt;stdlib.h&gt;</span>
 <span class="cp">#include &lt;stdio.h&gt;</span>
@@ -239,12 +269,6 @@ were minor (except for haptics support, which I don’t use).</p>
   <ol>
 <li id="fn:1">
       <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote">↩</a></p>
-    </li>
-    <li id="fn:2">
-      <p>SDL now supports multiple windows, which is awesome. <a href="#fnref:2" class="reversefootnote">↩</a></p>
-    </li>
-    <li id="fn:3">
-      <p>I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give me first creation a real name. <a href="#fnref:3" class="reversefootnote">↩</a></p>
     </li>
   </ol>
 </div>
