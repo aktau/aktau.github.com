@@ -68,7 +68,7 @@ to go with SDL2 even though it was still in release candidate status. It has wor
 I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
 were minor (except for haptics support, which I don’t use).</p>
 
-<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). [^3]</p>
+<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
 
 <pre><code class="language-c"><span class="cp">#include &lt;stdlib.h&gt;</span>
 <span class="cp">#include &lt;stdio.h&gt;</span>
@@ -267,6 +267,9 @@ were minor (except for haptics support, which I don’t use).</p>
   <ol>
 <li id="fn:1">
       <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+    <li id="fn:2">
+      <p>I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. <a href="#fnref:2" class="reversefootnote">↩</a></p>
     </li>
   </ol>
 </div>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Nicolas Hillegeer - Making a good game engine (part 1)</title>
+
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/stylesheets/pygments.css">
+
+        <meta name="description" content="The personal blog of Nicolas Hillegeer, developer and engineer">
+        <meta name="keywords" content="Blog, development, c, c++, lua, freelance, hire, AI">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.6.4">
+    </head>
+    <body>
+        <div id="main">
+    <div class="post">
+        <h1>Making a good game engine (part 1)</h1>
+        <aside>August 14, 2013</aside>
+
+        <article>
+            <p>I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
+would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
+allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
+stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
+water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
+Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
+to me…</p>
+
+<!-- more -->
+
+<p><strong>DISCLAIMER</strong>: I’ve never written an actual game engine before. When I was young I coded up a
+<a href="http://zatacka.sourceforge.net/index.php?id=screens">Zatacka</a><sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>-clone in SDL after
+following <a href="http://sol.gfxile.net/gp/index.html">Jari Komppa</a>’s tutorial. I loved that falling snow! After that my game-making tapered
+off a bit and I can painfully remember that I couldn’t even muster up the discipline to code up a tetris-clone. I guess I liked my
+win32 wildcard filename searcher better <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
+with OpenGL) that was supposed to teach butterfly evolution to a bunch of pre-schoolers. I learned C++ specifically for the project
+because that’s what game programmers did, or so I had read once. Needless to say, this was a mistake:
+new language + not experienced at game making = frantic coding to make up for lost time. It did provide me with a handle on C++ and a bit more
+of an idea of what it might mean to make an engine.</p>
+
+<p>But still, the idea lingered, and I wanted all those things that I wrote at the top of the page. I realized quite early that I couldn’t have all those things.
+It takes people far more experienced and likely also far smarter than me a lot of time to come up with engines like the one I want. How
+on earth am I supposed to do it then?</p>
+
+<p>Well, from my earlier experiments, I had learned two things:</p>
+
+<p>1) your first attempt(s) suck.
+2) every subsequent attempt gets better.
+3) agonizing over design is sometimes very necessary and sometimes utter crap.</p>
+
+<p>The two first points are nshrined in such common wisdom as “<em>practice makes perfect</em>”, this should come as no surprise. The third one
+seems to provide no value at all. I’ll try to clarify. For the butterfly evolution game I needed the students to play against each other:
+multiplayer. I thought about my Zatacka-clone, how I had made it and tried to add multiplayer to it after “perfecting” the singleplayer.
+And how incredibly painful that was. I just couldn’t get it to work right, after a short while my players would desync or have any of
+a million other issues. It took about a month for me to realize that Zatacka-multiplayer was unsalvageable. The game had just not been made
+with multiplayer in mind, and to shoehorn it in was the worst idea ever.</p>
+
+<p>Networking: link to John Carmack’s plan in which he lays out input/output. Link to tribes 2 networking design. Link to valve networking design.</p>
+
+<p>This is the reason I have so much respect for (f.ex) the people that made <a href="http://www.mtavc.com/">Multi Theft Auto</a>: they made a networked
+game out of a very complex, strictly singleplayer game, without having the source. My mind was blown. I couldn’t even do that for a game
+so simple a cellular automaton could have made it, and I even had the source!</p>
+
+<p>I had very little experience with socket programming and perhaps less with game design, but one thing I could foresee was
+that it would be absolute madness to shoehorn such a thing as multiplayer into a game designed as a</p>
+
+<p>Like all things, engine design is subject to certain trends and even fads. The one that’s currently (in 2013) the strongest and has been
+growing for a couple of years seems to be the \textbf{data-driven engine}. Sounds pretty generic, right? Which engine isn’t driven
+by data? What does it mean?</p>
+
+<h3 id="choosing-a-language">Choosing a language</h3>
+
+<p>C++11 looks awesome, but I find that classes distract from the true core of the data-driven religion.</p>
+
+<h3 id="the-pipeline">The pipeline</h3>
+
+<p>The point is to view your data as streaming through a pipeline</p>
+
+<p>The cache, bro.</p>
+
+<h3 id="no-more-trees">No more trees</h3>
+
+<p>Trees are bad for caches… or are they?</p>
+
+<h3 id="tooling">Tooling</h3>
+
+<p>Well, that’s a whole different can of worms. I’m not much of a tools programmer nor do I enjoy it very much. So I’ll try to reuse
+as much as humanly possible in this aspect.</p>
+
+<div class="footnotes">
+  <ol>
+<li id="fn:1">
+      <p>Also known as “<em>Achting die Kurve!</em>” <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+    <li id="fn:2">
+      <p>Years later, I encountered <a href="http://www.voidtools.com/">everything</a>, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, <em>real</em> fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+    </li>
+  </ol>
+</div>
+        </article>
+
+        <p>Tags: <a href="/tag/sdl" rel="tag">sdl</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/open-source" rel="tag">open-source</a>, <a href="/tag/data-driven" rel="tag">data-driven</a></p>
+    </div>
+</div>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="/contact">About Me &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (1)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (1)</a></li>
+                
+            </ul>
+        </div>
+
+        <script>
+            var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+            var _gaq=[['_setAccount','UA-37726728-1'],['_trackPageview'], ['_require', 'inpage_linkid', pluginUrl]];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
