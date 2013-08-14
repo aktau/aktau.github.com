@@ -54,7 +54,7 @@ to go with SDL2 even though it was still in release candidate status. It has wor
 I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
 were minor (except for haptics support, which I don't use).
 
-And because I can't post and article without a bit of code, here's the `main()` method of my toy project: (yes it's ugly, but I named it prototype so it's ok). [^3]
+And because I can't post and article without a bit of code, here's the `main()` method of my toy project: (yes it's ugly, but I named it prototype so it's ok). [^2]
 
 ~~~~~~~~~
 #!c
@@ -253,4 +253,4 @@ int main(int argc, char* argv[]) {
 ~~~~~~~~~
 
 [^1]: Okay, you might have to add a bit of effort for iPhone and Android, especially if you're developing with OpenGL and you haven't restricted yourself to the OpenGL ES subset. The plaforms' respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those.
-[^2]: I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give me first creation a real name.
+[^2]: I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name.
