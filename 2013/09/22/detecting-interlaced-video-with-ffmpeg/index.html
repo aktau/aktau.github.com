@@ -1,0 +1,142 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Nicolas Hillegeer - Detecting interlaced video with ffmpeg</title>
+
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/stylesheets/pygments.css">
+
+        <meta name="description" content="The personal blog of Nicolas Hillegeer, developer and engineer">
+        <meta name="keywords" content="Blog, development, c, c++, lua, freelance, hire, AI">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.6.4">
+    </head>
+    <body>
+        <div id="main">
+    <div class="post">
+        <h1>Detecting interlaced video with ffmpeg</h1>
+        <aside>September 22, 2013</aside>
+
+        <article>
+            <p>Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
+underlying video player (<a href="http://mpv.io/">mpv</a> in this case) to enable deinterlacing and get rid of that nasty combing effect.</p>
+
+<!-- more -->
+
+<p>Searching the internet I found that many people say that you can only really see if a video is interlaced or not by looking at it
+frame by frame. One can’t rely on any metadata present in the video file, which you can get for example by running <code>mediainfo</code>.
+It happens quite often that this metadata is just <em>wrong</em>.</p>
+
+<p>While this is true, I have no patience for manually viewing each file, especially because I’m dealing with thousands of user-submitted videos.
+So I kept digging and found an automated solution that, while not 100% accurate, was more than accurate enough. Anything that slipped through
+the cracks will be noticed and the users will hopefully notify me.</p>
+
+<p>It turns out that <strong>ffmpeg</strong> has a filter called <strong>idet</strong> that (tries to) detect interlaced frames, and in my experience is quite
+good at it. You’ll need a pretty recent version of ffmpeg for this (later 2012 I believe,
+the one in the debian wheezy repositories is not recent enough). Here’s an example of how to use it:</p>
+
+<pre><code class="language-bash"><span class="c"># detect interlacing with the ffmpeg "idet" filter, the more frames</span>
+<span class="c"># you extract, the better, though it's never 100% accurate</span>
+
+<span class="c"># flags:</span>
+<span class="c"># -an            = discard audio, we don't need it</span>
+<span class="c"># -f rawvideo    = output raw video</span>
+<span class="c"># -y /dev/null   = discard the output</span>
+<span class="c"># -i ...         = the input file to check</span>
+<span class="c"># -frames:v 100  = extract the first 100 frames</span>
+<span class="c"># -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames</span>
+
+ffmpeg -filter:v idet <span class="se">\</span>
+    -frames:v 100 <span class="se">\</span>
+    -an <span class="se">\</span>
+    -f rawvideo -y /dev/null <span class="se">\</span>
+    -i ~/Downloads/some_interlaced_video.mkv
+<span class="c"># Example output (this is interlaced, TFF style)</span>
+<span class="c"># [Parsed_idet_0 @ 0x1ccf7c0] Single frame detection: TFF:167 BFF:0 Progressive:1 Undetermined:0</span>
+<span class="c"># [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0</span>
+
+ffmpeg -filter:v idet <span class="se">\</span>
+    -frames:v 100 <span class="se">\</span>
+    -an <span class="se">\</span>
+    -f rawvideo -y /dev/null <span class="se">\</span>
+    -i ~/Downloads/some_non_interlaced_video.mkv
+<span class="c"># Example output (this is not interlaced):</span>
+<span class="c"># [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84</span>
+<span class="c"># [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25</span></code></pre>
+
+<p>If you see many frames next to <em>TFF</em> or <em>BFF</em>, that means a video is interlaced, if there are many in
+progressive, that means it’s not interlaced. If undetermined is the majority count, I guess you better
+look at the file in person, but that hasn’t happened to me yet.</p>
+
+<p>Armed with this new tool I thought it would be a good idea to scan my entire HD looking and check them
+all with the <em>idet</em> filter:</p>
+
+<pre><code class="language-bash"><span class="c"># scan all files on your HD, uses GNU parallel</span>
+<span class="c"># I believe this works just as well with standard</span>
+<span class="c"># xargs though</span>
+locate -0 <span class="s1">'.mov'</span> | parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i <span class="o">{}</span> 2&gt;&amp;1 | egrep <span class="s1">'idet|Input'</span></code></pre>
+
+<p>It turns out I only had 2, interlaced content indeed is quite rare for content on a computer, luckily so.</p>
+        </article>
+
+        <p>Tags: <a href="/tag/ffmpeg" rel="tag">ffmpeg</a></p>
+    </div>
+</div>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="/contact">About Me &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (1)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (1)</a></li>
+                
+            </ul>
+        </div>
+
+        <script>
+            var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+            var _gaq=[['_setAccount','UA-37726728-1'],['_trackPageview'], ['_require', 'inpage_linkid', pluginUrl]];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
