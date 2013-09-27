@@ -2,39 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://www.aktau.be/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/archive/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/contact/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/draft/</loc>
-    <lastmod>2013-09-22</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/13/sdl2-2-0-0-released-at-last/</loc>
-    <lastmod>2013-09-22</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/draft/2013/08/14/making-a-good-game-engine-part-1/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/09/22/detecting-interlaced-video-with-ffmpeg/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/06/introduction/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
@@ -42,11 +34,11 @@
   </url>
   <url>
     <loc>http://www.aktau.be/reading/2013-08-13/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/reading/2013-08-14/</loc>
-    <lastmod>2013-09-22</lastmod>
+    <lastmod>2013-09-27</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/tag/c/</loc>
