@@ -18,7 +18,7 @@
 def create_sitemap
   @items.each do |item|
     if %w{png gif jpg jpeg coffee scss sass less css xml js txt}.include?(item[:extension]) ||
-        item.identifier =~ /404|500|htaccess|google|CNAME/
+        item.identifier =~ /404|500|htaccess|google|CNAME/ || item.attributes.fetch(:draft, false) == true
       item[:is_hidden] = true unless item.attributes.has_key?(:is_hidden)
     end
   end
