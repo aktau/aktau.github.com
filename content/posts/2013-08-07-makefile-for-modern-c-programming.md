@@ -98,12 +98,12 @@ The following four are pretty important, for starters:
 
 - **$@**: the name of the target file (the one before the colon)
 - **$<**: the name of the first (or only) dependency (the first one after the colon)
-- **$^**: the names of all the depdencies (space separated)
+- **$^**: the names of all the dependencies (space separated)
 - **$***: the stem (the bit which matches the % wildcard in a rule definition. (I'm not using this now, but it could be handy someday)
 
 These special variables, combined with wildcards (the **%** symbol in make), allow us
 to compactly eliminate all the redundancy. An example will probably clarify it
-better than a 1000 words.
+better than a thousand words.
 
 ~~~~~~~~
 #!make
@@ -180,7 +180,7 @@ When you're done, spitting out a fully optimized and stripped
 executable.
 
 In make, there are often quite a few ways to achieve the
-same thing, adding to the confusing. For debug and release
+same thing, adding to the confusion. For debug and release
 builds, I personally went for something really simple, expanding
 our last example:
 
@@ -248,7 +248,7 @@ albeit with different flags.
 So now you've got your fancy project building in debug and release modes
 and you're really happy about it, but what when you've been developing
 on OSX and want to build &amp; run it on Linux as well? Or what if
-you want to support clang because of it's awesome diagnostics?
+you want to support clang because of its awesome diagnostics?
 
 With make, you can run some commands to find out what your environment
 looks like and make choices based on that. The long and short of it
@@ -290,7 +290,10 @@ else
         CCFLAGS += -D GCC
         CCFLAGS += -pthread
 
-        # at least on OS X 10.7.5, the apple linker does not understand AVX, and gcc uses it natively
+        # at least on OS X 10.7.5, the apple linker does 
+        # not understand AVX and gcc uses it when you specify 
+        # -mavx or -march=native and you have a CPU 
+        # with AVX or better
         ifeq ($(UNAME_S),Darwin)
             CCFLAGS += -mno-avx
         endif
@@ -337,6 +340,12 @@ your thing.
 But when your project exhibits just slight differences between OS or compiler toolchains,
 there's no need to take the plunge and migrate to autotools, cmake or anything else just yet.
 We can make do with plain make, and still keep it quite readable.
+
+Oh, and there's another thing cmake, autotools and its ilk are pretty
+good at: finding dependencies. This used to be much
+more important and difficult to do with make. But thanks to the rise of
+[pkg-config](http://www.freedesktop.org/wiki/Software/pkg-config/), I
+find that plain make will do fine for smaller projects.
 
 [^1]: Sweet nostalgia, Dev-C++ was my first real IDE, it helped me form my knowledge of C by being easy to use yet not having auto-completion, which cemented a lot of important functions in my muscle memory.
 
