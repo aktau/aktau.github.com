@@ -102,12 +102,12 @@ The following four are pretty important, for starters:</p>
   <li>
 <strong>$&lt;</strong>: the name of the first (or only) dependency (the first one after the colon)</li>
   <li>
-<strong>$^</strong>: the names of all the depdencies (space separated)</li>
+<strong>$^</strong>: the names of all the dependencies (space separated)</li>
   <li>
 <strong>$</strong>*: the stem (the bit which matches the % wildcard in a rule definition. (I’m not using this now, but it could be handy someday)</li>
 </ul><p>These special variables, combined with wildcards (the <strong>%</strong> symbol in make), allow us
 to compactly eliminate all the redundancy. An example will probably clarify it
-better than a 1000 words.</p>
+better than a thousand words.</p>
 
 <pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o helper.o</span>
     gcc <span class="nv">$^</span> -o <span class="nv">$@</span>
@@ -174,7 +174,7 @@ able to run</p>
 executable.</p>
 
 <p>In make, there are often quite a few ways to achieve the
-same thing, adding to the confusing. For debug and release
+same thing, adding to the confusion. For debug and release
 builds, I personally went for something really simple, expanding
 our last example:</p>
 
@@ -239,7 +239,7 @@ albeit with different flags.</p>
 <p>So now you’ve got your fancy project building in debug and release modes
 and you’re really happy about it, but what when you’ve been developing
 on OSX and want to build &amp; run it on Linux as well? Or what if
-you want to support clang because of it’s awesome diagnostics?</p>
+you want to support clang because of its awesome diagnostics?</p>
 
 <p>With make, you can run some commands to find out what your environment
 looks like and make choices based on that. The long and short of it
@@ -279,7 +279,10 @@ I’ll repaste my own edited version here for posterity:</p>
         CCFLAGS +<span class="o">=</span> -D GCC
         CCFLAGS +<span class="o">=</span> -pthread
 
-<span class="c">        # at least on OS X 10.7.5, the apple linker does not understand AVX, and gcc uses it natively</span>
+<span class="c">        # at least on OS X 10.7.5, the apple linker does </span>
+<span class="c">        # not understand AVX and gcc uses it when you specify </span>
+<span class="c">        # -mavx or -march=native and you have a CPU </span>
+<span class="c">        # with AVX or better</span>
 <span class="cp">        ifeq ($(UNAME_S),Darwin)</span>
             CCFLAGS +<span class="o">=</span> -mno-avx
 <span class="cp">        endif</span>
@@ -325,6 +328,12 @@ your thing.</p>
 <p>But when your project exhibits just slight differences between OS or compiler toolchains,
 there’s no need to take the plunge and migrate to autotools, cmake or anything else just yet.
 We can make do with plain make, and still keep it quite readable.</p>
+
+<p>Oh, and there’s another thing cmake, autotools and its ilk are pretty
+good at: finding dependencies. This used to be much
+more important and difficult to do with make. But thanks to the rise of
+<a href="http://www.freedesktop.org/wiki/Software/pkg-config/">pkg-config</a>, I
+find that plain make will do fine for smaller projects.</p>
 
 <div class="footnotes">
   <ol>
