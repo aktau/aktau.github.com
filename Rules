@@ -17,19 +17,19 @@ require 'to_slug'
 require 'set'
 
 preprocess do
-    create_sitemap
-
     tags = Set.new
 
     @items.each do |item|
-        if item[:tags]
+        if item[:tags] and item[:kind] == 'article'
             item[:tags].each { |t| tags.add(t.downcase) }
         end
     end
 
     tags.each do |tag|
-        @items << Nanoc::Item.new("", { :tag => tag, :title => 'tag: ' + tag }, "/tag/#{tag}/")
+        @items << Nanoc::Item.new("", { :tag => tag, :tags => [tag], :title => 'tag: ' + tag, :description => tag }, "/tag/#{tag}/")
     end
+
+    create_sitemap
 end
 
 compile '/CNAME/' do

@@ -1,7 +1,7 @@
 ---
 title: SDL2 (2.0.0) released at last!
 created_at: 2013-08-13
-description: The 2nd version of the ubiquitous game development library SDL was released today. Game developers everywhere rejoice
+description: The second version of the cross-platform game development library SDL was released today. Game developers everywhere rejoice
 kind: article
 tags: [sdl, game-engine, open-source]
 ---

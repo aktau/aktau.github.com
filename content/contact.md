@@ -1,5 +1,7 @@
 ---
-title: About me and get in touch
+title: Nicolas Hillegeer - About me and get in touch
+description: About Nicolas Hillegeer's life and work, contact information (get in touch)
+tags: [about, contact, personal, description, life, work, hire, job, projects, interests]
 ---
 
 # Get in touch

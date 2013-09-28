@@ -1,7 +1,7 @@
 ---
 title: Introduction
 created_at: 2013-08-06
-description: Introduction
+description: Introducing my blog to the world
 kind: article
 tags: [introduction, nanoc, pygments, github]
 ---

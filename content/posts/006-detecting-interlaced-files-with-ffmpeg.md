@@ -1,7 +1,7 @@
 ---
 title: Detecting interlaced video with ffmpeg
 created_at: 2013-09-22
-description: This small article describes how to use ffmpeg's commandline tools to detect pretty accurately whether or not a video files is interlaced or not
+description: This small article describes how to use ffmpeg's commandline tools to detect pretty accurately whether or not a video files is interlaced
 kind: article
 tags: [ffmpeg]
 ---

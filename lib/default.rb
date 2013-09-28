@@ -23,7 +23,7 @@ module PageHelper
     tags = Hash.new
 
     items.each do |item|
-        if item[:tags] and not item[:draft]
+        if item[:tags] and not item[:draft] and (item[:kind] == 'article')
             item[:tags].each { |t|
               name = t.downcase
 

@@ -1,7 +1,7 @@
 ---
 title: A makefile for modern C programming on UNIX-like operating systems
 created_at: 2013-08-07
-description: Presents a (hopefully) understandable makefile that can be used for cross-platform, cross-compiler projects
+description: Presents a (hopefully) understandable makefile that can be used for cross-platform, cross-compiler projects in C/C++
 kind: article
 tags: [unix, c, make, linux, osx]
 ---
