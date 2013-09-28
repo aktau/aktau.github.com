@@ -2,93 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://www.aktau.be/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/archive/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/contact/</loc>
-    <lastmod>2013-09-27</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/draft/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/13/sdl2-2-0-0-released-at-last/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/09/22/detecting-interlaced-video-with-ffmpeg/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/06/introduction/</loc>
-    <lastmod>2013-09-27</lastmod>
+    <lastmod>2013-09-28</lastmod>
   </url>
   <url>
     <loc>http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</loc>
-    <lastmod>2013-09-27</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/reading/2013-08-13/</loc>
-    <lastmod>2013-09-27</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/reading/2013-08-14/</loc>
-    <lastmod>2013-09-27</lastmod>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/c/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/data-driven/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/ffi/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/ffmpeg/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/game-engine/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/github/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/introduction/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/linux/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/lua/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/make/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/nanoc/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/open-source/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/osx/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/pygments/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/scripting/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/sdl/</loc>
-  </url>
-  <url>
-    <loc>http://www.aktau.be/tag/unix/</loc>
+    <lastmod>2013-09-28</lastmod>
   </url>
 </urlset>
