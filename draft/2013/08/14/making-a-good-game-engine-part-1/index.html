@@ -11,7 +11,7 @@
         <meta name="description" content="In this article I write about how I finally started making my own 3D game engine, and about how much it sucks.">
         <meta name="keywords" content="sdl, game-engine, open-source, data-driven">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.4">
+        <meta name="generator" content="nanoc 3.6.7">
     </head>
     <body>
         <div id="main">
@@ -89,6 +89,125 @@ by data? What does it mean?</p>
 <p>Well, that’s a whole different can of worms. I’m not much of a tools programmer nor do I enjoy it very much. So I’ll try to reuse
 as much as humanly possible in this aspect.</p>
 
+<h3 id="d-math">3D Math</h3>
+
+<p>Any game engine will need to perform a whole lot of mathematics.
+Physics, translations, rotations, projections, skinning, …: you name it,
+the engine does it. If you’re like me, you have always had this desire
+to craft really performant code (where it matters, and sometimes
+where it doesn’t). As it happens, even when I was not busy actually
+writing a graphics engine, I was at times amusing myself by
+reading articles about it. One thing that caught my attention was
+<em>template metaprogramming</em> in C++. This was back when I still believed C++
+was a good idea, mostly because all game engines were written in it.
+It promised to deliver the
+performance-conscious programmer from the hell of temporary allocations
+and inefficient code. All this by making the compiler do all the work
+thanks to the notably Turing-complete templates C++ offers. The price,
+was a serious increase in complexity. But only on the inside, said
+the proponents of this approach. Only the templates are complex, the
+client code doesn’t have to care that it’s so complex.</p>
+
+<p>While this may be true, there are two concerns I would like to note:</p>
+
+<ol>
+<li>I don’t particularly like using a piece of code that I couldn’t
+understand without an enormous effort. Template-based code seems to be
+very <em>write once</em> in nature. After a while, not even the author might
+understand it. (Granted, one could say the same about including LuaJIT
+in one’s codebase, but I feel that it’s somehow different. Though
+perhaps I’m just being arbitratry here).</li>
+  <li>It increases compile times a lot. C++ is already a slouch,
+espcially when you’re also using the STL, but template metaprogramming
+magic doesn’t help, at all. If there’s one thing I hate when I’m working
+on something, it’s a long edit-inspect cycle. I want to be able to see
+my changes a second after I make them. When I don’t, I tend to either
+lose my concentration or become frustrated.</li>
+</ol><p>But is there an alternative for intrepid performance-conscious
+developers such as ourselves? Certainly, just use intrinsics, wrap them
+in a nice function and let the compiler sort it all out – quickly I
+might add! A good example of this is the incomplete but functional
+<a href="https://github.com/rikusalminen/threedee-simd">threedee-simd library</a>.
+It is small and lean and compile very quickly, produces extremely
+performant code and is (with less effor than templates) understandable.</p>
+
+<p>To understand it you’d have to get the hang of some SIMD intrinsics first,
+but after that it all becomes quite obvious. A good tip is working it
+out on paper, because all the shuffling be consusing. The actual
+difficult thing, once you get the hang of it and want to add parts to
+the library, is to get the absolute last inch of performance out of it.
+It’s one thing to be able to write correct code with intrinsics, but
+it’s another entirely for that to satisfy the CPU’s desires. There are
+many SIMD functions and some combinations are better than others. Some
+might even lead to performance no better than pure scala code. So you
+might you as well write it in a scalar fashion.</p>
+
+<p>That’s the nice thing about threedee-simd, you can just write your
+function scalar-style first if it doesn’t exist yet. If it proves
+to be oft-used, you can optimize the snot out of it and just replace the
+call from the entrypoint with your shiny new implementation. Actually,
+advanced compiler vectorizers like Clangs’
+<a href="http://llvm.org/docs/Vectorizers.html#the-slp-vectorizer">SLP vectorizer</a>
+do a pretty good job of automatically vectorizing a lot of code, if you
+give it the right nudge.</p>
+
+<p>The right nudge in this case is usually two things:</p>
+
+<ol>
+<li>The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
+this case)</li>
+  <li>The loop in which the data is used has to have a constant number of
+iterations or be manually unrolled.</li>
+  <li>You have to tell the compiler what can change and what pointers can
+alias each other. The C99
+<a href="http://en.wikipedia.org/wiki/Restrict">restrict</a> keyword can be very
+helpful with this, in conjunction with const.</li>
+</ol><p>After these simple things, you already have a decent chance the the
+compiler will produce some pretty performant code. These requirements
+are easy, for alignment it’s enough to use a special typedef that
+enforces alignment. If you dynamically allocate memory for these types,
+you have to tell your <code>malloc</code> variant to give you 16-byte aligned
+memory though. These are the types from threedee-simd:</p>
+
+<pre><code class="language-c"><span class="k">typedef</span> <span class="kt">float</span> <span class="n">vec4</span> <span class="nf">__attribute__</span><span class="p">((</span><span class="n">vector_size</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+<span class="k">typedef</span> <span class="kt">float</span> <span class="n">scalar</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="kt">mat4_t</span>
+<span class="p">{</span>
+      <span class="n">vec4</span> <span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">aligned</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="kt">mat4_t</span> <span class="n">mat4</span><span class="p">;</span></code></pre>
+
+<p>When you use these types, any on-stack variables with these types will
+be aligned correctly. What’s more, when you pass these variables to
+function, the compiler can assume they are aligned correctly, which
+makes it easier to vectorize.</p>
+
+<pre><code class="language-c"><span class="cm">/**</span>
+<span class="cm"> * convert an axis-angle vector to a quaternion</span>
+<span class="cm"> * angle in radians</span>
+<span class="cm"> *</span>
+<span class="cm"> * [axis.x, axis.y, axis.z, angle] =&gt; quaternion</span>
+<span class="cm"> */</span>
+<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">vec4</span> <span class="n">vsn</span><span class="p">,</span> <span class="n">vcs</span><span class="p">;</span>
+    <span class="n">vsincos</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span> <span class="o">*</span> <span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">vsn</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vcs</span><span class="p">);</span>
+
+    <span class="n">vec4</span> <span class="n">sincos</span> <span class="o">=</span> <span class="n">vshuffle</span><span class="p">(</span><span class="n">vsn</span><span class="p">,</span> <span class="n">vcs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span> <span class="o">*</span> <span class="n">vshuffle</span><span class="p">(</span><span class="n">sincos</span><span class="p">,</span> <span class="n">sincos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * a little bit faster, especially when you have FMA instructions, but</span>
+<span class="cm"> * less readable too</span>
+<span class="cm"> */</span>
+<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span> <span class="o">*</span> <span class="n">vsin</span><span class="p">(</span><span class="n">vmadd</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span> <span class="n">vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">M_PI_F</span> <span class="o">*</span> <span class="mf">0.5f</span><span class="p">)));</span>
+<span class="p">}</span></code></pre>
+
 <div class="footnotes">
   <ol>
 <li id="fn:1">
@@ -131,13 +250,21 @@ as much as humanly possible in this aspect.</p>
                 
                 <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
                 
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
                 <li><a href="/tag/introduction">introduction (1)</a></li>
                 
                 <li><a href="/tag/nanoc">nanoc (1)</a></li>
                 
                 <li><a href="/tag/pygments">pygments (1)</a></li>
-                
-                <li><a href="/tag/github">github (1)</a></li>
                 
                 <li><a href="/tag/unix">unix (1)</a></li>
                 

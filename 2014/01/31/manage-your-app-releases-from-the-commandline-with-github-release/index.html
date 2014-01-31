@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Manage your app releases from the commandline with github-release</title>
+
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/stylesheets/pygments.css">
+
+        <meta name="description" content="github-release is a small commandline app writtin in Golang that allows you to manage github releases -- information and artifacts (= binaries) -- from the comfort of the commandline.">
+        <meta name="keywords" content="github, github-release, gofinance, golang, cross-compiling">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.6.7">
+    </head>
+    <body>
+        <div id="main">
+    <div class="post">
+        <h1>Manage your app releases from the commandline with github-release</h1>
+        <aside>January 31, 2014</aside>
+
+        <article>
+            <p>Recently I started on a new side-project:
+<a href="https://github.com/aktau/gofinance">gofinance</a>. It dowloads and stores
+financial data from the likes of Yahoo Finance, Bloomberg et al. It’s
+under heavy development but already provides me with a nice way of
+viewing my stocks from the commandline. A blog post about it is underway
+but I’m waiting until I can get a bit of security analysis code
+commited.</p>
+
+<p>Anyway, I felt the need to upload binaries when I got around to tagging
+a usable release. Normally one would go to github after tagging and
+pushing, and create the release manually, adding a description and
+uploading the binaries.</p>
+
+<p>Naturally, being a programmer, I wasn’t content with this repetitive
+clicking, so I automated the task, and
+<a href="https://github.com/aktau/github-release">github-release</a> was born.</p>
+
+<!-- more -->
+
+<p>It makes use of the rather recent <a href="http://developer.github.com/v3/repos/releases/">github API for managing
+releases</a>, and takes
+care of the dirty work for you.</p>
+
+<p>It also allows you to check the current state of your releases. A small
+example of some output I get out of the current version for the
+<code>github-release</code> repo itself:</p>
+
+<pre><code class="language-bash"><span class="nv">$ </span>github-release info -u aktau -r github-release
+git tags:
+- v0.3 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/b30980cb2a0850689e9f68a75549e52f73893e0d<span class="o">)</span>
+- v0.2 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/264d2373ef74f60e94726ef37c5a7ee9164412d2<span class="o">)</span>
+- v0.1 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/20fa17d227789813e8a7bc24137d384f8e7e7a33<span class="o">)</span>
+releases:
+-  v0.3, name: <span class="s1">'v0.3'</span>, description: <span class="s1">'v0.3'</span>, id: 167330, tagged: 30/01/2014 at 23:27, published: 30/01/2014 at 23:27, draft: ✔, prerelease: ✔
+  - artifact: darwin-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68861
+  - artifact: freebsd-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68862
+  - artifact: linux-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68863
+  - artifact: windows-amd64-github-release.zip, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.1MB, id: 68864</code></pre>
+
+<p>So there are 3 tags, and only one of them has a formal github release
+(v0.3).  It has 4 artifacts, all about 2MB in size. I’ve automated this
+entire process in a  makefile, so all I have to do is run <code>make release</code>
+whenever I’ve made a new tag and presto, it builds all executables,
+makes a formal release and uploads the artifacts. Check out the makefile
+on the <a href="https://github.com/aktau/github-release">project page</a>.</p>
+
+<p>All of this is made infinitely easier by the fact that
+<a href="http://golang.org/">golang</a> has awesome support for cross-compilation.
+I can make a windows binary from the comfort of my OSX environment by
+just issuing:</p>
+
+<pre><code class="language-bash"><span class="nv">$ GOARCH</span><span class="o">=</span>amd64 <span class="nv">GOOS</span><span class="o">=</span>windows go build</code></pre>
+
+<p>And presto, there’s a brand new <code>app.exe</code> in the directory. This,
+combined with the fact that Go generates static binaries that are
+entirely self-contained, makes for the easiest distribution and
+deployment steps I’ve had in years. It’s at least 1/4th of the reason
+why I enjoy making stuff in Go. (others are ease of writing/reading,
+speed, great standard library, …). No more rbenv, virtualenv, pip, or
+whatever shenanigans the next scripting language du jour comes up with.</p>
+        </article>
+
+        <p>Tags: <a href="/tag/github" rel="tag">github</a>, <a href="/tag/github-release" rel="tag">github-release</a>, <a href="/tag/gofinance" rel="tag">gofinance</a>, <a href="/tag/golang" rel="tag">golang</a>, <a href="/tag/cross-compiling" rel="tag">cross-compiling</a></p>
+    </div>
+</div>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="/contact">About Me &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (1)</a></li>
+                
+            </ul>
+            -->
+        </div>
+
+        <script>
+            var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+            var _gaq=[['_setAccount','UA-37726728-1'],['_trackPageview'], ['_require', 'inpage_linkid', pluginUrl]];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
