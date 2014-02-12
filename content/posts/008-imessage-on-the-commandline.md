@@ -54,5 +54,9 @@ $ imessage 0495876923 "knock knock!"
 ~~~~~~~~
 
 Those are not actual telephone numbers (that I know of), by the way.
+There are even more cool things you could do with this. Someone has even
+made a [Lisp REPL that works over
+iMessage](https://46b.it/2012/hacking-with-imessage). Oh the
+possibilities!
 
-[^1]: the ruby utility can be found on [github](https://github.com/chrisfsampaio/imsg)
+[^1]: the ruby utility can be found on [github](https://github.com/chrisfsampaio/imsg).
