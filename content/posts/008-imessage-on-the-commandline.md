@@ -42,10 +42,12 @@ on run {targetBuddyPhone, targetMessage}
 end run
 ~~~~~~~~
 
-Gist version [here](https://gist.github.com/aktau/8958054). Paste that
-in a file, make it executable with `chmod u+x "thefilename"` and you're
-good to go. It doesn't even require Ruby, so you can just drop the
-script in some folder in your `$PATH` and use it like this:
+Gist version [here](https://gist.github.com/aktau/8958054). It's a bit
+more complicated than what's pasted above because it tries to launch
+Messages.app if it isn't running. Paste that in a file, make it
+executable with `chmod u+x "thefilename"` and you're good to go. It
+doesn't even require Ruby, so you can just drop the script in some
+folder in your `$PATH` and use it like this:
 
 ~~~~~~~~
 #!bash
