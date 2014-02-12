@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Send iMessages via the commandline on OSX, even to yourself</title>
+
+        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/stylesheets/pygments.css">
+
+        <meta name="description" content="this little applescript allows one to easily send an iMessage to anyone in your contact list by communicating with Messages.app">
+        <meta name="keywords" content="imessage, osx, applescript">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.6.7">
+    </head>
+    <body>
+        <div id="main">
+    <div class="post">
+        <h1>Send iMessages via the commandline on OSX, even to yourself</h1>
+        <aside>February 12, 2014</aside>
+
+        <article>
+            <p>Today on HN someone posted a small ruby utility to send iMessages via
+the commandline, which piqued my interest. I would love to send messages
+to my phone when one of my cronscripts discovers something interesting.
+However, the utility doesn’t allow sending to self.</p>
+
+<p>So I looked around and found a way to get around this restriction, and
+it doesn’t even require ruby anymore!</p>
+
+<!-- more -->
+
+<p>After realizing the utility worked through applescript <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, I perused
+google to find a way to circumvent the inability to send to self. Lo and
+behold, <a href="http://stackoverflow.com/questions/11812184/how-to-send-an-imessage-text-with-applescript-only-in-provided-service">Stack Overflow has the
+answer</a>!</p>
+
+<p>I didn’t like typing: <code>osascript "script" "number" "message"</code> all the
+time, so I looked for <a href="http://hints.macworld.com/article.php?story=20060425140531375">a way to use it like a normal UNIX
+script</a>.
+With this unholy shebang hack, it now looks like this:</p>
+
+<pre><code class="language-applescript"><span class="c">#!/bin/sh</span>
+<span class="nv">exec</span> <span class="o">&lt;</span><span class="s2">"$0"</span> <span class="err">||</span> <span class="k">exit</span><span class="err">;</span> <span class="nb">read</span> <span class="nv">v</span><span class="err">;</span> <span class="nb">read</span> <span class="nv">v</span><span class="err">;</span> <span class="nv">exec</span> <span class="o">/</span><span class="nv">usr</span><span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">osascript</span> <span class="o">-</span> <span class="s2">"$@"</span><span class="err">;</span> <span class="k">exit</span>
+
+<span class="k">on</span> <span class="nb">run</span> <span class="p">{</span><span class="nv">targetBuddyPhone</span><span class="p">,</span> <span class="nv">targetMessage</span><span class="p">}</span>
+    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">"Messages"</span>
+        <span class="k">set</span> <span class="nv">targetService</span> <span class="k">to</span> <span class="nb">1st</span> <span class="nv">service</span> <span class="nb">whose</span> <span class="nv">service</span> <span class="nv">type</span> <span class="o">=</span> <span class="nv">iMessage</span>
+        <span class="k">set</span> <span class="nv">targetBuddy</span> <span class="k">to</span> <span class="nv">buddy</span> <span class="nv">targetBuddyPhone</span> <span class="k">of</span> <span class="nv">targetService</span>
+        <span class="nv">send</span> <span class="nv">targetMessage</span> <span class="k">to</span> <span class="nv">targetBuddy</span>
+    <span class="k">end</span> <span class="k">tell</span>
+<span class="k">end</span> <span class="nb">run</span></code></pre>
+
+<p>Gist version <a href="https://gist.github.com/aktau/8958054">here</a>. Paste that
+in a file, make it executable with <code>chmod u+x "thefilename"</code> and you’re
+good to go. It doesn’t even require Ruby, so you can just drop the
+script in some folder in your <code>$PATH</code> and use it like this:</p>
+
+<pre><code class="language-bash"><span class="nv">$ </span>imessage 0487198747 <span class="s2">"gofinance: your stock AAPL has gone up by 20%"</span>
+<span class="nv">$ </span>imessage 0495876923 <span class="s2">"knock knock!"</span></code></pre>
+
+<p>Those are not actual telephone numbers (that I know of), by the way.</p>
+
+<div class="footnotes">
+  <ol>
+<li id="fn:1">
+      <p>the ruby utility can be found on <a href="https://github.com/chrisfsampaio/imsg">github</a> <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+  </ol>
+</div>
+        </article>
+
+        <p>Tags: <a href="/tag/imessage" rel="tag">imessage</a>, <a href="/tag/osx" rel="tag">osx</a>, <a href="/tag/applescript" rel="tag">applescript</a></p>
+    </div>
+</div>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="/contact">About Me &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+            </ul>
+            -->
+        </div>
+
+        <script>
+            var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+            var _gaq=[['_setAccount','UA-37726728-1'],['_trackPageview'], ['_require', 'inpage_linkid', pluginUrl]];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
