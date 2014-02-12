@@ -51,10 +51,12 @@ With this unholy shebang hack, it now looks like this:</p>
     <span class="k">end</span> <span class="k">tell</span>
 <span class="k">end</span> <span class="nb">run</span></code></pre>
 
-<p>Gist version <a href="https://gist.github.com/aktau/8958054">here</a>. Paste that
-in a file, make it executable with <code>chmod u+x "thefilename"</code> and you’re
-good to go. It doesn’t even require Ruby, so you can just drop the
-script in some folder in your <code>$PATH</code> and use it like this:</p>
+<p>Gist version <a href="https://gist.github.com/aktau/8958054">here</a>. It’s a bit
+more complicated than what’s pasted above because it tries to launch
+Messages.app if it isn’t running. Paste that in a file, make it
+executable with <code>chmod u+x "thefilename"</code> and you’re good to go. It
+doesn’t even require Ruby, so you can just drop the script in some
+folder in your <code>$PATH</code> and use it like this:</p>
 
 <pre><code class="language-bash"><span class="nv">$ </span>imessage 0487198747 <span class="s2">"gofinance: your stock AAPL has gone up by 20%"</span>
 <span class="nv">$ </span>imessage 0495876923 <span class="s2">"knock knock!"</span></code></pre>
