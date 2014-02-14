@@ -1,0 +1,4 @@
+<%=
+ atom_feed :content_proc => Proc.new { |article| article.compiled_content },
+ :excerpt_proc => Proc.new { |article| article.compiled_content.partition('<!-- more -->').first }
+%>

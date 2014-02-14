@@ -2,9 +2,10 @@
 # http://domain.tld
 base_url: http://www.aktau.be
 
-author: Nicolas Hillegeer
+author_name: Nicolas Hillegeer
+author_uri: http://www.aktau.be/contact
 
-site_name: Portfolio and personal blog
+title: Portfolio and personal blog
 
 # A list of file extensions that nanoc will consider to be textual rather than
 # binary. If an item with an extension not in this list is found,  the file

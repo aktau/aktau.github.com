@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
 
-        <title><%= @item[:title] || (site.config[:author] + " - " + site.config[:site_name]) %></title>
+        <title><%= @item[:title] || (site.config[:author_name] + " - " + site.config[:title]) %></title>
 
         <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
@@ -16,8 +16,8 @@
         <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
         <meta name="robots" content="index,follow">
 
-        <meta property="og:title" content="<%= @item[:title] || (site.config[:author] + " - " + site.config[:site_name]) %>">
-        <meta property="og:site_name" content="<%= site.config[:author] %> - <%= site.config[:site_name] %>">
+        <meta property="og:title" content="<%= @item[:title] || (site.config[:author_name] + " - " + site.config[:title]) %>">
+        <meta property="og:title" content="<%= site.config[:author_name] %> - <%= site.config[:site_name] %>">
         <meta property="og:type" content="blog">
         <meta property="og:url" content="<%= url_for(@item) %>">
 

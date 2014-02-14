@@ -36,6 +36,10 @@ compile '/CNAME/' do
     # don’t filter or layout
 end
 
+compile '/feed/' do
+    filter :erb
+end
+
 compile '/stylesheets/*/' do
     # don’t filter or layout
 end
@@ -93,6 +97,10 @@ end
 # for github pages...
 route '/CNAME/' do
   '/CNAME'
+end
+
+route '/feed/' do
+    '/blog.xml'
 end
 
 # for google webmaster tools
