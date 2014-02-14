@@ -1,5 +1,6 @@
 h1, h2, h3, h4, h5 {
     font-weight: normal;
+    text-rendering: optimizeLegibility;
 }
 
 h1 {
@@ -29,6 +30,7 @@ p, .read-more {
     font-size: 21px;
     line-height: 28px;
     margin-bottom: 35px;
+    text-rendering: optimizeLegibility;
 }
 
 aside {
@@ -159,6 +161,14 @@ a:hover {
     color: #2ba6cb;
 }
 
+::selection{
+    background: #b3eecc;
+}
+
+::-moz-selection{
+    background: #b3eecc;
+}
+
 /* inline code shouldn't affect the line-height */
 p code {
     line-height: 0;
@@ -193,14 +203,10 @@ article ul, article ol {
     margin-left: 0;
 }
 
-article li {
+article li, article li p {
     text-indent: 0!important;
     margin-bottom: 17px;
-}
-
-article li p {
-    text-indent: 0!important;
-    margin-bottom: 17px;
+    text-rendering: optimizeLegibility;
 }
 
 /* sidebar */
