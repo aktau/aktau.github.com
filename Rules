@@ -59,7 +59,7 @@ compile '/sitemap/', :rep => 'gzip' do
 end
 
 compile '/images/*/', :rep => :thumbnail do
-    filter :thumbnailize, :width => 500
+    filter :thumbnailize, :width => 600
 end
 
 compile 'posts/*' do
