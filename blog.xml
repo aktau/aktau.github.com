@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://www.aktau.be/</id>
+  <title>Portfolio and personal blog</title>
+  <updated>2014-02-11T23:00:00Z</updated>
+  <link rel="alternate" href="http://www.aktau.be/"/>
+  <link rel="self" href="http://www.aktau.be/blog.xml"/>
+  <author>
+    <name>Nicolas Hillegeer</name>
+    <uri>http://www.aktau.be/contact</uri>
+  </author>
+  <entry>
+    <id>tag:www.aktau.be,2014-02-12:/2014/02/12/send-imessages-via-the-commandline-on-osx-even-to-yourself/</id>
+    <title type="html">Send iMessages via the commandline on OSX, even to yourself</title>
+    <published>2014-02-11T23:00:00Z</published>
+    <updated>2014-02-11T23:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2014/02/12/send-imessages-via-the-commandline-on-osx-even-to-yourself/"/>
+    <content type="html">&lt;p&gt;Today on HN someone posted a small ruby utility to send iMessages via
+the commandline, which piqued my interest. I would love to send messages
+to my phone when one of my cronscripts discovers something interesting.
+However, the utility doesn’t allow sending to self.&lt;/p&gt;
+
+&lt;p&gt;So I looked around and found a way to get around this restriction, and
+it doesn’t even require ruby anymore!&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;After realizing the utility worked through applescript &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;, I perused
+google to find a way to circumvent the inability to send to self. Lo and
+behold, &lt;a href="http://stackoverflow.com/questions/11812184/how-to-send-an-imessage-text-with-applescript-only-in-provided-service"&gt;Stack Overflow has the
+answer&lt;/a&gt;!&lt;/p&gt;
+
+&lt;p&gt;I didn’t like typing: &lt;code&gt;osascript "script" "number" "message"&lt;/code&gt; all the
+time, so I looked for &lt;a href="http://hints.macworld.com/article.php?story=20060425140531375"&gt;a way to use it like a normal UNIX
+script&lt;/a&gt;.
+With this unholy shebang hack, it now looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-applescript"&gt;&lt;span class="c"&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class="nv"&gt;exec&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="s2"&gt;"$0"&lt;/span&gt; &lt;span class="err"&gt;||&lt;/span&gt; &lt;span class="k"&gt;exit&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt; &lt;span class="nb"&gt;read&lt;/span&gt; &lt;span class="nv"&gt;v&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt; &lt;span class="nb"&gt;read&lt;/span&gt; &lt;span class="nv"&gt;v&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt; &lt;span class="nv"&gt;exec&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nv"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nv"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nv"&gt;osascript&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="s2"&gt;"$@"&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt; &lt;span class="k"&gt;exit&lt;/span&gt;
+
+&lt;span class="k"&gt;on&lt;/span&gt; &lt;span class="nb"&gt;run&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nv"&gt;targetBuddyPhone&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;targetMessage&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;tell&lt;/span&gt; &lt;span class="nb"&gt;application&lt;/span&gt; &lt;span class="s2"&gt;"Messages"&lt;/span&gt;
+        &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;targetService&lt;/span&gt; &lt;span class="k"&gt;to&lt;/span&gt; &lt;span class="nb"&gt;1st&lt;/span&gt; &lt;span class="nv"&gt;service&lt;/span&gt; &lt;span class="nb"&gt;whose&lt;/span&gt; &lt;span class="nv"&gt;service&lt;/span&gt; &lt;span class="nv"&gt;type&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nv"&gt;iMessage&lt;/span&gt;
+        &lt;span class="k"&gt;set&lt;/span&gt; &lt;span class="nv"&gt;targetBuddy&lt;/span&gt; &lt;span class="k"&gt;to&lt;/span&gt; &lt;span class="nv"&gt;buddy&lt;/span&gt; &lt;span class="nv"&gt;targetBuddyPhone&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="nv"&gt;targetService&lt;/span&gt;
+        &lt;span class="nv"&gt;send&lt;/span&gt; &lt;span class="nv"&gt;targetMessage&lt;/span&gt; &lt;span class="k"&gt;to&lt;/span&gt; &lt;span class="nv"&gt;targetBuddy&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt; &lt;span class="k"&gt;tell&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt; &lt;span class="nb"&gt;run&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Gist version &lt;a href="https://gist.github.com/aktau/8958054"&gt;here&lt;/a&gt;. It’s a bit
+more complicated than what’s pasted above because it tries to launch
+Messages.app if it isn’t running. Paste that in a file, make it
+executable with &lt;code&gt;chmod u+x "thefilename"&lt;/code&gt; and you’re good to go. It
+doesn’t even require Ruby, so you can just drop the script in some
+folder in your &lt;code&gt;$PATH&lt;/code&gt; and use it like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;imessage 0487198747 &lt;span class="s2"&gt;"gofinance: your stock AAPL has gone up by 20%"&lt;/span&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;imessage 0495876923 &lt;span class="s2"&gt;"knock knock!"&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Those are not actual telephone numbers (that I know of), by the way.
+There are even more cool things you could do with this. Someone has even
+made a &lt;a href="https://46b.it/2012/hacking-with-imessage"&gt;Lisp REPL that works over
+iMessage&lt;/a&gt;. Oh the
+possibilities!&lt;/p&gt;
+
+&lt;div class="footnotes"&gt;
+  &lt;ol&gt;
+&lt;li id="fn:1"&gt;
+      &lt;p&gt;the ruby utility can be found on &lt;a href="https://github.com/chrisfsampaio/imsg"&gt;github&lt;/a&gt;. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+    <summary type="html">&lt;p&gt;Today on HN someone posted a small ruby utility to send iMessages via
+the commandline, which piqued my interest. I would love to send messages
+to my phone when one of my cronscripts discovers something interesting.
+However, the utility doesn’t allow sending to self.&lt;/p&gt;
+
+&lt;p&gt;So I looked around and found a way to get around this restriction, and
+it doesn’t even require ruby anymore!&lt;/p&gt;
+
+</summary>
+  </entry>
+  <entry>
+    <id>tag:www.aktau.be,2014-01-31:/2014/01/31/manage-your-app-releases-from-the-commandline-with-github-release/</id>
+    <title type="html">Manage your app releases from the commandline with github-release</title>
+    <published>2014-01-30T23:00:00Z</published>
+    <updated>2014-01-30T23:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2014/01/31/manage-your-app-releases-from-the-commandline-with-github-release/"/>
+    <content type="html">&lt;p&gt;Recently I started on a new side-project:
+&lt;a href="https://github.com/aktau/gofinance"&gt;gofinance&lt;/a&gt;. It dowloads and stores
+financial data from the likes of Yahoo Finance, Bloomberg et al. It’s
+under heavy development but already provides me with a nice way of
+viewing my stocks from the commandline. A blog post about it is underway
+but I’m waiting until I can get a bit of security analysis code
+commited.&lt;/p&gt;
+
+&lt;p&gt;Anyway, I felt the need to upload binaries when I got around to tagging
+a usable release. Normally one would go to github after tagging and
+pushing, and create the release manually, adding a description and
+uploading the binaries.&lt;/p&gt;
+
+&lt;p&gt;Naturally, being a programmer, I wasn’t content with this repetitive
+clicking, so I automated the task, and
+&lt;a href="https://github.com/aktau/github-release"&gt;github-release&lt;/a&gt; was born.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;It makes use of the rather recent &lt;a href="http://developer.github.com/v3/repos/releases/"&gt;github API for managing
+releases&lt;/a&gt;, and takes
+care of the dirty work for you.&lt;/p&gt;
+
+&lt;p&gt;It also allows you to check the current state of your releases. A small
+example of some output I get out of the current version for the
+&lt;code&gt;github-release&lt;/code&gt; repo itself:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;github-release info -u aktau -r github-release
+git tags:
+- v0.3 &lt;span class="o"&gt;(&lt;/span&gt;commit: https://api.github.com/repos/aktau/github-release/commits/b30980cb2a0850689e9f68a75549e52f73893e0d&lt;span class="o"&gt;)&lt;/span&gt;
+- v0.2 &lt;span class="o"&gt;(&lt;/span&gt;commit: https://api.github.com/repos/aktau/github-release/commits/264d2373ef74f60e94726ef37c5a7ee9164412d2&lt;span class="o"&gt;)&lt;/span&gt;
+- v0.1 &lt;span class="o"&gt;(&lt;/span&gt;commit: https://api.github.com/repos/aktau/github-release/commits/20fa17d227789813e8a7bc24137d384f8e7e7a33&lt;span class="o"&gt;)&lt;/span&gt;
+releases:
+-  v0.3, name: &lt;span class="s1"&gt;'v0.3'&lt;/span&gt;, description: &lt;span class="s1"&gt;'v0.3'&lt;/span&gt;, id: 167330, tagged: 30/01/2014 at 23:27, published: 30/01/2014 at 23:27, draft: ✔, prerelease: ✔
+  - artifact: darwin-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, &lt;span class="nb"&gt;type&lt;/span&gt;: application/octet-stream, size: 2.0MB, id: 68861
+  - artifact: freebsd-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, &lt;span class="nb"&gt;type&lt;/span&gt;: application/octet-stream, size: 2.0MB, id: 68862
+  - artifact: linux-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, &lt;span class="nb"&gt;type&lt;/span&gt;: application/octet-stream, size: 2.0MB, id: 68863
+  - artifact: windows-amd64-github-release.zip, downloads: 0, state: uploaded, &lt;span class="nb"&gt;type&lt;/span&gt;: application/octet-stream, size: 2.1MB, id: 68864&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So there are 3 tags, and only one of them has a formal github release
+(v0.3).  It has 4 artifacts, all about 2MB in size. I’ve automated this
+entire process in a  makefile, so all I have to do is run &lt;code&gt;make release&lt;/code&gt;
+whenever I’ve made a new tag and presto, it builds all executables,
+makes a formal release and uploads the artifacts. Check out the makefile
+on the &lt;a href="https://github.com/aktau/github-release"&gt;project page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;All of this is made infinitely easier by the fact that
+&lt;a href="http://golang.org/"&gt;golang&lt;/a&gt; has awesome support for cross-compilation.
+I can make a windows binary from the comfort of my OSX environment by
+just issuing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ GOARCH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;amd64 &lt;span class="nv"&gt;GOOS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;windows go build&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And presto, there’s a brand new &lt;code&gt;app.exe&lt;/code&gt; in the directory. This,
+combined with the fact that Go generates static binaries that are
+entirely self-contained, makes for the easiest distribution and
+deployment steps I’ve had in years. It’s at least 1/4th of the reason
+why I enjoy making stuff in Go. (others are ease of writing/reading,
+speed, great standard library, …). No more rbenv, virtualenv, pip, or
+whatever shenanigans the next scripting language du jour comes up with.&lt;/p&gt;</content>
+    <summary type="html">&lt;p&gt;Recently I started on a new side-project:
+&lt;a href="https://github.com/aktau/gofinance"&gt;gofinance&lt;/a&gt;. It dowloads and stores
+financial data from the likes of Yahoo Finance, Bloomberg et al. It’s
+under heavy development but already provides me with a nice way of
+viewing my stocks from the commandline. A blog post about it is underway
+but I’m waiting until I can get a bit of security analysis code
+commited.&lt;/p&gt;
+
+&lt;p&gt;Anyway, I felt the need to upload binaries when I got around to tagging
+a usable release. Normally one would go to github after tagging and
+pushing, and create the release manually, adding a description and
+uploading the binaries.&lt;/p&gt;
+
+&lt;p&gt;Naturally, being a programmer, I wasn’t content with this repetitive
+clicking, so I automated the task, and
+&lt;a href="https://github.com/aktau/github-release"&gt;github-release&lt;/a&gt; was born.&lt;/p&gt;
+
+</summary>
+  </entry>
+  <entry>
+    <id>tag:www.aktau.be,2013-09-22:/2013/09/22/detecting-interlaced-video-with-ffmpeg/</id>
+    <title type="html">Detecting interlaced video with ffmpeg</title>
+    <published>2013-09-21T22:00:00Z</published>
+    <updated>2013-09-21T22:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2013/09/22/detecting-interlaced-video-with-ffmpeg/"/>
+    <content type="html">&lt;p&gt;Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
+underlying video player (&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid of that nasty combing effect.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;Searching the internet I found that many people say that you can only really see if a video is interlaced or not by looking at it
+frame by frame. One can’t rely on any metadata present in the video file, which you can get for example by running &lt;code&gt;mediainfo&lt;/code&gt;.
+It happens quite often that this metadata is just &lt;em&gt;wrong&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;While this is true, I have no patience for manually viewing each file, especially because I’m dealing with thousands of user-submitted videos.
+So I kept digging and found an automated solution that, while not 100% accurate, was more than accurate enough. Anything that slipped through
+the cracks will be noticed and the users will hopefully notify me.&lt;/p&gt;
+
+&lt;p&gt;It turns out that &lt;strong&gt;ffmpeg&lt;/strong&gt; has a filter called &lt;strong&gt;idet&lt;/strong&gt; that (tries to) detect interlaced frames, and in my experience is quite
+good at it. You’ll need a pretty recent version of ffmpeg for this (later 2012 I believe,
+the one in the debian wheezy repositories is not recent enough). Here’s an example of how to use it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# detect interlacing with the ffmpeg "idet" filter, the more frames&lt;/span&gt;
+&lt;span class="c"&gt;# you extract, the better, though it's never 100% accurate&lt;/span&gt;
+
+&lt;span class="c"&gt;# flags:&lt;/span&gt;
+&lt;span class="c"&gt;# -an            = discard audio, we don't need it&lt;/span&gt;
+&lt;span class="c"&gt;# -f rawvideo    = output raw video&lt;/span&gt;
+&lt;span class="c"&gt;# -y /dev/null   = discard the output&lt;/span&gt;
+&lt;span class="c"&gt;# -i ...         = the input file to check&lt;/span&gt;
+&lt;span class="c"&gt;# -frames:v 100  = extract the first 100 frames&lt;/span&gt;
+&lt;span class="c"&gt;# -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames&lt;/span&gt;
+
+ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
+    -frames:v 100 &lt;span class="se"&gt;\&lt;/span&gt;
+    -an &lt;span class="se"&gt;\&lt;/span&gt;
+    -f rawvideo -y /dev/null &lt;span class="se"&gt;\&lt;/span&gt;
+    -i ~/Downloads/some_interlaced_video.mkv
+&lt;span class="c"&gt;# Example output (this is interlaced, TFF style)&lt;/span&gt;
+&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1ccf7c0] Single frame detection: TFF:167 BFF:0 Progressive:1 Undetermined:0&lt;/span&gt;
+&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0&lt;/span&gt;
+
+ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
+    -frames:v 100 &lt;span class="se"&gt;\&lt;/span&gt;
+    -an &lt;span class="se"&gt;\&lt;/span&gt;
+    -f rawvideo -y /dev/null &lt;span class="se"&gt;\&lt;/span&gt;
+    -i ~/Downloads/some_non_interlaced_video.mkv
+&lt;span class="c"&gt;# Example output (this is not interlaced):&lt;/span&gt;
+&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84&lt;/span&gt;
+&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you see many frames next to &lt;em&gt;TFF&lt;/em&gt; or &lt;em&gt;BFF&lt;/em&gt;, that means a video is interlaced, if there are many in
+progressive, that means it’s not interlaced. If undetermined is the majority count, I guess you better
+look at the file in person, but that hasn’t happened to me yet.&lt;/p&gt;
+
+&lt;p&gt;Armed with this new tool I thought it would be a good idea to scan my entire HD looking and check them
+all with the &lt;em&gt;idet&lt;/em&gt; filter:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# scan all files on your HD, uses GNU parallel&lt;/span&gt;
+&lt;span class="c"&gt;# I believe this works just as well with standard&lt;/span&gt;
+&lt;span class="c"&gt;# xargs though&lt;/span&gt;
+locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; | parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&amp;amp;1 | egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It turns out I only had 2, interlaced content indeed is quite rare for content on a computer, luckily so.&lt;/p&gt;</content>
+    <summary type="html">&lt;p&gt;Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
+underlying video player (&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid of that nasty combing effect.&lt;/p&gt;
+
+</summary>
+  </entry>
+  <entry>
+    <id>tag:www.aktau.be,2013-08-14:/draft/2013/08/14/making-a-good-game-engine-part-1/</id>
+    <title type="html">Making a good game engine (part 1)</title>
+    <published>2013-08-13T22:00:00Z</published>
+    <updated>2013-08-13T22:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/draft/2013/08/14/making-a-good-game-engine-part-1/"/>
+    <content type="html">&lt;p&gt;I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
+would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
+allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
+stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
+water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
+Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
+to me…&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;&lt;strong&gt;DISCLAIMER&lt;/strong&gt;: I’ve never written an actual game engine before. When I was young I coded up a
+&lt;a href="http://zatacka.sourceforge.net/index.php?id=screens"&gt;Zatacka&lt;/a&gt;&lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;-clone in SDL after
+following &lt;a href="http://sol.gfxile.net/gp/index.html"&gt;Jari Komppa&lt;/a&gt;’s tutorial. I loved that falling snow! After that my game-making tapered
+off a bit and I can painfully remember that I couldn’t even muster up the discipline to code up a tetris-clone. I guess I liked my
+win32 wildcard filename searcher better &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
+with OpenGL) that was supposed to teach butterfly evolution to a bunch of pre-schoolers. I learned C++ specifically for the project
+because that’s what game programmers did, or so I had read once. Needless to say, this was a mistake:
+new language + not experienced at game making = frantic coding to make up for lost time. It did provide me with a handle on C++ and a bit more
+of an idea of what it might mean to make an engine.&lt;/p&gt;
+
+&lt;p&gt;But still, the idea lingered, and I wanted all those things that I wrote at the top of the page. I realized quite early that I couldn’t have all those things.
+It takes people far more experienced and likely also far smarter than me a lot of time to come up with engines like the one I want. How
+on earth am I supposed to do it then?&lt;/p&gt;
+
+&lt;p&gt;Well, from my earlier experiments, I had learned two things:&lt;/p&gt;
+
+&lt;p&gt;1) your first attempt(s) suck.
+2) every subsequent attempt gets better.
+3) agonizing over design is sometimes very necessary and sometimes utter crap.&lt;/p&gt;
+
+&lt;p&gt;The two first points are nshrined in such common wisdom as “&lt;em&gt;practice makes perfect&lt;/em&gt;”, this should come as no surprise. The third one
+seems to provide no value at all. I’ll try to clarify. For the butterfly evolution game I needed the students to play against each other:
+multiplayer. I thought about my Zatacka-clone, how I had made it and tried to add multiplayer to it after “perfecting” the singleplayer.
+And how incredibly painful that was. I just couldn’t get it to work right, after a short while my players would desync or have any of
+a million other issues. It took about a month for me to realize that Zatacka-multiplayer was unsalvageable. The game had just not been made
+with multiplayer in mind, and to shoehorn it in was the worst idea ever.&lt;/p&gt;
+
+&lt;p&gt;Networking: link to John Carmack’s plan in which he lays out input/output. Link to tribes 2 networking design. Link to valve networking design.&lt;/p&gt;
+
+&lt;p&gt;This is the reason I have so much respect for (f.ex) the people that made &lt;a href="http://www.mtavc.com/"&gt;Multi Theft Auto&lt;/a&gt;: they made a networked
+game out of a very complex, strictly singleplayer game, without having the source. My mind was blown. I couldn’t even do that for a game
+so simple a cellular automaton could have made it, and I even had the source!&lt;/p&gt;
+
+&lt;p&gt;I had very little experience with socket programming and perhaps less with game design, but one thing I could foresee was
+that it would be absolute madness to shoehorn such a thing as multiplayer into a game designed as a&lt;/p&gt;
+
+&lt;p&gt;Like all things, engine design is subject to certain trends and even fads. The one that’s currently (in 2013) the strongest and has been
+growing for a couple of years seems to be the \textbf{data-driven engine}. Sounds pretty generic, right? Which engine isn’t driven
+by data? What does it mean?&lt;/p&gt;
+
+&lt;h3 id="choosing-a-language"&gt;Choosing a language&lt;/h3&gt;
+
+&lt;p&gt;C++11 looks awesome, but I find that classes distract from the true core of the data-driven religion.&lt;/p&gt;
+
+&lt;h3 id="the-pipeline"&gt;The pipeline&lt;/h3&gt;
+
+&lt;p&gt;The point is to view your data as streaming through a pipeline&lt;/p&gt;
+
+&lt;p&gt;The cache, bro.&lt;/p&gt;
+
+&lt;h3 id="no-more-trees"&gt;No more trees&lt;/h3&gt;
+
+&lt;p&gt;Trees are bad for caches… or are they?&lt;/p&gt;
+
+&lt;h3 id="tooling"&gt;Tooling&lt;/h3&gt;
+
+&lt;p&gt;Well, that’s a whole different can of worms. I’m not much of a tools programmer nor do I enjoy it very much. So I’ll try to reuse
+as much as humanly possible in this aspect.&lt;/p&gt;
+
+&lt;h3 id="d-math"&gt;3D Math&lt;/h3&gt;
+
+&lt;p&gt;Any game engine will need to perform a whole lot of mathematics.
+Physics, translations, rotations, projections, skinning, …: you name it,
+the engine does it. If you’re like me, you have always had this desire
+to craft really performant code (where it matters, and sometimes
+where it doesn’t). As it happens, even when I was not busy actually
+writing a graphics engine, I was at times amusing myself by
+reading articles about it. One thing that caught my attention was
+&lt;em&gt;template metaprogramming&lt;/em&gt; in C++. This was back when I still believed C++
+was a good idea, mostly because all game engines were written in it.
+It promised to deliver the
+performance-conscious programmer from the hell of temporary allocations
+and inefficient code. All this by making the compiler do all the work
+thanks to the notably Turing-complete templates C++ offers. The price,
+was a serious increase in complexity. But only on the inside, said
+the proponents of this approach. Only the templates are complex, the
+client code doesn’t have to care that it’s so complex.&lt;/p&gt;
+
+&lt;p&gt;While this may be true, there are two concerns I would like to note:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;I don’t particularly like using a piece of code that I couldn’t
+understand without an enormous effort. Template-based code seems to be
+very &lt;em&gt;write once&lt;/em&gt; in nature. After a while, not even the author might
+understand it. (Granted, one could say the same about including LuaJIT
+in one’s codebase, but I feel that it’s somehow different. Though
+perhaps I’m just being arbitratry here).&lt;/li&gt;
+  &lt;li&gt;It increases compile times a lot. C++ is already a slouch,
+espcially when you’re also using the STL, but template metaprogramming
+magic doesn’t help, at all. If there’s one thing I hate when I’m working
+on something, it’s a long edit-inspect cycle. I want to be able to see
+my changes a second after I make them. When I don’t, I tend to either
+lose my concentration or become frustrated.&lt;/li&gt;
+&lt;/ol&gt;&lt;p&gt;But is there an alternative for intrepid performance-conscious
+developers such as ourselves? Certainly, just use intrinsics, wrap them
+in a nice function and let the compiler sort it all out – quickly I
+might add! A good example of this is the incomplete but functional
+&lt;a href="https://github.com/rikusalminen/threedee-simd"&gt;threedee-simd library&lt;/a&gt;.
+It is small and lean and compile very quickly, produces extremely
+performant code and is (with less effor than templates) understandable.&lt;/p&gt;
+
+&lt;p&gt;To understand it you’d have to get the hang of some SIMD intrinsics first,
+but after that it all becomes quite obvious. A good tip is working it
+out on paper, because all the shuffling be consusing. The actual
+difficult thing, once you get the hang of it and want to add parts to
+the library, is to get the absolute last inch of performance out of it.
+It’s one thing to be able to write correct code with intrinsics, but
+it’s another entirely for that to satisfy the CPU’s desires. There are
+many SIMD functions and some combinations are better than others. Some
+might even lead to performance no better than pure scala code. So you
+might you as well write it in a scalar fashion.&lt;/p&gt;
+
+&lt;p&gt;That’s the nice thing about threedee-simd, you can just write your
+function scalar-style first if it doesn’t exist yet. If it proves
+to be oft-used, you can optimize the snot out of it and just replace the
+call from the entrypoint with your shiny new implementation. Actually,
+advanced compiler vectorizers like Clangs’
+&lt;a href="http://llvm.org/docs/Vectorizers.html#the-slp-vectorizer"&gt;SLP vectorizer&lt;/a&gt;
+do a pretty good job of automatically vectorizing a lot of code, if you
+give it the right nudge.&lt;/p&gt;
+
+&lt;p&gt;The right nudge in this case is usually two things:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
+this case)&lt;/li&gt;
+  &lt;li&gt;The loop in which the data is used has to have a constant number of
+iterations or be manually unrolled.&lt;/li&gt;
+  &lt;li&gt;You have to tell the compiler what can change and what pointers can
+alias each other. The C99
+&lt;a href="http://en.wikipedia.org/wiki/Restrict"&gt;restrict&lt;/a&gt; keyword can be very
+helpful with this, in conjunction with const.&lt;/li&gt;
+&lt;/ol&gt;&lt;p&gt;After these simple things, you already have a decent chance the the
+compiler will produce some pretty performant code. These requirements
+are easy, for alignment it’s enough to use a special typedef that
+enforces alignment. If you dynamically allocate memory for these types,
+you have to tell your &lt;code&gt;malloc&lt;/code&gt; variant to give you 16-byte aligned
+memory though. These are the types from threedee-simd:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;vector_size&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;scalar&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="kt"&gt;mat4_t&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;cols&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;aligned&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="kt"&gt;mat4_t&lt;/span&gt; &lt;span class="n"&gt;mat4&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you use these types, any on-stack variables with these types will
+be aligned correctly. What’s more, when you pass these variables to
+function, the compiler can assume they are aligned correctly, which
+makes it easier to vectorize.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/**&lt;/span&gt;
+&lt;span class="cm"&gt; * convert an axis-angle vector to a quaternion&lt;/span&gt;
+&lt;span class="cm"&gt; * angle in radians&lt;/span&gt;
+&lt;span class="cm"&gt; *&lt;/span&gt;
+&lt;span class="cm"&gt; * [axis.x, axis.y, axis.z, angle] =&amp;gt; quaternion&lt;/span&gt;
+&lt;span class="cm"&gt; */&lt;/span&gt;
+&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_shuf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;always_inline&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_shuf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;vsincos&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsplat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vscalar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;sincos&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;vshuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;vxyz1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vshuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sincos&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sincos&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/**&lt;/span&gt;
+&lt;span class="cm"&gt; * a little bit faster, especially when you have FMA instructions, but&lt;/span&gt;
+&lt;span class="cm"&gt; * less readable too&lt;/span&gt;
+&lt;span class="cm"&gt; */&lt;/span&gt;
+&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_clever&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;always_inline&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_clever&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;vxyz1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vsin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vmadd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsplat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;vscalar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;M_PI_F&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class="footnotes"&gt;
+  &lt;ol&gt;
+&lt;li id="fn:1"&gt;
+      &lt;p&gt;Also known as “&lt;em&gt;Achting die Kurve!&lt;/em&gt;” &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id="fn:2"&gt;
+      &lt;p&gt;Years later, I encountered &lt;a href="http://www.voidtools.com/"&gt;everything&lt;/a&gt;, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, &lt;em&gt;real&lt;/em&gt; fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+    <summary type="html">&lt;p&gt;I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
+would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
+allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
+stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
+water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
+Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
+to me…&lt;/p&gt;
+
+</summary>
+  </entry>
+  <entry>
+    <id>tag:www.aktau.be,2013-08-13:/2013/08/13/sdl2-2-0-0-released-at-last/</id>
+    <title type="html">SDL2 (2.0.0) released at last!</title>
+    <published>2013-08-12T22:00:00Z</published>
+    <updated>2013-08-12T22:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2013/08/13/sdl2-2-0-0-released-at-last/"/>
+    <content type="html">&lt;p&gt;For the impatient: &lt;a href="http://www.libsdl.org/"&gt;get it here&lt;/a&gt; and read the &lt;a href="http://wiki.libsdl.org/moin.fcg/MigrationGuide"&gt;migration guide&lt;/a&gt;. SDL is an open-source game development library. It’s been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;p&gt;For those of you who don’t know, SDL helps developers create cross-platform games by abstracting window creation, input,
+networking (with extension libraries), et cetera. In this way, there doesn’t need to be icky conditional compilation based on OS, nor different
+input subsystems according to different capabilities and so forth.&lt;/p&gt;
+
+&lt;p&gt;Copied from the mailing list, here are the most important new features:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Full 3D hardware acceleration&lt;/li&gt;
+  &lt;li&gt;Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)&lt;/li&gt;
+  &lt;li&gt;Support for OpenGL ES&lt;/li&gt;
+  &lt;li&gt;Support for multiple windows&lt;/li&gt;
+  &lt;li&gt;Support for multiple displays&lt;/li&gt;
+  &lt;li&gt;Support for multiple audio devices&lt;/li&gt;
+  &lt;li&gt;Android and iOS support&lt;/li&gt;
+  &lt;li&gt;Simple 2D rendering API that can use Direct3D, OpenGL, OpenGL ES, or software rendering behind the scenes&lt;/li&gt;
+  &lt;li&gt;Force Feedback available on Windows, Mac OS X and Linux&lt;/li&gt;
+  &lt;li&gt;XInput and XAudio2 support for Windows&lt;/li&gt;
+  &lt;li&gt;Atomic operations&lt;/li&gt;
+  &lt;li&gt;Power management (exposes battery life remaining, etc)&lt;/li&gt;
+  &lt;li&gt;Shaped windows&lt;/li&gt;
+  &lt;li&gt;32-bit audio (int and float)&lt;/li&gt;
+  &lt;li&gt;Simplified Game Controller API (the Joystick API is still here, too!)&lt;/li&gt;
+  &lt;li&gt;Touch support (multitouch, gestures, etc)&lt;/li&gt;
+  &lt;li&gt;Better fullscreen support&lt;/li&gt;
+  &lt;li&gt;Better keyboard support (scancodes vs keycodes, etc).&lt;/li&gt;
+  &lt;li&gt;Message boxes&lt;/li&gt;
+  &lt;li&gt;Clipboard support&lt;/li&gt;
+  &lt;li&gt;Basic Drag’n’Drop support&lt;/li&gt;
+  &lt;li&gt;Proper unicode input and IME support&lt;/li&gt;
+  &lt;li&gt;A really powerful assert macro&lt;/li&gt;
+  &lt;li&gt;Lots of old annoyances from 1.2 are gone&lt;/li&gt;
+  &lt;li&gt;Many other things!&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;If you develop your code with just SDL, (optionally) OpenGL and the standard
+C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;
+So it pays off to use it, especially if you’re in the market to develop games commercially: &lt;strong&gt;write once, run on your toaster&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;SDL also features a drawing API, which is now hardware accelerated when possible thanks to SDL2. They worked very hard on this feature, though I
+hardly use it. This is because I choose to perform my drawing with OpenGL. So in short, I just use SDL to open my OpenGL window(s).&lt;/p&gt;
+
+&lt;p&gt;I’m using SDL in my own &lt;a href="https://github.com/warfare/prototype"&gt;toy weekend-project&lt;/a&gt; as well. Since I only started it a month ago I decided
+to go with SDL2 even though it was still in release candidate status. It has worked perfectly up until now and has proved that it deserved it’s &lt;strong&gt;rc&lt;/strong&gt; status.
+I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
+were minor (except for haptics support, which I don’t use).&lt;/p&gt;
+
+&lt;p&gt;And because I can’t post and article without a bit of code, here’s the &lt;code&gt;main()&lt;/code&gt; method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cp"&gt;#include &amp;lt;stdlib.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;string.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;math.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;stdint.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;limits.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cm"&gt;/**&lt;/span&gt;
+&lt;span class="cm"&gt; * this is mac only, probably gl/gl3.h for linux and something else for win.&lt;/span&gt;
+&lt;span class="cm"&gt; * For win we will likely also need glew or another extension loader.&lt;/span&gt;
+&lt;span class="cm"&gt; */&lt;/span&gt;
+&lt;span class="cp"&gt;#define GL3_PROTOTYPES&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;OpenGL/gl3.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cp"&gt;#include "SDL.h"&lt;/span&gt;
+
+&lt;span class="cp"&gt;#include "util.h"&lt;/span&gt;
+&lt;span class="cp"&gt;#include "vec.h"&lt;/span&gt;
+
+&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;printGlInfo&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="s"&gt;"version"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s"&gt;"renderer"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s"&gt;"vendor"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="s"&gt;"shading_language_version"&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;constant&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;GL_VERSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;GL_RENDERER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;GL_VENDOR&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;GL_SHADING_LANGUAGE_VERSION&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;ARRAY_SIZE&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;constant&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;const&lt;/span&gt; &lt;span class="kt"&gt;unsigned&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;glGetString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;constant&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;info&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"could not retrieve %s information, aborting&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+
+            &lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"%s: %s&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;info&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;GLint&lt;/span&gt; &lt;span class="n"&gt;major&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;GLint&lt;/span&gt; &lt;span class="n"&gt;minor&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;glGetIntegerv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GL_MAJOR_VERSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;major&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;glGetIntegerv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GL_MINOR_VERSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;minor&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"context version double check: %d.%d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;major&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;minor&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[])&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;vsync&lt;/span&gt;     &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;doublebuf&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* 16:9 =&amp;gt; 704x440 */&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;width&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;800&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;height&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;600&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_Init&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_INIT_VIDEO&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* set the opengl context version, this is the latest that OSX can handle, for now... */&lt;/span&gt;
+    &lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_CONTEXT_MAJOR_VERSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_CONTEXT_MINOR_VERSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_DOUBLEBUFFER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_DEPTH_SIZE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;24&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_CONTEXT_PROFILE_MASK&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SDL_GL_CONTEXT_PROFILE_CORE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_Window&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SDL_CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="s"&gt;"SDL2/OpenGL prototype"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;SDL_WINDOWPOS_UNDEFINED&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;SDL_WINDOWPOS_UNDEFINED&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;SDL_WINDOW_OPENGL&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;SDL_WINDOW_RESIZABLE&lt;/span&gt;
+    &lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_GLContext&lt;/span&gt; &lt;span class="n"&gt;glcontext&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SDL_GL_CreateContext&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;printGlInfo&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* set the background black */&lt;/span&gt;
+    &lt;span class="n"&gt;glClearColor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mf"&gt;0.0f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;0.0f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;0.0f&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mf"&gt;1.0f&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;glClearDepth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mf"&gt;1.0f&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;glDisable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GL_DITHER&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_Event&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;Uint8&lt;/span&gt; &lt;span class="n"&gt;done&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_SetSwapInterval&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"could not set desired vsync mode: %d"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"starting to render, vsync is %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SDL_GL_GetSwapInterval&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;
+
+    &lt;span class="n"&gt;setupTransform&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* implementation not shown, lots of tutorials on the net, or check the original source */&lt;/span&gt;
+    &lt;span class="n"&gt;GLuint&lt;/span&gt; &lt;span class="n"&gt;vtShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fgShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;program&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;setupShaders&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vtShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;fgShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;program&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;GLuint&lt;/span&gt; &lt;span class="n"&gt;vao&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ibo&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;genTriangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vao&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;cbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ibo&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_PollEvent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_WINDOWEVENT&lt;/span&gt;:
+                    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_WINDOWEVENT_RESIZED&lt;/span&gt;:
+                        &lt;span class="p"&gt;{&lt;/span&gt;
+                            &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;newWidth&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                            &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;newHeight&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data2&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                            &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+                                &lt;span class="s"&gt;"Window %d resized to %dx%d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                                &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;windowID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                                &lt;span class="n"&gt;newWidth&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;newHeight&lt;/span&gt;
+                            &lt;span class="p"&gt;);&lt;/span&gt;
+
+                            &lt;span class="n"&gt;setupTransform&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;newWidth&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;newHeight&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                        &lt;span class="p"&gt;}&lt;/span&gt;
+                        &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                    &lt;span class="p"&gt;}&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_KEYDOWN&lt;/span&gt;:
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_KEYUP&lt;/span&gt;:
+                    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keysym&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sym&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_ESCAPE&lt;/span&gt;:
+                            &lt;span class="n"&gt;done&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                        &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_v&lt;/span&gt;:
+                            &lt;span class="n"&gt;vsync&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_SetSwapInterval&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"could not set desired vsync mode: %s&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt; &lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="s"&gt;"on"&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;"off"&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+                            &lt;span class="p"&gt;}&lt;/span&gt;
+                            &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"turned vsync %s&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt; &lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="s"&gt;"on"&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;"off"&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+                            &lt;span class="p"&gt;}&lt;/span&gt;
+                        &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_d&lt;/span&gt;:
+                            &lt;span class="n"&gt;doublebuf&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                            &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_DOUBLEBUFFER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"could not set desired doublebuf mode: %d&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                            &lt;span class="p"&gt;}&lt;/span&gt;
+                            &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                &lt;span class="n"&gt;trace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"turned doublebuf %s&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;doublebuf&lt;/span&gt; &lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="s"&gt;"on"&lt;/span&gt; &lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s"&gt;"off"&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+                            &lt;span class="p"&gt;}&lt;/span&gt;
+                        &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                    &lt;span class="p"&gt;}&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_QUIT&lt;/span&gt;:
+                    &lt;span class="n"&gt;done&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                &lt;span class="c1"&gt;// default:&lt;/span&gt;
+                &lt;span class="c1"&gt;//     trace("unkown even type received: %d\n", event.type);&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="n"&gt;render&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+        &lt;span class="n"&gt;SDL_GL_SwapWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="n"&gt;diagFrameDone&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* implementation not shown, lots of tutorials on the net, or check the original source */&lt;/span&gt;
+    &lt;span class="n"&gt;destroyTriangle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vao&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;cbo&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ibo&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;destroyShaders&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vtShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;fgShader&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;program&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_GL_DeleteContext&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;glcontext&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;SDL_DestroyWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;SDL_Quit&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class="footnotes"&gt;
+  &lt;ol&gt;
+&lt;li id="fn:1"&gt;
+      &lt;p&gt;Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id="fn:2"&gt;
+      &lt;p&gt;I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+    <summary type="html">&lt;p&gt;For the impatient: &lt;a href="http://www.libsdl.org/"&gt;get it here&lt;/a&gt; and read the &lt;a href="http://wiki.libsdl.org/moin.fcg/MigrationGuide"&gt;migration guide&lt;/a&gt;. SDL is an open-source game development library. It’s been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.&lt;/p&gt;
+
+</summary>
+  </entry>
+</feed>
+
