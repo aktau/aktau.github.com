@@ -36,10 +36,6 @@ compile '/CNAME/' do
     # don’t filter or layout
 end
 
-compile '/stylesheet/' do
-    # don’t filter or layout
-end
-
 compile '/stylesheets/*/' do
     # don’t filter or layout
 end
@@ -67,6 +63,12 @@ compile 'posts/*' do
     filter :colorize_syntax, :default_colorizer => :pygmentize
 
     layout 'post'
+end
+
+compile '/contact' do
+    filter :kramdown
+
+    layout 'contact'
 end
 
 compile '/tag/*' do
@@ -104,10 +106,6 @@ end
 
 route '/sitemap/', :rep => 'gzip' do
     '/sitemap.xml.gz'
-end
-
-route '/stylesheet/' do
-    '/style.css'
 end
 
 route '/stylesheets/*/' do

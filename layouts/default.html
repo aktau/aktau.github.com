@@ -3,15 +3,42 @@
     <head>
         <meta charset="utf-8">
 
-        <title><%= @item[:title] %></title>
+        <title><%= @item[:title] || (site.config[:author] + " - " + site.config[:site_name]) %></title>
 
-        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
         <meta name="description" content="<%= @item[:description] %>">
         <meta name="keywords" content="<%= (@item[:tags] || ["notags"]).join(", ") %>">
         <meta name="author" content="Nicolas Hillegeer">
         <meta name="generator" content="nanoc <%= Nanoc::VERSION %>">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="<%= @item[:title] || (site.config[:author] + " - " + site.config[:site_name]) %>">
+        <meta property="og:site_name" content="<%= site.config[:author] %> - <%= site.config[:site_name] %>">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="<%= url_for(@item) %>">
+
+        <!-- Google Fonts embed code -->
+        <script type="text/javascript">
+            (function() {
+                var link_element = document.createElement("link"),
+                    s = document.getElementsByTagName("script")[0];
+                if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+                    link_element.href = "http:";
+                }
+                link_element.href += "//fonts.googleapis.com/css?family=EB+Garamond:400";
+                link_element.rel = "stylesheet";
+                link_element.type = "text/css";
+                s.parentNode.insertBefore(link_element, s);
+            })();
+        </script>
+        <noscript>
+            <!-- don't leave noscript users out in the cold -->
+            <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
+        </noscript>
     </head>
     <body>
         <div id="main"><%= yield %></div>
