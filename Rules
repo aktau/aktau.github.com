@@ -36,8 +36,8 @@ compile '/CNAME/' do
     # don’t filter or layout
 end
 
-compile '/feed/' do
-    filter :erb
+compile /(rss|atom)/ do
+    filter :erb unless rep.binary? # e.g. rss.png image
 end
 
 compile '/stylesheets/*/' do
@@ -99,8 +99,8 @@ route '/CNAME/' do
   '/CNAME'
 end
 
-route '/feed/' do
-    '/blog.xml'
+route '/(atom|rss)/' do
+    item.identifier.chop + '.xml'
 end
 
 # for google webmaster tools
