@@ -44,6 +44,10 @@ compile '/stylesheets/*/' do
     # don’t filter or layout
 end
 
+compile '/js/*/' do
+    # don’t filter or layout
+end
+
 compile %r{^/(google|robots|Bing)} do
     # Don't filter or layout any google files, robots.txt, error pages .
 end
@@ -118,12 +122,16 @@ route '/sitemap/', :rep => 'gzip' do
     '/sitemap.xml.gz'
 end
 
+route '/js/*/' do
+  item.identifier.chop + '.' + item[:extension]
+end
+
 route '/stylesheets/*/' do
   item.identifier.chop + '.' + item[:extension]
 end
 
 route '/images/*/', :rep => :thumbnail do
-  item.identifier.chop + '-small.' + item[:extension]
+    item.identifier.chop + '-small.' + item[:extension]
 end
 
 route '/posts/*' do

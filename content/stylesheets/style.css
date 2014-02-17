@@ -137,7 +137,7 @@ p {
 
 /* custom */
 
-#main {
+main {
     margin: 0 auto;
     width: 650px;
 }
@@ -178,7 +178,7 @@ p code {
     font-size: medium;
 }
 
-#main ul, #main ol, #main dl {
+main ul, main ol, main dl {
     font-size: 21px;
 }
 
@@ -211,7 +211,7 @@ article li, article li p {
 
 /* sidebar */
 
-#sidebar {
+nav {
     position: fixed;
     top: 40px;
     left: 20px;
@@ -221,7 +221,7 @@ article li, article li p {
     text-align: right;
 }
 
-#sidebar h2 {
+nav h2 {
     text-transform: uppercase;
     font-size: 13px;
     color: #333;
@@ -229,12 +229,12 @@ article li, article li p {
     line-height: 20px;
 }
 
-#sidebar ul {
+nav ul {
     list-style-type: none;
     margin: 20px 0;
 }
 
-#sidebar li {
+nav li {
     font-size: 14px;
     line-height: 20px;
 }
@@ -244,7 +244,7 @@ article li, article li p {
 /* portrait vs landscape: http://www.javascriptkit.com/dhtmltutors/cssmediaqueries2.shtml */
 
 @media screen and (max-width: 1180px) {
-    #main {
+    main {
         position: absolute;
         top: 40px;
         left: 280px;
@@ -252,12 +252,12 @@ article li, article li p {
 }
 
 @media screen and (max-width: 940px) {
-    #main {
+    main {
         position: static;
         margin: 0 auto;
     }
 
-    #sidebar {
+    nav {
         position: static;
         margin: 0 auto;
 
@@ -266,23 +266,23 @@ article li, article li p {
         text-align: start;
     }
 
-    #sidebar ul {
+    nav ul {
         list-style-type: none;
         margin: 0;
         padding: 0 0 0 10px;
     }
 
-    #sidebar ul > li {
+    nav ul > li {
         display: inline-block; /* You can also add some margins here to make it look prettier */
         zoom: 1;
         *display: inline; /* this fix is needed for IE7- */
     }
 
-    #sidebar ul > li:after {
+    nav ul > li:after {
         content: " \00b7";
     }
 
-    #sidebar ul > li:last-child:after {
+    nav ul > li:last-child:after {
         content: none;
     }
 
@@ -301,59 +301,59 @@ article li, article li p {
 }
 
 @media screen and (max-width: 940px) {
-    #main { width: 650px; }
-    #sidebar { width: 650px; }
+    main { width: 650px; }
+    nav { width: 650px; }
 }
 
 @media screen and (max-width: 690px) {
-    #main { width: 600px; }
-    #sidebar { width: 600px; }
+    main { width: 600px; }
+    nav { width: 600px; }
 }
 
 /* iphone 5 landscape */
 @media screen and (max-width: 640px) {
-    #main { width: 550px; }
-    #sidebar { width: 550px; }
+    main { width: 550px; }
+    nav { width: 550px; }
 }
 
 @media screen and (max-width: 580px) {
-    #main { width: 520px; }
-    #sidebar { width: 520px; }
+    main { width: 520px; }
+    nav { width: 520px; }
 }
 
 @media screen and (max-width: 540px) {
-    #main { width: 460px; }
-    #sidebar { width: 460px; }
+    main { width: 460px; }
+    nav { width: 460px; }
 }
 
 @media screen and (max-width: 480px) {
-    #main { width: 430px; }
-    #sidebar { width: 430px; }
+    main { width: 430px; }
+    nav { width: 430px; }
 }
 
 @media screen and (max-width: 440px) {
-    #main { width: 390px; }
-    #sidebar { width: 390px; }
+    main { width: 390px; }
+    nav { width: 390px; }
 }
 
 @media screen and (max-width: 400px) {
-    #main { width: 380px; }
-    #sidebar { width: 380px; }
+    main { width: 380px; }
+    nav { width: 380px; }
 }
 
 @media screen and (max-width: 380px) {
-    #main { width: 350px; }
-    #sidebar { width: 350px; }
+    main { width: 350px; }
+    nav { width: 350px; }
 }
 
 /* galaxy */
 @media screen and (max-width: 360px) {
-    #main { width: 340px; }
-    #sidebar { width: 340px; }
+    main { width: 340px; }
+    nav { width: 340px; }
 }
 
 /* iphone 4+ */
 @media screen and (max-width: 340px) {
-    #main { width: 300px; }
-    #sidebar { width: 300px; }
+    main { width: 300px; }
+    nav { width: 300px; }
 }
