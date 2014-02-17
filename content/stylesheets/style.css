@@ -243,8 +243,17 @@ article li, article li p {
 
 /* portrait vs landscape: http://www.javascriptkit.com/dhtmltutors/cssmediaqueries2.shtml */
 
-@media screen and (max-device-width: 720px) {
+@media screen and (max-width: 1024px) {
     #main {
+        position: absolute;
+        top: 40px;
+        left: 280px;
+    }
+}
+
+@media screen and (max-width: 940px) {
+    #main {
+        position: static;
         margin: 0 auto;
     }
 
@@ -291,25 +300,35 @@ article li, article li p {
     }
 }
 
+@media screen and (max-width: 940px) {
+    #main { width: 800px; }
+    #sidebar { width: 800px; }
+}
+
+@media screen and (max-width: 720px) {
+    #main { width: 680px; }
+    #sidebar { width: 680px; }
+}
+
 /* iphone 5 landscape */
-@media screen and (max-device-width: 640px) {
+@media screen and (max-width: 640px) {
     #main { width: 550px; }
     #sidebar { width: 550px; }
 }
 
-@media screen and (max-device-width: 480px) {
+@media screen and (max-width: 480px) {
     #main { width: 450px; }
     #sidebar { width: 450px; }
 }
 
 /* galaxy */
-@media screen and (max-device-width: 360px) {
+@media screen and (max-width: 360px) {
     #main { width: 340px; }
     #sidebar { width: 340px; }
 }
 
 /* iphone 4+ */
-@media screen and (max-device-width: 340px) {
+@media screen and (max-width: 340px) {
     #main { width: 300px; }
     #sidebar { width: 300px; }
 }
