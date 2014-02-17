@@ -45,8 +45,10 @@ class ImageSizeFilter < Nanoc::Filter
       .select { |img| img.has_attribute?('src') }
       .each do |img|
         path = img['src']
-        dimensions = image_size(path)
-        dimensions.each{|k,v| img[k.to_s] = v.to_s}
+        if File.exists?(path)
+          dimensions = image_size(path)
+          dimensions.each{|k,v| img[k.to_s] = v.to_s}
+        end
       end
     end
     result = doc.send("to_#{type}")
