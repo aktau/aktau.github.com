@@ -7,7 +7,7 @@
 
         <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
-        <link rel="stylesheet" href="/stylesheets/pygments.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/pygments.css" media="all">
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="">
@@ -17,7 +17,7 @@
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Nicolas Hillegeer - Portfolio and personal blog">
-        <meta property="og:title" content="Nicolas Hillegeer - ">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
         <meta property="og:url" content="http://www.aktau.be/reading/2013-08-13/">
 
@@ -39,9 +39,11 @@
             <!-- don't leave noscript users out in the cold -->
             <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
         </noscript>
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
     </head>
     <body>
-        <div id="sidebar">
+        <nav>
             <h2>Nicolas Hillegeer</h2>
             <ul>
                 <li><a href="/">Blog</a></li>
@@ -100,15 +102,18 @@
                 
             </ul>
             -->
-        </div>
-        <div id="main"><ul>
+        </nav>
+
+        <main>
+            <ul>
   <li>
     <p><a href="http://twistedoakstudios.com/blog/Post5365_searching-a-sorted-matrix-faster">searching a sorted matrix faster</a></p>
 
     <p>Features an interesting (but ugly) optimal algorithm and a good case of “most people get this wrong”™. I tried searching for a solution before looking at the answers, and unfortunately guessed the multi-binary search one. I absolutely loved the simplicity and elegance of the linear solution though, I smacked myself in the head that I didn’t think of it. After reading about the linear algorithm, I thought a combination of multi-binary search and the linear algorithm would do… and I was wrong again. Embarrased for the second time, I just read on for the optimal solution and enjoyed the article.</p>
   </li>
 </ul>
-</div>
+
+        </main>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';

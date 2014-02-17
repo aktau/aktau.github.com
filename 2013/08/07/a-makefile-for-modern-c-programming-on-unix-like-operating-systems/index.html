@@ -7,7 +7,7 @@
 
         <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
-        <link rel="stylesheet" href="/stylesheets/pygments.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/pygments.css" media="all">
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="Presents a (hopefully) understandable makefile that can be used for cross-platform, cross-compiler projects in C/C++">
@@ -17,7 +17,7 @@
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="A makefile for modern C programming on UNIX-like operating systems">
-        <meta property="og:title" content="Nicolas Hillegeer - ">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
         <meta property="og:url" content="http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/">
 
@@ -39,9 +39,11 @@
             <!-- don't leave noscript users out in the cold -->
             <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
         </noscript>
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
     </head>
     <body>
-        <div id="sidebar">
+        <nav>
             <h2>Nicolas Hillegeer</h2>
             <ul>
                 <li><a href="/">Blog</a></li>
@@ -100,8 +102,10 @@
                 
             </ul>
             -->
-        </div>
-        <div id="main">
+        </nav>
+
+        <main>
+            
     <div class="post">
         <h1>A makefile for modern C programming on UNIX-like operating systems</h1>
         <aside>August 7, 2013</aside>
@@ -343,7 +347,7 @@ I’ll repaste my own edited version here for posterity:</p>
 <span class="cp">    endif</span>
 <span class="cp">else</span>
 <span class="c">    # tries to find the compiler name</span>
-    CC_VERSION :<span class="o">=</span> <span class="k">$(</span>shell <span class="k">$(</span>CC<span class="k">)</span> --version | head -1 | cut -f1 -d<span class="s1">' '</span><span class="k">)</span>
+    CC_VERSION :<span class="o">=</span> <span class="k">$(</span>shell <span class="k">$(</span>CC<span class="k">)</span> --version <span class="p">|</span> head -1 <span class="p">|</span> cut -f1 -d<span class="s1">' '</span><span class="k">)</span>
 
 <span class="c">    # tries to discern what UNIX-like OS we're running on</span>
     UNAME_S :<span class="o">=</span> <span class="k">$(</span>shell uname -s<span class="k">)</span>
@@ -436,7 +440,8 @@ find that plain make will do fine for smaller projects.</p>
 
         <p>Tags: <a href="/tag/unix" rel="tag">unix</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/make" rel="tag">make</a>, <a href="/tag/linux" rel="tag">linux</a>, <a href="/tag/osx" rel="tag">osx</a></p>
     </div>
-</div>
+
+        </main>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';

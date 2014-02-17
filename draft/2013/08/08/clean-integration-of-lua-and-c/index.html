@@ -7,7 +7,7 @@
 
         <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
-        <link rel="stylesheet" href="/stylesheets/pygments.css">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/pygments.css" media="all">
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="A small, self-contained tutorial for how to get your C code to talk to Lua and vice versa">
@@ -17,7 +17,7 @@
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Clean integration of Lua and C">
-        <meta property="og:title" content="Nicolas Hillegeer - ">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
         <meta property="og:url" content="http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/">
 
@@ -39,9 +39,11 @@
             <!-- don't leave noscript users out in the cold -->
             <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
         </noscript>
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
     </head>
     <body>
-        <div id="sidebar">
+        <nav>
             <h2>Nicolas Hillegeer</h2>
             <ul>
                 <li><a href="/">Blog</a></li>
@@ -100,8 +102,10 @@
                 
             </ul>
             -->
-        </div>
-        <div id="main">
+        </nav>
+
+        <main>
+            
     <div class="post">
         <h1>Clean integration of Lua and C</h1>
         <aside>August 8, 2013</aside>
@@ -155,7 +159,8 @@ carefully we can see that the developers of redis took the same approach in <em>
 
         <p>Tags: <a href="/tag/lua" rel="tag">lua</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/scripting" rel="tag">scripting</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/ffi" rel="tag">ffi</a></p>
     </div>
-</div>
+
+        </main>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';

@@ -226,7 +226,7 @@ all with the &lt;em&gt;idet&lt;/em&gt; filter:&lt;/p&gt;
 &lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# scan all files on your HD, uses GNU parallel&lt;/span&gt;
 &lt;span class="c"&gt;# I believe this works just as well with standard&lt;/span&gt;
 &lt;span class="c"&gt;# xargs though&lt;/span&gt;
-locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; | parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&amp;amp;1 | egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;1 &lt;span class="p"&gt;|&lt;/span&gt; egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;It turns out I only had 2, interlaced content indeed is quite rare for content on a computer, luckily so.&lt;/p&gt;</content>
     <summary type="html">&lt;p&gt;Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
