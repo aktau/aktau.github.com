@@ -17,7 +17,7 @@
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="<%= @item[:title] || (site.config[:author_name] + " - " + site.config[:title]) %>">
-        <meta property="og:site_name" content="<%= site.config[:author_name] %> - <%= site.config[:site_name] %>">
+        <meta property="og:site_name" content="<%= site.config[:author_name] %> - <%= site.config[:title] %>">
         <meta property="og:type" content="blog">
         <meta property="og:url" content="<%= url_for(@item) %>">
 
