@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 source "http://gemcutter.org/"
 source "http://gems.github.com"
+
 gem "nanoc"
 gem "guard-nanoc"
 gem "adsf"
@@ -11,6 +12,7 @@ gem "systemu"
 gem "mime-types"
 gem "yui-compressor"
 gem "rake"
+gem "pygments.rb"
 
 # Dependency for XML Sitemap generation
 gem 'builder'
