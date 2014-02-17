@@ -238,3 +238,78 @@ article li, article li p {
     font-size: 14px;
     line-height: 20px;
 }
+
+/* mobile browser optimisations */
+
+/* portrait vs landscape: http://www.javascriptkit.com/dhtmltutors/cssmediaqueries2.shtml */
+
+@media screen and (max-device-width: 720px) {
+    #main {
+        margin: 0 auto;
+    }
+
+    #sidebar {
+        position: static;
+        margin: 0 auto;
+
+        padding: 0;
+        border: none;
+        text-align: start;
+    }
+
+    #sidebar ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0 0 0 10px;
+    }
+
+    #sidebar ul > li {
+        display: inline-block; /* You can also add some margins here to make it look prettier */
+        zoom: 1;
+        *display: inline; /* this fix is needed for IE7- */
+    }
+
+    #sidebar ul > li:after {
+        content: " \00b7";
+    }
+
+    #sidebar ul > li:last-child:after {
+        content: none;
+    }
+
+    h1 {
+        font-size: 36px;
+        line-height: 39px;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 24px;
+        line-height: 25px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+}
+
+/* iphone 5 landscape */
+@media screen and (max-device-width: 640px) {
+    #main { width: 550px; }
+    #sidebar { width: 550px; }
+}
+
+@media screen and (max-device-width: 480px) {
+    #main { width: 450px; }
+    #sidebar { width: 450px; }
+}
+
+/* galaxy */
+@media screen and (max-device-width: 360px) {
+    #main { width: 340px; }
+    #sidebar { width: 340px; }
+}
+
+/* iphone 4+ */
+@media screen and (max-device-width: 340px) {
+    #main { width: 300px; }
+    #sidebar { width: 300px; }
+}
