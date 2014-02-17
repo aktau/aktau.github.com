@@ -9,7 +9,7 @@
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="This small article describes how to use ffmpeg's commandline tools to detect pretty accurately whether or not a video files is interlaced">
         <meta name="keywords" content="ffmpeg">
         <meta name="author" content="Nicolas Hillegeer">
@@ -41,6 +41,66 @@
         </noscript>
     </head>
     <body>
+        <div id="sidebar">
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
+                <li><a href="/contact">About Me &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+            </ul>
+            -->
+        </div>
         <div id="main">
     <div class="post">
         <h1>Detecting interlaced video with ffmpeg</h1>
@@ -111,66 +171,6 @@ locate -0 <span class="s1">'.mov'</span> | parallel -0 ./ffmpeg -filter:v idet -
         <p>Tags: <a href="/tag/ffmpeg" rel="tag">ffmpeg</a></p>
     </div>
 </div>
-        <div id="sidebar">
-            <h2>Nicolas Hillegeer</h2>
-            <ul>
-                <li><a href="/">Blog</a></li>
-                <li><a href="/archive">Archive</a></li>
-                <li><a href="/cv-alt/cv.pdf">Curriculum Vitae / Résumé</a></li>
-                <li><a href="/contact">About Me &amp; Contact</a></li>
-            </ul>
-            <h2>Online presence</h2>
-            <ul>
-                <li><a href="https://github.com/Aktau/">Github</a></li>
-                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
-                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
-                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
-            </ul>
-            <!--
-            <h2>Tags</h2>
-            <ul>
-                
-                <li><a href="/tag/sdl">sdl (1)</a></li>
-                
-                <li><a href="/tag/game-engine">game-engine (1)</a></li>
-                
-                <li><a href="/tag/open-source">open-source (1)</a></li>
-                
-                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
-                
-                <li><a href="/tag/github">github (2)</a></li>
-                
-                <li><a href="/tag/github-release">github-release (1)</a></li>
-                
-                <li><a href="/tag/gofinance">gofinance (1)</a></li>
-                
-                <li><a href="/tag/golang">golang (1)</a></li>
-                
-                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
-                
-                <li><a href="/tag/imessage">imessage (1)</a></li>
-                
-                <li><a href="/tag/osx">osx (2)</a></li>
-                
-                <li><a href="/tag/applescript">applescript (1)</a></li>
-                
-                <li><a href="/tag/introduction">introduction (1)</a></li>
-                
-                <li><a href="/tag/nanoc">nanoc (1)</a></li>
-                
-                <li><a href="/tag/pygments">pygments (1)</a></li>
-                
-                <li><a href="/tag/unix">unix (1)</a></li>
-                
-                <li><a href="/tag/c">c (1)</a></li>
-                
-                <li><a href="/tag/make">make (1)</a></li>
-                
-                <li><a href="/tag/linux">linux (1)</a></li>
-                
-            </ul>
-            -->
-        </div>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';

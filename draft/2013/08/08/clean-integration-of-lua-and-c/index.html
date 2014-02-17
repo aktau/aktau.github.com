@@ -9,7 +9,7 @@
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="A small, self-contained tutorial for how to get your C code to talk to Lua and vice versa">
         <meta name="keywords" content="lua, c, scripting, game-engine, ffi">
         <meta name="author" content="Nicolas Hillegeer">
@@ -41,61 +41,6 @@
         </noscript>
     </head>
     <body>
-        <div id="main">
-    <div class="post">
-        <h1>Clean integration of Lua and C</h1>
-        <aside>August 8, 2013</aside>
-
-        <article>
-            <p>Ever since thinking about building my own amateur game engine, I’ve wanted to integrate
-scripting in it. Because I believe the advantages to outweigh the downsides.</p>
-
-<!-- more -->
-
-<ul>
-<li>
-<strong>Configuration</strong>: You get a configuration format for free, you can just have your interpreter load some configuration files and then pull the necessary values
-into the host program. Moreover you can also expose the defined values to other Lua scripts, opening the floodgates for extensive modding.</li>
-  <li>
-<strong>Security</strong>: If you want, you can quite easily disable I/O and other functionality for scripts. Since you can easily load multiple Lua interpreters and they’re very lightweight, it’s a piece of cake to have both a high-privilege and low-privilege interpreter, if required.</li>
-  <li>
-<strong>Ease of use</strong>: Lua is – in comparison to other scripting languages – very easy to integrate with another language. It almost feels like a pleasure to integrate both, while it can feel like a cactus eating contest to integrate other scripting languages. After this integration, you can write all non-performance critical code in Lua, which is quite a bit easier than writing it in C all the time because you don’t have to worry about allocation, object ownership and you have access to easier to use data structures.</li>
-</ul><h3 id="exemplary-code-with-redis">Exemplary code, with redis</h3>
-
-<p>Whenever possible, I like to look at how well-written, modern projects handle this. In this case that’s easy, <a href="http://redis.io/">redis</a> has lua scripting! Quite a lot of things in redis are small, efficient, self-contained and liberally licensed (MIT), which makes it excellent to study and learn from.</p>
-
-<p>By the way, I think it’s good practice to look for ideas in other projects. The trick is to remember some projects that you can have look at, confident that the author knows what she is doing. For me, that project is redis.</p>
-
-<p>The other side of the coin though is that it can stifle your creativity. So maybe a good middle ground is to only start looking at things if you can’t find a solution in 20 minutes or so.</p>
-
-<p>Let’s take the redis scripting code as an example:</p>
-
-<h3 id="sandboxing">Sandboxing</h3>
-
-<p>This section is based on an answer from <a href="http://stackoverflow.com/questions/966162/best-way-to-omit-lua-standard-libraries">stack overflow</a>, and if we look
-carefully we can see that the developers of redis took the same approach in <em>scripting.c</em>.</p>
-
-<p>Some other tutorials if you still have questions:</p>
-
-<ul>
-<li><a href="http://csl.sublevel3.org/lua/">Using Lua with C++ — A short tutorial</a></li>
-  <li><a href="http://www.ibm.com/developerworks/library/l-embed-lua/">IBM DeveloperWorks - Embed Lua for scriptable apps</a></li>
-</ul><p>Alternatives to Lua to consider, that share some of its advantages (easy integration, …):</p>
-
-<ul>
-<li><a href="http://www.squirrel-lang.org/">Squirrel</a></li>
-  <li><a href="http://www.angelcode.com/angelscript/">AngelScript</a></li>
-</ul><p>Suggestions, comments? Feel free to send me a mail and if possible I’ll amend the article or just write a Part II.</p>
-
-<!--
-    TODO: sandboxing, luaL_openlibs(L) opens all libraries, even IO, shouldn't do that
-    TODO: more sandboxing, separating interpreteters, one for GUI, one for AI, ...
--->
-        </article>
-
-        <p>Tags: <a href="/tag/lua" rel="tag">lua</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/scripting" rel="tag">scripting</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/ffi" rel="tag">ffi</a></p>
-    </div>
-</div>
         <div id="sidebar">
             <h2>Nicolas Hillegeer</h2>
             <ul>
@@ -156,6 +101,61 @@ carefully we can see that the developers of redis took the same approach in <em>
             </ul>
             -->
         </div>
+        <div id="main">
+    <div class="post">
+        <h1>Clean integration of Lua and C</h1>
+        <aside>August 8, 2013</aside>
+
+        <article>
+            <p>Ever since thinking about building my own amateur game engine, I’ve wanted to integrate
+scripting in it. Because I believe the advantages to outweigh the downsides.</p>
+
+<!-- more -->
+
+<ul>
+<li>
+<strong>Configuration</strong>: You get a configuration format for free, you can just have your interpreter load some configuration files and then pull the necessary values
+into the host program. Moreover you can also expose the defined values to other Lua scripts, opening the floodgates for extensive modding.</li>
+  <li>
+<strong>Security</strong>: If you want, you can quite easily disable I/O and other functionality for scripts. Since you can easily load multiple Lua interpreters and they’re very lightweight, it’s a piece of cake to have both a high-privilege and low-privilege interpreter, if required.</li>
+  <li>
+<strong>Ease of use</strong>: Lua is – in comparison to other scripting languages – very easy to integrate with another language. It almost feels like a pleasure to integrate both, while it can feel like a cactus eating contest to integrate other scripting languages. After this integration, you can write all non-performance critical code in Lua, which is quite a bit easier than writing it in C all the time because you don’t have to worry about allocation, object ownership and you have access to easier to use data structures.</li>
+</ul><h3 id="exemplary-code-with-redis">Exemplary code, with redis</h3>
+
+<p>Whenever possible, I like to look at how well-written, modern projects handle this. In this case that’s easy, <a href="http://redis.io/">redis</a> has lua scripting! Quite a lot of things in redis are small, efficient, self-contained and liberally licensed (MIT), which makes it excellent to study and learn from.</p>
+
+<p>By the way, I think it’s good practice to look for ideas in other projects. The trick is to remember some projects that you can have look at, confident that the author knows what she is doing. For me, that project is redis.</p>
+
+<p>The other side of the coin though is that it can stifle your creativity. So maybe a good middle ground is to only start looking at things if you can’t find a solution in 20 minutes or so.</p>
+
+<p>Let’s take the redis scripting code as an example:</p>
+
+<h3 id="sandboxing">Sandboxing</h3>
+
+<p>This section is based on an answer from <a href="http://stackoverflow.com/questions/966162/best-way-to-omit-lua-standard-libraries">stack overflow</a>, and if we look
+carefully we can see that the developers of redis took the same approach in <em>scripting.c</em>.</p>
+
+<p>Some other tutorials if you still have questions:</p>
+
+<ul>
+<li><a href="http://csl.sublevel3.org/lua/">Using Lua with C++ — A short tutorial</a></li>
+  <li><a href="http://www.ibm.com/developerworks/library/l-embed-lua/">IBM DeveloperWorks - Embed Lua for scriptable apps</a></li>
+</ul><p>Alternatives to Lua to consider, that share some of its advantages (easy integration, …):</p>
+
+<ul>
+<li><a href="http://www.squirrel-lang.org/">Squirrel</a></li>
+  <li><a href="http://www.angelcode.com/angelscript/">AngelScript</a></li>
+</ul><p>Suggestions, comments? Feel free to send me a mail and if possible I’ll amend the article or just write a Part II.</p>
+
+<!--
+    TODO: sandboxing, luaL_openlibs(L) opens all libraries, even IO, shouldn't do that
+    TODO: more sandboxing, separating interpreteters, one for GUI, one for AI, ...
+-->
+        </article>
+
+        <p>Tags: <a href="/tag/lua" rel="tag">lua</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/scripting" rel="tag">scripting</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/ffi" rel="tag">ffi</a></p>
+    </div>
+</div>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';

@@ -9,7 +9,7 @@
         <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
         <link rel="stylesheet" href="/stylesheets/pygments.css">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="description" content="Introducing my blog to the world">
         <meta name="keywords" content="introduction, nanoc, pygments, github">
         <meta name="author" content="Nicolas Hillegeer">
@@ -41,66 +41,6 @@
         </noscript>
     </head>
     <body>
-        <div id="main">
-    <div class="post">
-        <h1>Introduction</h1>
-        <aside>August 6, 2013</aside>
-
-        <article>
-            <p>Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?</p>
-
-<!-- more -->
-
-<ul>
-<li>
-<strong>programming</strong>: when I’ve got something to say about the open-source software I write, or want to illustrate a technique I utilised while writing closed-source software.</li>
-</ul><p>The blog is hosted (for now) on <a href="https://github.com/">github</a>, and statically generated with <a href="http://nanoc.ws/">nanoc</a>. At first I thought that – not exactly being a rubyist – it would be quite hard to get started, but I managed to set it all up in a day. It’s not that difficult after all. The most difficult thing was probably to get <a href="http://pygments.org/">pygments</a> to work for code highlighting and choosing an apprioprate style, I chose to emulate github.</p>
-
-<p>There are plenty of tutorials on how to get started, but here’s a nudge if you’re on OSX:</p>
-
-<pre><code class="language-bash"><span class="c"># get the latest and greatest ruby</span>
-<span class="nv">$ </span>brew install ruby
-
-<span class="c"># make sure the local ruby and gem paths are added to $PAH, make sure</span>
-<span class="c"># `which gem` gives the local gem executable</span>
-<span class="c"># instead of the system default</span>
-<span class="nv">$ </span>edit ~/.zshrc <span class="c"># or ~/.bashrc ...</span>
-
-<span class="nv">$ </span>gem install bundler
-
-<span class="c"># clone this repo or your own or start from scratch</span>
-<span class="c"># the repo has a gemfile with most of the things you</span>
-<span class="c"># need to get started</span>
-<span class="nv">$ </span>git clone ...
-
-<span class="c"># if you want code highlighting, install pygments</span>
-<span class="c"># (alternatively you can use the built-in CodeRay)</span>
-<span class="nv">$ </span>sudo easy_install Pygments
-
-<span class="nv">$ </span><span class="nb">cd </span>aktau.github.com
-
-<span class="c"># make sure bundler exports its executables to /usr/local/bin</span>
-<span class="nv">$ </span><span class="nb">export </span><span class="nv">BUNDLE_BIN</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span>
-<span class="nv">$ </span>bundle install
-
-<span class="c"># compile with nanoc</span>
-<span class="nv">$ </span>nanoc <span class="c"># (or bundle exec nanoc, if you want to be specific about versions)</span>
-
-<span class="c"># if you want to have guard watch your folders and automatically</span>
-<span class="c"># recompile while you're editing, which is really handy, just</span>
-<span class="c"># do this once:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard init nanoc
-
-<span class="c">#start watching:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard
-
-<span class="c"># run nanoc's internal webserver to preview what you just did</span>
-<span class="nv">$ </span>nanoc view</code></pre>
-        </article>
-
-        <p>Tags: <a href="/tag/introduction" rel="tag">introduction</a>, <a href="/tag/nanoc" rel="tag">nanoc</a>, <a href="/tag/pygments" rel="tag">pygments</a>, <a href="/tag/github" rel="tag">github</a></p>
-    </div>
-</div>
         <div id="sidebar">
             <h2>Nicolas Hillegeer</h2>
             <ul>
@@ -161,6 +101,66 @@
             </ul>
             -->
         </div>
+        <div id="main">
+    <div class="post">
+        <h1>Introduction</h1>
+        <aside>August 6, 2013</aside>
+
+        <article>
+            <p>Welcome to my brand new page, this will hopefully be the least interesting of all the things I write here. So what will I write about?</p>
+
+<!-- more -->
+
+<ul>
+<li>
+<strong>programming</strong>: when I’ve got something to say about the open-source software I write, or want to illustrate a technique I utilised while writing closed-source software.</li>
+</ul><p>The blog is hosted (for now) on <a href="https://github.com/">github</a>, and statically generated with <a href="http://nanoc.ws/">nanoc</a>. At first I thought that – not exactly being a rubyist – it would be quite hard to get started, but I managed to set it all up in a day. It’s not that difficult after all. The most difficult thing was probably to get <a href="http://pygments.org/">pygments</a> to work for code highlighting and choosing an apprioprate style, I chose to emulate github.</p>
+
+<p>There are plenty of tutorials on how to get started, but here’s a nudge if you’re on OSX:</p>
+
+<pre><code class="language-bash"><span class="c"># get the latest and greatest ruby</span>
+<span class="nv">$ </span>brew install ruby
+
+<span class="c"># make sure the local ruby and gem paths are added to $PAH, make sure</span>
+<span class="c"># `which gem` gives the local gem executable</span>
+<span class="c"># instead of the system default</span>
+<span class="nv">$ </span>edit ~/.zshrc <span class="c"># or ~/.bashrc ...</span>
+
+<span class="nv">$ </span>gem install bundler
+
+<span class="c"># clone this repo or your own or start from scratch</span>
+<span class="c"># the repo has a gemfile with most of the things you</span>
+<span class="c"># need to get started</span>
+<span class="nv">$ </span>git clone ...
+
+<span class="c"># if you want code highlighting, install pygments</span>
+<span class="c"># (alternatively you can use the built-in CodeRay)</span>
+<span class="nv">$ </span>sudo easy_install Pygments
+
+<span class="nv">$ </span><span class="nb">cd </span>aktau.github.com
+
+<span class="c"># make sure bundler exports its executables to /usr/local/bin</span>
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">BUNDLE_BIN</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span>
+<span class="nv">$ </span>bundle install
+
+<span class="c"># compile with nanoc</span>
+<span class="nv">$ </span>nanoc <span class="c"># (or bundle exec nanoc, if you want to be specific about versions)</span>
+
+<span class="c"># if you want to have guard watch your folders and automatically</span>
+<span class="c"># recompile while you're editing, which is really handy, just</span>
+<span class="c"># do this once:</span>
+<span class="nv">$ </span>bundle <span class="nb">exec </span>guard init nanoc
+
+<span class="c">#start watching:</span>
+<span class="nv">$ </span>bundle <span class="nb">exec </span>guard
+
+<span class="c"># run nanoc's internal webserver to preview what you just did</span>
+<span class="nv">$ </span>nanoc view</code></pre>
+        </article>
+
+        <p>Tags: <a href="/tag/introduction" rel="tag">introduction</a>, <a href="/tag/nanoc" rel="tag">nanoc</a>, <a href="/tag/pygments" rel="tag">pygments</a>, <a href="/tag/github" rel="tag">github</a></p>
+    </div>
+</div>
 
         <script>
             var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
