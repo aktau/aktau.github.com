@@ -13,6 +13,7 @@ gem "mime-types"
 gem "yui-compressor"
 gem "rake"
 gem "pygments.rb"
+gem "image_size"
 
 # Dependency for XML Sitemap generation
 gem 'builder'
