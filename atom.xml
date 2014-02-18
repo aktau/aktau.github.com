@@ -170,33 +170,36 @@ clicking, so I automated the task, and
     <published>2013-09-21T22:00:00Z</published>
     <updated>2013-09-21T22:00:00Z</updated>
     <link rel="alternate" href="http://www.aktau.be/2013/09/22/detecting-interlaced-video-with-ffmpeg/"/>
-    <content type="html">&lt;p&gt;Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
-underlying video player (&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid of that nasty combing effect.&lt;/p&gt;
+    <content type="html">&lt;p&gt;Today I had to determine whether a video file is interlaced or not.
+This has an effect on which flags I pass to the underlying video player
+(&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid
+of that nasty combing effect.&lt;/p&gt;
 
 &lt;!-- more --&gt;
 
-&lt;p&gt;Searching the internet I found that many people say that you can only really see if a video is interlaced or not by looking at it
-frame by frame. One can’t rely on any metadata present in the video file, which you can get for example by running &lt;code&gt;mediainfo&lt;/code&gt;.
-It happens quite often that this metadata is just &lt;em&gt;wrong&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Searching the internet I found that many people say that you can only
+really see if a video is interlaced or not by looking at it frame by
+frame. One can’t rely on any metadata present in the video file, which
+you can get for example by running
+&lt;a href="http://mediainfo.sourceforge.net"&gt;mediainfo&lt;/a&gt; or
+&lt;a href="http://www.ffmpeg.org/ffprobe.html"&gt;ffprobe&lt;/a&gt;. It happens quite often
+that this metadata is just &lt;em&gt;wrong&lt;/em&gt;.&lt;/p&gt;
 
-&lt;p&gt;While this is true, I have no patience for manually viewing each file, especially because I’m dealing with thousands of user-submitted videos.
-So I kept digging and found an automated solution that, while not 100% accurate, was more than accurate enough. Anything that slipped through
+&lt;p&gt;While this is true, I have no patience for manually viewing each file,
+especially because I’m dealing with thousands of user-submitted videos.
+So I kept digging and found an automated solution that, while not 100%
+accurate, was more than accurate enough. Anything that slipped through
 the cracks will be noticed and the users will hopefully notify me.&lt;/p&gt;
 
-&lt;p&gt;It turns out that &lt;strong&gt;ffmpeg&lt;/strong&gt; has a filter called &lt;strong&gt;idet&lt;/strong&gt; that (tries to) detect interlaced frames, and in my experience is quite
-good at it. You’ll need a pretty recent version of ffmpeg for this (later 2012 I believe,
-the one in the debian wheezy repositories is not recent enough). Here’s an example of how to use it:&lt;/p&gt;
+&lt;p&gt;It turns out that &lt;strong&gt;ffmpeg&lt;/strong&gt; has a filter called &lt;strong&gt;idet&lt;/strong&gt; that (tries
+to) detect interlaced frames, and in my experience is quite good at it.
+You’ll need a pretty recent version of ffmpeg for this (later 2012 I
+believe, the one in the debian wheezy repository is not recent enough).
+Here’s an example of how to use it and what happens when I try it on an
+interlaced and non-interlaced file:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# detect interlacing with the ffmpeg "idet" filter, the more frames&lt;/span&gt;
 &lt;span class="c"&gt;# you extract, the better, though it's never 100% accurate&lt;/span&gt;
-
-&lt;span class="c"&gt;# flags:&lt;/span&gt;
-&lt;span class="c"&gt;# -an            = discard audio, we don't need it&lt;/span&gt;
-&lt;span class="c"&gt;# -f rawvideo    = output raw video&lt;/span&gt;
-&lt;span class="c"&gt;# -y /dev/null   = discard the output&lt;/span&gt;
-&lt;span class="c"&gt;# -i ...         = the input file to check&lt;/span&gt;
-&lt;span class="c"&gt;# -frames:v 100  = extract the first 100 frames&lt;/span&gt;
-&lt;span class="c"&gt;# -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames&lt;/span&gt;
 
 ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
     -frames:v 100 &lt;span class="se"&gt;\&lt;/span&gt;
@@ -214,23 +217,36 @@ ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
     -i ~/Downloads/some_non_interlaced_video.mkv
 &lt;span class="c"&gt;# Example output (this is not interlaced):&lt;/span&gt;
 &lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84&lt;/span&gt;
-&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25&lt;/span&gt;
 
-&lt;p&gt;If you see many frames next to &lt;em&gt;TFF&lt;/em&gt; or &lt;em&gt;BFF&lt;/em&gt;, that means a video is interlaced, if there are many in
-progressive, that means it’s not interlaced. If undetermined is the majority count, I guess you better
-look at the file in person, but that hasn’t happened to me yet.&lt;/p&gt;
+&lt;span class="c"&gt;# flags:&lt;/span&gt;
+&lt;span class="c"&gt;# -an            = discard audio, we don't need it&lt;/span&gt;
+&lt;span class="c"&gt;# -f rawvideo    = output raw video&lt;/span&gt;
+&lt;span class="c"&gt;# -y /dev/null   = discard the output&lt;/span&gt;
+&lt;span class="c"&gt;# -i ...         = the input file to check&lt;/span&gt;
+&lt;span class="c"&gt;# -frames:v 100  = extract the first 100 frames&lt;/span&gt;
+&lt;span class="c"&gt;# -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Armed with this new tool I thought it would be a good idea to scan my entire HD looking and check them
-all with the &lt;em&gt;idet&lt;/em&gt; filter:&lt;/p&gt;
+&lt;p&gt;If you see many frames next to &lt;em&gt;TFF&lt;/em&gt; or &lt;em&gt;BFF&lt;/em&gt;, that means a video is
+interlaced. On the other hand if there are many in progressive, that
+means it’s not interlaced. If undetermined is the majority count, I
+guess you better look at the file in person, but that hasn’t happened to
+me yet.&lt;/p&gt;
+
+&lt;p&gt;Armed with this new tool I thought it would be a good idea to scan my
+entire HD looking and check them all with the &lt;em&gt;idet&lt;/em&gt; filter:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# scan all files on your HD, uses GNU parallel&lt;/span&gt;
 &lt;span class="c"&gt;# I believe this works just as well with standard&lt;/span&gt;
 &lt;span class="c"&gt;# xargs though&lt;/span&gt;
 locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;1 &lt;span class="p"&gt;|&lt;/span&gt; egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;It turns out I only had 2, interlaced content indeed is quite rare for content on a computer, luckily so.&lt;/p&gt;</content>
-    <summary type="html">&lt;p&gt;Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
-underlying video player (&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid of that nasty combing effect.&lt;/p&gt;
+&lt;p&gt;It turns out I only had 2, interlaced content indeed is quite rare for
+content on a computer, luckily so.&lt;/p&gt;</content>
+    <summary type="html">&lt;p&gt;Today I had to determine whether a video file is interlaced or not.
+This has an effect on which flags I pass to the underlying video player
+(&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid
+of that nasty combing effect.&lt;/p&gt;
 
 </summary>
   </entry>
