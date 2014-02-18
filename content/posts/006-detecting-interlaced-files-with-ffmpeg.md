@@ -6,35 +6,38 @@ kind: article
 tags: [ffmpeg]
 ---
 
-Today I had to decide whether some video files are interlaced or not. This has an effect on which flags I pass to the
-underlying video player ([mpv](http://mpv.io/) in this case) to enable deinterlacing and get rid of that nasty combing effect.
+Today I had to determine whether a video file is interlaced or not.
+This has an effect on which flags I pass to the underlying video player
+([mpv](http://mpv.io/) in this case) to enable deinterlacing and get rid
+of that nasty combing effect.
 
 <!-- more -->
 
-Searching the internet I found that many people say that you can only really see if a video is interlaced or not by looking at it
-frame by frame. One can't rely on any metadata present in the video file, which you can get for example by running `mediainfo`.
-It happens quite often that this metadata is just *wrong*.
+Searching the internet I found that many people say that you can only
+really see if a video is interlaced or not by looking at it frame by
+frame. One can't rely on any metadata present in the video file, which
+you can get for example by running
+[mediainfo](http://mediainfo.sourceforge.net) or
+[ffprobe](http://www.ffmpeg.org/ffprobe.html). It happens quite often
+that this metadata is just *wrong*.
 
-While this is true, I have no patience for manually viewing each file, especially because I'm dealing with thousands of user-submitted videos.
-So I kept digging and found an automated solution that, while not 100% accurate, was more than accurate enough. Anything that slipped through
+While this is true, I have no patience for manually viewing each file,
+especially because I'm dealing with thousands of user-submitted videos.
+So I kept digging and found an automated solution that, while not 100%
+accurate, was more than accurate enough. Anything that slipped through
 the cracks will be noticed and the users will hopefully notify me.
 
-It turns out that **ffmpeg** has a filter called **idet** that (tries to) detect interlaced frames, and in my experience is quite
-good at it. You'll need a pretty recent version of ffmpeg for this (later 2012 I believe,
-the one in the debian wheezy repositories is not recent enough). Here's an example of how to use it:
+It turns out that **ffmpeg** has a filter called **idet** that (tries
+to) detect interlaced frames, and in my experience is quite good at it.
+You'll need a pretty recent version of ffmpeg for this (later 2012 I
+believe, the one in the debian wheezy repository is not recent enough).
+Here's an example of how to use it and what happens when I try it on an
+interlaced and non-interlaced file:
 
 ~~~~~~~~
 #!bash
 # detect interlacing with the ffmpeg "idet" filter, the more frames
 # you extract, the better, though it's never 100% accurate
-
-# flags:
-# -an            = discard audio, we don't need it
-# -f rawvideo    = output raw video
-# -y /dev/null   = discard the output
-# -i ...         = the input file to check
-# -frames:v 100  = extract the first 100 frames
-# -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames
 
 ffmpeg -filter:v idet \
     -frames:v 100 \
@@ -53,14 +56,24 @@ ffmpeg -filter:v idet \
 # Example output (this is not interlaced):
 # [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84
 # [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25
+
+# flags:
+# -an            = discard audio, we don't need it
+# -f rawvideo    = output raw video
+# -y /dev/null   = discard the output
+# -i ...         = the input file to check
+# -frames:v 100  = extract the first 100 frames
+# -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames
 ~~~~~~~~
 
-If you see many frames next to *TFF* or *BFF*, that means a video is interlaced, if there are many in
-progressive, that means it's not interlaced. If undetermined is the majority count, I guess you better
-look at the file in person, but that hasn't happened to me yet.
+If you see many frames next to *TFF* or *BFF*, that means a video is
+interlaced. On the other hand if there are many in progressive, that
+means it's not interlaced. If undetermined is the majority count, I
+guess you better look at the file in person, but that hasn't happened to
+me yet.
 
-Armed with this new tool I thought it would be a good idea to scan my entire HD looking and check them
-all with the *idet* filter:
+Armed with this new tool I thought it would be a good idea to scan my
+entire HD looking and check them all with the *idet* filter:
 
 ~~~~~~~~
 #!bash
@@ -70,4 +83,5 @@ all with the *idet* filter:
 locate -0 '.mov' | parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i {} 2>&1 | egrep 'idet|Input'
 ~~~~~~~~
 
-It turns out I only had 2, interlaced content indeed is quite rare for content on a computer, luckily so.
+It turns out I only had 2, interlaced content indeed is quite rare for
+content on a computer, luckily so.
