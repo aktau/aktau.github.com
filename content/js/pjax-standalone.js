@@ -224,7 +224,7 @@
 			document.title = title;
 
 		// Look through all returned divs.
-		tmpNodes = tmp.getElementsByTagName('div');
+		tmpNodes = tmp.getElementsByTagName('main');
 		for(var i=0;i<tmpNodes.length;i++) {
 			if(tmpNodes[i].id === options.container.id){
 				// If our container div is within the returned HTML, we both know the returned content is
