@@ -18,7 +18,7 @@
         <meta property="og:url" content="http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/">
 
         <!-- Google Fonts embed code -->
-        <script type="text/javascript">
+        <script>
             (function() {
                 var link_element = document.createElement("link"),
                     s = document.getElementsByTagName("script")[0];
@@ -106,7 +106,7 @@
             -->
         </nav>
 
-        <main>
+        <main id="content">
             
     <div class="post">
         <h1>Clean integration of Lua and C</h1>
@@ -170,6 +170,23 @@ carefully we can see that the developers of redis took the same approach in <em>
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    if (window._gaq) {
+                        console.log("load completed, notifying old-style GA");
+                        _gaq.push(['_trackPageview', window.location.href]);
+                    }
+                    else {
+                        console.log("load completed, notifying new-style GA");
+                        ga('set', 'location', window.location.href);
+                        ga('send', 'pageview');
+                    }
+                }
+            });
         </script>
     </body>
 </html>

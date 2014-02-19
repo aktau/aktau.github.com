@@ -18,7 +18,7 @@
         <meta property="og:url" content="http://www.aktau.be/tag/linux/">
 
         <!-- Google Fonts embed code -->
-        <script type="text/javascript">
+        <script>
             (function() {
                 var link_element = document.createElement("link"),
                     s = document.getElementsByTagName("script")[0];
@@ -106,7 +106,7 @@
             -->
         </nav>
 
-        <main>
+        <main id="content">
             
     <h1>
         tag / linux
@@ -128,6 +128,23 @@
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    if (window._gaq) {
+                        console.log("load completed, notifying old-style GA");
+                        _gaq.push(['_trackPageview', window.location.href]);
+                    }
+                    else {
+                        console.log("load completed, notifying new-style GA");
+                        ga('set', 'location', window.location.href);
+                        ga('send', 'pageview');
+                    }
+                }
+            });
         </script>
     </body>
 </html>
