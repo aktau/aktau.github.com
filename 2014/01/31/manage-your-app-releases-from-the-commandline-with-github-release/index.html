@@ -193,10 +193,7 @@ whatever shenanigans the next scripting language du jour comes up with.</p>
         <script>
             pjax.connect({
                 "container": "content",
-                "complete": function() {
-                    ga('set', 'location', window.location.href);
-                    ga('send', 'pageview');
-                }
+                "autoAnalytics", true
             });
         </script>
     </body>

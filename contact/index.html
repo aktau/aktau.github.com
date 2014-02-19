@@ -234,10 +234,7 @@ I plan to read or am reading right now:</p>
         <script>
             pjax.connect({
                 "container": "content",
-                "complete": function() {
-                    ga('set', 'location', window.location.href);
-                    ga('send', 'pageview');
-                }
+                "autoAnalytics", true
             });
         </script>
     </body>

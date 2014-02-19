@@ -386,10 +386,7 @@ were minor (except for haptics support, which I don’t use).</p>
         <script>
             pjax.connect({
                 "container": "content",
-                "complete": function() {
-                    ga('set', 'location', window.location.href);
-                    ga('send', 'pageview');
-                }
+                "autoAnalytics", true
             });
         </script>
     </body>

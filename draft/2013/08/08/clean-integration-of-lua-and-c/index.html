@@ -177,10 +177,7 @@ carefully we can see that the developers of redis took the same approach in <em>
         <script>
             pjax.connect({
                 "container": "content",
-                "complete": function() {
-                    ga('set', 'location', window.location.href);
-                    ga('send', 'pageview');
-                }
+                "autoAnalytics", true
             });
         </script>
     </body>

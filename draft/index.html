@@ -169,10 +169,7 @@ scripting in it. Because I believe the advantages to outweigh the downsides.</p>
         <script>
             pjax.connect({
                 "container": "content",
-                "complete": function() {
-                    ga('set', 'location', window.location.href);
-                    ga('send', 'pageview');
-                }
+                "autoAnalytics", true
             });
         </script>
     </body>
