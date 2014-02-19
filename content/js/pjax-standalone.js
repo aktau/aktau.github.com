@@ -143,7 +143,6 @@
         var exclude = {'pdf': true},
             ext = node.pathname.split('.').pop();
         if (ext in exclude) {
-            console.log("not TRANSFORMING", node, node.protocol, node.pathname);
             return true;
         }
 
