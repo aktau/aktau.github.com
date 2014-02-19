@@ -40,8 +40,13 @@ compile /(rss|atom)/ do
     filter :erb unless rep.binary? # e.g. rss.png image
 end
 
-compile '/stylesheets/*/' do
-    # don’t filter or layout
+# compile '/stylesheets/*/' do
+#     # don’t filter or layout
+# end
+
+compile '/stylesheets/*' do
+  filter :erb
+  filter :rainpress if File.basename(item[:content_filename], ".*") == 'all'
 end
 
 compile '/js/*/' do
@@ -126,8 +131,17 @@ route '/js/*/' do
   item.identifier.chop + '.' + item[:extension]
 end
 
-route '/stylesheets/*/' do
-  item.identifier.chop + '.' + item[:extension]
+# route '/stylesheets/*/' do
+#   item.identifier.chop + '.' + item[:extension]
+# end
+
+route '/stylesheets/*' do
+    # if not debug mode, only let all.css through
+    unless @config[:debug]
+        item.identifier.chop + '.css' if File.basename(item[:content_filename], ".*") == 'all'
+    else
+        item.identifier.chop + '.css'
+    end
 end
 
 route '/images/*/', :rep => :thumbnail do

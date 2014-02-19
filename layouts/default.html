@@ -36,9 +36,13 @@
             <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
         </noscript>
 
-        <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" media="all">
-        <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" media="all">
-        <link rel="stylesheet" type="text/css" href="/stylesheets/pygments.css" media="all">
+        <% if @config[:debug] %>
+        <% for file in @config[:stylesheets] %>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/<%= File.basename(file, ".*") %>.css">
+        <% end %>
+        <% else %>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        <% end %>
 
         <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
 

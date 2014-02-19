@@ -1,3 +1,5 @@
+debug: true
+
 # The base URL for the website, for use in sitemaps etc. Something like
 # http://domain.tld
 base_url: http://www.aktau.be
@@ -6,6 +8,13 @@ author_name: Nicolas Hillegeer
 author_uri: http://www.aktau.be/contact
 
 title: Portfolio and personal blog
+
+# your stylesheets files without extension, in order, will only
+# be used if debug is false
+stylesheets:
+  - normalize
+  - style
+  - pygments
 
 # A list of file extensions that nanoc will consider to be textual rather than
 # binary. If an item with an extension not in this list is found,  the file

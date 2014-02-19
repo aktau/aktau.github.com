@@ -14,6 +14,7 @@ gem "yui-compressor"
 gem "rake"
 gem "pygments.rb"
 gem "image_size"
+gem "rainpress"
 
 # Dependency for XML Sitemap generation
-gem 'builder'
+gem "builder"

@@ -121,6 +121,15 @@ def change_base_url_to(url)
   end
 end
 
+def set_debug(mode)
+    puts "Changing Debug Mode to #{mode}.."
+    config = YAML.load_file('./nanoc.yaml')
+    config['debug'] = mode
+    File.open('./nanoc.yaml', 'w') do |file|
+      file.write(config.to_yaml)
+    end
+end
+
 ##
 # Prepares the deployment environment
 #
@@ -136,6 +145,7 @@ end
 #
 def compile!
   change_base_url_to(BASE_URL)
+  set_debug(false)
 
   puts "Compiling website.."
   puts %x[rm -rf output]
