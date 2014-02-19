@@ -139,6 +139,14 @@
 			return true;
 		}
 
+        // Ignore non-html resources
+        var exclude = {'pdf': true},
+            ext = node.pathname.split('.').pop();
+        if (ext in exclude) {
+            console.log("not TRANSFORMING", node, node.protocol, node.pathname);
+            return true;
+        }
+
 		// Add link HREF to object
 		options.url = node.href;
 		// If PJAX data is specified, use as container
