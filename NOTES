@@ -31,3 +31,42 @@ http://www.cassannet.net/
 http://somadesign.ca/projects/fontfriend/
 http://fontdragr.com/
 http://www.gamedeception.net/content/193-Cross-platform-x86-x86-64-detours?s=877a31aa7be5e52c6e6712e576acbd09&page=2#comments
+
+Get image width/height right
+============================
+
+In the post:
+
+```md
+Some text...
+
+<%= image_link('/assets/images/blah/') %>
+
+More text
+```
+
+You'd have to filter with :erb first though, then :kramdown. Could add a bit
+of latency.
+
+```ruby
+def image_link(identifier, rep_name)
+  item = @items[identifier]
+  rep = item.rep_named(rep_name)
+
+  # Create soft dependency
+  # (i.e. when the image changes, this page will be recompiled)
+  Nanoc::NotificationCenter.post(:visit_started, item)
+  Nanoc::NotificationCenter.post(:visit_ended,   item)
+
+  # Create hard dependency
+  # (i.e. this page requires the item to be compiled already)
+  if !rep.compiled?
+    raise Nanoc::Errors::UnmetDependency.new(rep)
+  end
+
+  # TODO: implement #extract_dimensions
+  width, height = extract_dimensions(rep.raw_path)
+
+  %[<img src="#{rep.path}" width="#{width}" height="#{height}">]
+end
+```
