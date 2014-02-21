@@ -3,19 +3,19 @@
     <head>
         <meta charset="utf-8">
 
-        <title>tag: unix</title>
+        <title>OpenGL analysis, spherical normal mapping</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <meta name="description" content="unix">
-        <meta name="keywords" content="notags">
+        <meta name="description" content="A small analysis of the WebGL sperical normal mapping demo as seen on ClickToRelease">
+        <meta name="keywords" content="opengl, webgl">
         <meta name="author" content="Nicolas Hillegeer">
         <meta name="generator" content="nanoc 3.6.7">
         <meta name="robots" content="index,follow">
 
-        <meta property="og:title" content="tag: unix">
+        <meta property="og:title" content="OpenGL analysis, spherical normal mapping">
         <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
-        <meta property="og:url" content="http://www.aktau.be/tag/unix/">
+        <meta property="og:url" content="http://www.aktau.be/draft/2014/02/21/opengl-analysis-spherical-normal-mapping/">
 
         <!-- Google Fonts embed code -->
         <script>
@@ -108,17 +108,53 @@
 
         <main id="content">
             
-    <h1>
-        tag / unix
-    </h1>
+    <div class="post">
+        <h1>OpenGL analysis, spherical normal mapping</h1>
+        <aside>February 21, 2014</aside>
 
-    <ul>
-        
-            <li>
-                2013-08-07 - <a href="/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/">A makefile for modern C programming on UNIX-like operating systems</a>
-            </li>
-        
-    </ul>
+        <article>
+            <p>Deep in the vast reaches of the twitterspace, <a href="http://www.clicktorelease.com/code/spherical-normal-mapping/">this little
+beauty</a>
+popped up on my monitor. Steeped in the cold, hard light of the monitor,
+my eyes glazed over, and I knew I wanted it in my toy engine.</p>
+
+<p>For a long time, any engine worth its iodine-enhanced salt has supported
+environment and normal mapping (almost like bump mapping). After this
+article, my fledgling engine will, too!</p>
+
+<!-- more -->
+
+<p>Before we start discussing what’s actually implemented in the demo let’s
+get some terminology out of the way.</p>
+
+<h2 id="difference-between-normal-mapping-bump-mapping-et-cetera">Difference between normal mapping, bump mapping, et cetera</h2>
+
+<p>There is some confusion about this, for some, they’re not different. For
+others, bump mapping happens with a greyscale <em>heightmap</em> from which you
+calculate the new surface normals from the old ones (like an offset), and normal
+mapping uses a RGB map which has pre-computed normals.</p>
+
+<p>Then there are those who think of bump-mapping as a catch-all term for
+faking geometry (in this case faking relief) on a mesh. For them, the
+greyscale heightmap approach, the RGB normal map and even RGBA parallax
+maps are instances of the same technique, with slightly different
+approaches.</p>
+
+<p>To sum it up:</p>
+
+<ol>
+<li>A single-channel (greyscale) heightmap, commonly referred to as a
+<strong>bump map</strong>.</li>
+  <li>A RGB map (like a regular color texture), usually called a <strong>normal
+map</strong>.</li>
+  <li>A RGBA map (like a color texture with transparancy), usually called a
+<strong>parallax map</strong>. This is actually a combination of a <strong>bump map</strong> and a
+<strong>normal map</strong>.</li>
+</ol><pre><code class="language-javascript"><span class="c1">// code here</span></code></pre>
+        </article>
+
+        <p>Tags: <a href="/tag/opengl" rel="tag">opengl</a>, <a href="/tag/webgl" rel="tag">webgl</a></p>
+    </div>
 
         </main>
 

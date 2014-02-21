@@ -3,19 +3,19 @@
     <head>
         <meta charset="utf-8">
 
-        <title>tag: unix</title>
+        <title>OpenGL analysis, WebGL cubes</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <meta name="description" content="unix">
-        <meta name="keywords" content="notags">
+        <meta name="description" content="A small analysis of the WebGL cubes demo as seen on Google Chrome Experiments">
+        <meta name="keywords" content="opengl, webgl">
         <meta name="author" content="Nicolas Hillegeer">
         <meta name="generator" content="nanoc 3.6.7">
         <meta name="robots" content="index,follow">
 
-        <meta property="og:title" content="tag: unix">
+        <meta property="og:title" content="OpenGL analysis, WebGL cubes">
         <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
-        <meta property="og:url" content="http://www.aktau.be/tag/unix/">
+        <meta property="og:url" content="http://www.aktau.be/draft/2014/02/20/opengl-analysis-webgl-cubes/">
 
         <!-- Google Fonts embed code -->
         <script>
@@ -108,17 +108,50 @@
 
         <main id="content">
             
-    <h1>
-        tag / unix
-    </h1>
+    <div class="post">
+        <h1>OpenGL analysis, WebGL cubes</h1>
+        <aside>February 20, 2014</aside>
 
-    <ul>
-        
-            <li>
-                2013-08-07 - <a href="/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/">A makefile for modern C programming on UNIX-like operating systems</a>
-            </li>
-        
-    </ul>
+        <article>
+            <p>When I first saw the WebGL demo for spinning cubes, I was a bit amazed
+at how smooth it was, so naturally I went for the “View Page Source”
+menu and had a look.</p>
+
+<!-- more -->
+
+<p>My first hunch was that it used instanced rendering so as to tax the GPU
+as little as possible. However WebGL doesn’t support instanced
+rendering.<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> So how does it do what it does?</p>
+
+<p>First of all, if you ever encounter a WebGL demo where you want to a
+quick overview of what is happening, or don’t want to learn a framework
+yet want to know how it does it’s magic? In that case you can use the
+<a href="http://benvanik.github.io/WebGL-Inspector/">WebGL Inspector</a>. It is an
+absolutely indispensable tool for the intrepid graphics developer. It’s
+often the first thing I activate when I find something new.</p>
+
+<p>First it creates 3 big arrays to hold the position, normal and color
+values of each triangle. Each face of a cube consists of 2 triangles,
+and each cube consists of 6 faces, which</p>
+
+<pre><code class="language-javascript"><span class="kd">var</span> <span class="nx">triangles</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="mi">150000</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">geometry</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">BufferGeometry</span><span class="p">();</span>
+
+<span class="kd">function</span> <span class="nx">hw</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Hello, graphics language world"</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+
+<div class="footnotes">
+  <ol>
+<li id="fn:1">
+      <p>Not really true, there is an extension called <a href="http://blog.tojicode.com/2013/07/webgl-instancing-with.html">ANGLE_instanced_arrays</a> which allows you to do instancing even in WebGL. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+  </ol>
+</div>
+        </article>
+
+        <p>Tags: <a href="/tag/opengl" rel="tag">opengl</a>, <a href="/tag/webgl" rel="tag">webgl</a></p>
+    </div>
 
         </main>
 

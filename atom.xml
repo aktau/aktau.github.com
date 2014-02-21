@@ -251,220 +251,6 @@ of that nasty combing effect.&lt;/p&gt;
 </summary>
   </entry>
   <entry>
-    <id>tag:www.aktau.be,2013-08-14:/draft/2013/08/14/making-a-good-game-engine-part-1/</id>
-    <title type="html">Making a good game engine (part 1)</title>
-    <published>2013-08-13T22:00:00Z</published>
-    <updated>2013-08-13T22:00:00Z</updated>
-    <link rel="alternate" href="http://www.aktau.be/draft/2013/08/14/making-a-good-game-engine-part-1/"/>
-    <content type="html">&lt;p&gt;I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
-would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
-allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
-stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
-water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
-Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
-to me…&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;p&gt;&lt;strong&gt;DISCLAIMER&lt;/strong&gt;: I’ve never written an actual game engine before. When I was young I coded up a
-&lt;a href="http://zatacka.sourceforge.net/index.php?id=screens"&gt;Zatacka&lt;/a&gt;&lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;-clone in SDL after
-following &lt;a href="http://sol.gfxile.net/gp/index.html"&gt;Jari Komppa&lt;/a&gt;’s tutorial. I loved that falling snow! After that my game-making tapered
-off a bit and I can painfully remember that I couldn’t even muster up the discipline to code up a tetris-clone. I guess I liked my
-win32 wildcard filename searcher better &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
-with OpenGL) that was supposed to teach butterfly evolution to a bunch of pre-schoolers. I learned C++ specifically for the project
-because that’s what game programmers did, or so I had read once. Needless to say, this was a mistake:
-new language + not experienced at game making = frantic coding to make up for lost time. It did provide me with a handle on C++ and a bit more
-of an idea of what it might mean to make an engine.&lt;/p&gt;
-
-&lt;p&gt;But still, the idea lingered, and I wanted all those things that I wrote at the top of the page. I realized quite early that I couldn’t have all those things.
-It takes people far more experienced and likely also far smarter than me a lot of time to come up with engines like the one I want. How
-on earth am I supposed to do it then?&lt;/p&gt;
-
-&lt;p&gt;Well, from my earlier experiments, I had learned two things:&lt;/p&gt;
-
-&lt;p&gt;1) your first attempt(s) suck.
-2) every subsequent attempt gets better.
-3) agonizing over design is sometimes very necessary and sometimes utter crap.&lt;/p&gt;
-
-&lt;p&gt;The two first points are nshrined in such common wisdom as “&lt;em&gt;practice makes perfect&lt;/em&gt;”, this should come as no surprise. The third one
-seems to provide no value at all. I’ll try to clarify. For the butterfly evolution game I needed the students to play against each other:
-multiplayer. I thought about my Zatacka-clone, how I had made it and tried to add multiplayer to it after “perfecting” the singleplayer.
-And how incredibly painful that was. I just couldn’t get it to work right, after a short while my players would desync or have any of
-a million other issues. It took about a month for me to realize that Zatacka-multiplayer was unsalvageable. The game had just not been made
-with multiplayer in mind, and to shoehorn it in was the worst idea ever.&lt;/p&gt;
-
-&lt;p&gt;Networking: link to John Carmack’s plan in which he lays out input/output. Link to tribes 2 networking design. Link to valve networking design.&lt;/p&gt;
-
-&lt;p&gt;This is the reason I have so much respect for (f.ex) the people that made &lt;a href="http://www.mtavc.com/"&gt;Multi Theft Auto&lt;/a&gt;: they made a networked
-game out of a very complex, strictly singleplayer game, without having the source. My mind was blown. I couldn’t even do that for a game
-so simple a cellular automaton could have made it, and I even had the source!&lt;/p&gt;
-
-&lt;p&gt;I had very little experience with socket programming and perhaps less with game design, but one thing I could foresee was
-that it would be absolute madness to shoehorn such a thing as multiplayer into a game designed as a&lt;/p&gt;
-
-&lt;p&gt;Like all things, engine design is subject to certain trends and even fads. The one that’s currently (in 2013) the strongest and has been
-growing for a couple of years seems to be the \textbf{data-driven engine}. Sounds pretty generic, right? Which engine isn’t driven
-by data? What does it mean?&lt;/p&gt;
-
-&lt;h3 id="choosing-a-language"&gt;Choosing a language&lt;/h3&gt;
-
-&lt;p&gt;C++11 looks awesome, but I find that classes distract from the true core of the data-driven religion.&lt;/p&gt;
-
-&lt;h3 id="the-pipeline"&gt;The pipeline&lt;/h3&gt;
-
-&lt;p&gt;The point is to view your data as streaming through a pipeline&lt;/p&gt;
-
-&lt;p&gt;The cache, bro.&lt;/p&gt;
-
-&lt;h3 id="no-more-trees"&gt;No more trees&lt;/h3&gt;
-
-&lt;p&gt;Trees are bad for caches… or are they?&lt;/p&gt;
-
-&lt;h3 id="tooling"&gt;Tooling&lt;/h3&gt;
-
-&lt;p&gt;Well, that’s a whole different can of worms. I’m not much of a tools programmer nor do I enjoy it very much. So I’ll try to reuse
-as much as humanly possible in this aspect.&lt;/p&gt;
-
-&lt;h3 id="d-math"&gt;3D Math&lt;/h3&gt;
-
-&lt;p&gt;Any game engine will need to perform a whole lot of mathematics.
-Physics, translations, rotations, projections, skinning, …: you name it,
-the engine does it. If you’re like me, you have always had this desire
-to craft really performant code (where it matters, and sometimes
-where it doesn’t). As it happens, even when I was not busy actually
-writing a graphics engine, I was at times amusing myself by
-reading articles about it. One thing that caught my attention was
-&lt;em&gt;template metaprogramming&lt;/em&gt; in C++. This was back when I still believed C++
-was a good idea, mostly because all game engines were written in it.
-It promised to deliver the
-performance-conscious programmer from the hell of temporary allocations
-and inefficient code. All this by making the compiler do all the work
-thanks to the notably Turing-complete templates C++ offers. The price,
-was a serious increase in complexity. But only on the inside, said
-the proponents of this approach. Only the templates are complex, the
-client code doesn’t have to care that it’s so complex.&lt;/p&gt;
-
-&lt;p&gt;While this may be true, there are two concerns I would like to note:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;I don’t particularly like using a piece of code that I couldn’t
-understand without an enormous effort. Template-based code seems to be
-very &lt;em&gt;write once&lt;/em&gt; in nature. After a while, not even the author might
-understand it. (Granted, one could say the same about including LuaJIT
-in one’s codebase, but I feel that it’s somehow different. Though
-perhaps I’m just being arbitratry here).&lt;/li&gt;
-  &lt;li&gt;It increases compile times a lot. C++ is already a slouch,
-espcially when you’re also using the STL, but template metaprogramming
-magic doesn’t help, at all. If there’s one thing I hate when I’m working
-on something, it’s a long edit-inspect cycle. I want to be able to see
-my changes a second after I make them. When I don’t, I tend to either
-lose my concentration or become frustrated.&lt;/li&gt;
-&lt;/ol&gt;&lt;p&gt;But is there an alternative for intrepid performance-conscious
-developers such as ourselves? Certainly, just use intrinsics, wrap them
-in a nice function and let the compiler sort it all out – quickly I
-might add! A good example of this is the incomplete but functional
-&lt;a href="https://github.com/rikusalminen/threedee-simd"&gt;threedee-simd library&lt;/a&gt;.
-It is small and lean and compile very quickly, produces extremely
-performant code and is (with less effor than templates) understandable.&lt;/p&gt;
-
-&lt;p&gt;To understand it you’d have to get the hang of some SIMD intrinsics first,
-but after that it all becomes quite obvious. A good tip is working it
-out on paper, because all the shuffling be consusing. The actual
-difficult thing, once you get the hang of it and want to add parts to
-the library, is to get the absolute last inch of performance out of it.
-It’s one thing to be able to write correct code with intrinsics, but
-it’s another entirely for that to satisfy the CPU’s desires. There are
-many SIMD functions and some combinations are better than others. Some
-might even lead to performance no better than pure scala code. So you
-might you as well write it in a scalar fashion.&lt;/p&gt;
-
-&lt;p&gt;That’s the nice thing about threedee-simd, you can just write your
-function scalar-style first if it doesn’t exist yet. If it proves
-to be oft-used, you can optimize the snot out of it and just replace the
-call from the entrypoint with your shiny new implementation. Actually,
-advanced compiler vectorizers like Clangs’
-&lt;a href="http://llvm.org/docs/Vectorizers.html#the-slp-vectorizer"&gt;SLP vectorizer&lt;/a&gt;
-do a pretty good job of automatically vectorizing a lot of code, if you
-give it the right nudge.&lt;/p&gt;
-
-&lt;p&gt;The right nudge in this case is usually two things:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
-this case)&lt;/li&gt;
-  &lt;li&gt;The loop in which the data is used has to have a constant number of
-iterations or be manually unrolled.&lt;/li&gt;
-  &lt;li&gt;You have to tell the compiler what can change and what pointers can
-alias each other. The C99
-&lt;a href="http://en.wikipedia.org/wiki/Restrict"&gt;restrict&lt;/a&gt; keyword can be very
-helpful with this, in conjunction with const.&lt;/li&gt;
-&lt;/ol&gt;&lt;p&gt;After these simple things, you already have a decent chance the the
-compiler will produce some pretty performant code. These requirements
-are easy, for alignment it’s enough to use a special typedef that
-enforces alignment. If you dynamically allocate memory for these types,
-you have to tell your &lt;code&gt;malloc&lt;/code&gt; variant to give you 16-byte aligned
-memory though. These are the types from threedee-simd:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;vector_size&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="kt"&gt;float&lt;/span&gt; &lt;span class="n"&gt;scalar&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-
-&lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="kt"&gt;mat4_t&lt;/span&gt;
-&lt;span class="p"&gt;{&lt;/span&gt;
-      &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;cols&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;aligned&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;16&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
-
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="kt"&gt;mat4_t&lt;/span&gt; &lt;span class="n"&gt;mat4&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you use these types, any on-stack variables with these types will
-be aligned correctly. What’s more, when you pass these variables to
-function, the compiler can assume they are aligned correctly, which
-makes it easier to vectorize.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/**&lt;/span&gt;
-&lt;span class="cm"&gt; * convert an axis-angle vector to a quaternion&lt;/span&gt;
-&lt;span class="cm"&gt; * angle in radians&lt;/span&gt;
-&lt;span class="cm"&gt; *&lt;/span&gt;
-&lt;span class="cm"&gt; * [axis.x, axis.y, axis.z, angle] =&amp;gt; quaternion&lt;/span&gt;
-&lt;span class="cm"&gt; */&lt;/span&gt;
-&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_shuf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;always_inline&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
-&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_shuf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="n"&gt;vsincos&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsplat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vscalar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
-
-    &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;sincos&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;vshuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsn&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;vcs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;vxyz1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vshuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sincos&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sincos&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-
-&lt;span class="cm"&gt;/**&lt;/span&gt;
-&lt;span class="cm"&gt; * a little bit faster, especially when you have FMA instructions, but&lt;/span&gt;
-&lt;span class="cm"&gt; * less readable too&lt;/span&gt;
-&lt;span class="cm"&gt; */&lt;/span&gt;
-&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_clever&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;__attribute__&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;always_inline&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
-&lt;span class="k"&gt;static&lt;/span&gt; &lt;span class="kr"&gt;inline&lt;/span&gt; &lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="nf"&gt;quat_axisangle_clever&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vec4&lt;/span&gt; &lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;vxyz1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;vsin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vmadd&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsplat&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;axisangle&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;vscalar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;vec&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;M_PI_F&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mf"&gt;0.5f&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;div class="footnotes"&gt;
-  &lt;ol&gt;
-&lt;li id="fn:1"&gt;
-      &lt;p&gt;Also known as “&lt;em&gt;Achting die Kurve!&lt;/em&gt;” &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id="fn:2"&gt;
-      &lt;p&gt;Years later, I encountered &lt;a href="http://www.voidtools.com/"&gt;everything&lt;/a&gt;, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, &lt;em&gt;real&lt;/em&gt; fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/div&gt;</content>
-    <summary type="html">&lt;p&gt;I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
-would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
-allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
-stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
-water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
-Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
-to me…&lt;/p&gt;
-
-</summary>
-  </entry>
-  <entry>
     <id>tag:www.aktau.be,2013-08-13:/2013/08/13/sdl2-2-0-0-released-at-last/</id>
     <title type="html">SDL2 (2.0.0) released at last!</title>
     <published>2013-08-12T22:00:00Z</published>
@@ -727,5 +513,386 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
 
 </summary>
   </entry>
-</feed>
+  <entry>
+    <id>tag:www.aktau.be,2013-08-07:/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</id>
+    <title type="html">A makefile for modern C programming on UNIX-like operating systems</title>
+    <published>2013-08-06T22:00:00Z</published>
+    <updated>2013-08-06T22:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/"/>
+    <content type="html">&lt;p&gt;Looking for an easy to use build tool? Project not yet large enough to
+warrant cmake? Downright scared of autotools (which generates the
+scariest kind of makefiles)? May I present… make!&lt;/p&gt;
 
+&lt;!-- more --&gt;
+
+&lt;p&gt;Most of you have probably seen what a makefile looks like, either from
+another open source project or automatically generated by tools like
+&lt;a href="http://orwelldevcpp.blogspot.de/"&gt;Dev-C++&lt;/a&gt; &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt; or (god forbid)
+autotools. They usually have one thing in common: &lt;strong&gt;they’re horrendous,
+unreadable messes&lt;/strong&gt;. And it makes you never want to touch make with a
+10-foot pole.&lt;/p&gt;
+
+&lt;p&gt;It was just recently that I learned that it didn’t have to be that way,
+make can be small and simple. Let’s start with the simplest of
+makefiles, which compiles a single .c file into an application. Save the
+following into a file with the name Makefile, next to a main.c file.
+&lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
+    gcc -o myapp main.c -I.&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run it, execute:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make myapp
+&lt;span class="c"&gt;# or... absent a specific target, make will&lt;/span&gt;
+&lt;span class="c"&gt;# just execute the first one it finds.&lt;/span&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;make&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;(if you get strange errors when you try this, it’s because you haven’t
+been indenting your lines with a TAB-character. Make explicitly requires
+that lines be indented with tabs or it will throw a hissy fit and spout
+poorly worded error messages from which it is impossible to infer that
+it actually wants tabs.)&lt;/p&gt;
+
+&lt;p&gt;So, what does this do? Make will try to create the target (&lt;strong&gt;myapp&lt;/strong&gt;) by
+checking if the dependencies (&lt;strong&gt;main.c&lt;/strong&gt;) exist or have been modified
+more recently than an already existing &lt;strong&gt;myapp&lt;/strong&gt;. The way to produce the
+target from the dependencies is specified by the rule, in this case the
+&lt;strong&gt;gcc&lt;/strong&gt; invocation. IF &lt;strong&gt;myapp&lt;/strong&gt; already exists and is more recent than
+&lt;strong&gt;main.c&lt;/strong&gt;, nothing happens:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make
+gcc -o myapp main.c -I.
+
+&lt;span class="nv"&gt;$ &lt;/span&gt;make
+make: Nothing to be &lt;span class="k"&gt;done for&lt;/span&gt; &lt;span class="sb"&gt;`&lt;/span&gt;all&lt;span class="err"&gt;'&lt;/span&gt;.
+
+&lt;span class="nv"&gt;$ &lt;/span&gt;edit main.c
+&lt;span class="nv"&gt;$ &lt;/span&gt;make
+gcc -o myapp main.c -I.
+
+&lt;span class="nv"&gt;$ &lt;/span&gt;rm myapp &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make
+gcc -o myapp main.c -I.&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If one of the dependencies is missing and make doesn’t know how to make
+it (with another rule), make will error out.  Likewise if one of the
+steps produces an error, make will stop (unless specifically told to
+ignore the error).&lt;/p&gt;
+
+&lt;p&gt;Put more abstractly, make is just trying to produce output, which look
+like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;&amp;lt;output&amp;gt;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;&amp;lt;dependencies&amp;gt;&lt;/span&gt;
+    &amp;lt;steps to make output from dependencies&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So, in these terms, make’s reasoning becomes clearer: to get &lt;em&gt;output&lt;/em&gt;
+&lt;sup id="fnref:3"&gt;&lt;a href="#fn:3" class="footnote"&gt;3&lt;/a&gt;&lt;/sup&gt;, I need &lt;em&gt;dependencies&lt;/em&gt; and then I need to run &lt;em&gt;steps to make
+output from dependencies&lt;/em&gt;. If the dependencies are lacking, make will
+try to make them if it has a rule for them. Please note that the part
+called output is often also called a target.&lt;/p&gt;
+
+&lt;p&gt;In the case above, &lt;em&gt;main.c&lt;/em&gt; already exists, so it doesn’t need to be made. Lucky for us,
+as we didn’t specify a rule to make &lt;em&gt;main.c&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;In most C projects, there’s a tendency to first generate the object (.o) files and then
+generate the application from them. Doing this presents a nice opportunity to show multiple
+rules working in tandem:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o&lt;/span&gt;
+    gcc main.o -o myapp -I.
+
+&lt;span class="nf"&gt;main.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
+    gcc -c main.c -o main.o&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So now we’re first compiling to object files and then linking them together into
+an executable, great! But what if we want to add another file? Suppose we have
+another file called helper.c that we want to compile and link into our executable,
+we could do this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
+    gcc main.o helper.o -o myapp -I.
+
+&lt;span class="nf"&gt;main.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
+    gcc -c main.c -o main.o
+
+&lt;span class="nf"&gt;helper.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;helper.c&lt;/span&gt;
+    gcc -c helper.c -o helper.o&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that we added helper.o as a new dependency for myapp, and that we specified
+a rule for how to build helper.o from helper.c.&lt;/p&gt;
+
+&lt;p&gt;This works perfectly fine, but it’s getting kind of repetitive. Is there no way we
+can fold the two last rules into one? Basically the only thing that differs
+between them is the filename.&lt;/p&gt;
+
+&lt;p&gt;Sure, but that’s usually where it gets hairy for someone not accustomed to make.
+Make has some special variables you can use inside of a rules to get rid of
+the redundancy, but they’re very (very) poorly named.
+The following four are pretty important, for starters:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;strong&gt;$@&lt;/strong&gt;: the name of the target file (the one before the colon)&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;$&amp;lt;&lt;/strong&gt;: the name of the first (or only) dependency (the first one after the colon)&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;$^&lt;/strong&gt;: the names of all the dependencies (space separated)&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;$&lt;/strong&gt;*: the stem (the bit which matches the % wildcard in a rule definition. (I’m not using this now, but it could be handy someday)&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;These special variables, combined with wildcards (the &lt;strong&gt;%&lt;/strong&gt; symbol in make), allow us
+to compactly eliminate all the redundancy. An example will probably clarify it
+better than a thousand words.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
+    gcc &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt;
+
+&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
+&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
+&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
+    gcc -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There, redundancy solved! We only had to specify the name of the executable, and the object files
+that are necessary to build the executable exactly once. If you expand
+the variables in your head, it also looks quite logical.&lt;/p&gt;
+
+&lt;p&gt;Now there are some tiny tweaks that I do quite often to add
+some commandline overridability:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="c"&gt;# if $CC is not set, use gcc as a sensible default&lt;/span&gt;
+&lt;span class="nv"&gt;CC&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; gcc
+
+&lt;span class="c"&gt;# if $CFLAGS is not set, be very pedantic and compile&lt;/span&gt;
+&lt;span class="c"&gt;# as C11, that should catch some common errors, also&lt;/span&gt;
+&lt;span class="c"&gt;# fortify the source, which is a must for security.&lt;/span&gt;
+&lt;span class="nv"&gt;CFLAGS&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; -Wall &lt;span class="se"&gt;\&lt;/span&gt;
+    -D_FORTIFY_SOURCE&lt;span class="o"&gt;=&lt;/span&gt;2 &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wextra -Wcast-align -Wcast-qual -Wpointer-arith &lt;span class="se"&gt;\&lt;/span&gt;
+    -Waggregate-return -Wunreachable-code -Wfloat-equal &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wformat&lt;span class="o"&gt;=&lt;/span&gt;2 -Wredundant-decls -Wundef &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wdisabled-optimization -Wshadow -Wmissing-braces &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wstrict-aliasing&lt;span class="o"&gt;=&lt;/span&gt;2 -Wstrict-overflow&lt;span class="o"&gt;=&lt;/span&gt;5 -Wconversion &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wno-unused-parameter &lt;span class="se"&gt;\&lt;/span&gt;
+    -pedantic -std&lt;span class="o"&gt;=&lt;/span&gt;c11
+
+&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
+&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
+&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That cranks the warnings up to 11, which is often
+a good thing.&lt;sup id="fnref:4"&gt;&lt;a href="#fn:4" class="footnote"&gt;4&lt;/a&gt;&lt;/sup&gt; It’s a good idea to turn the warnings on when
+you start your project. Solving the deluge of warnings that
+can come out of a mature project when going from no flags
+to very pedantic is not fun.&lt;/p&gt;
+
+&lt;h3 id="debug-and-release-builds"&gt;Debug and release builds&lt;/h3&gt;
+
+&lt;p&gt;Quite often, you’d want to compile in debug mode but be
+able to run&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make release&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you’re done, spitting out a fully optimized and stripped
+executable.&lt;/p&gt;
+
+&lt;p&gt;In make, there are often quite a few ways to achieve the
+same thing, adding to the confusion. For debug and release
+builds, I personally went for something really simple, expanding
+our last example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="c"&gt;# if $CC is not set, use gcc as a sensible default&lt;/span&gt;
+&lt;span class="nv"&gt;CC&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; gcc
+
+&lt;span class="c"&gt;# if $CFLAGS is not set, be very pedantic and compile&lt;/span&gt;
+&lt;span class="c"&gt;# as C11, that should catch some common errors, also&lt;/span&gt;
+&lt;span class="c"&gt;# fortify the source, which is a must for security.&lt;/span&gt;
+&lt;span class="nv"&gt;CFLAGS&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; -Wall &lt;span class="se"&gt;\&lt;/span&gt;
+    -D_FORTIFY_SOURCE&lt;span class="o"&gt;=&lt;/span&gt;2 &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wextra -Wcast-align -Wcast-qual -Wpointer-arith &lt;span class="se"&gt;\&lt;/span&gt;
+    -Waggregate-return -Wunreachable-code -Wfloat-equal &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wformat&lt;span class="o"&gt;=&lt;/span&gt;2 -Wredundant-decls -Wundef &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wdisabled-optimization -Wshadow -Wmissing-braces &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wstrict-aliasing&lt;span class="o"&gt;=&lt;/span&gt;2 -Wstrict-overflow&lt;span class="o"&gt;=&lt;/span&gt;5 -Wconversion &lt;span class="se"&gt;\&lt;/span&gt;
+    -Wno-unused-parameter &lt;span class="se"&gt;\&lt;/span&gt;
+    -pedantic -std&lt;span class="o"&gt;=&lt;/span&gt;c11
+
+&lt;span class="nv"&gt;CFLAGS_DEBUG&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; -g3 &lt;span class="se"&gt;\&lt;/span&gt;
+    -O &lt;span class="se"&gt;\&lt;/span&gt;
+    -DDEBUG
+
+&lt;span class="nv"&gt;CFLAGS_RELEASE&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; -O2 &lt;span class="se"&gt;\&lt;/span&gt;
+    -march&lt;span class="o"&gt;=&lt;/span&gt;native &lt;span class="se"&gt;\&lt;/span&gt;
+    -mtune&lt;span class="o"&gt;=&lt;/span&gt;native &lt;span class="se"&gt;\&lt;/span&gt;
+    -ftree-vectorize
+
+&lt;span class="c"&gt;# the default target is debug&lt;/span&gt;
+&lt;span class="nf"&gt;all&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;debug&lt;/span&gt;
+
+&lt;span class="c"&gt;# when the target is debug,&lt;/span&gt;
+&lt;span class="c"&gt;# add CFLAGS_DEBUG to CFLAGS&lt;/span&gt;
+&lt;span class="nf"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;CFLAGS += $(CFLAGS_DEBUG)&lt;/span&gt;
+&lt;span class="nf"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;myapp&lt;/span&gt;
+
+&lt;span class="c"&gt;# when the target is release,&lt;/span&gt;
+&lt;span class="c"&gt;# add CFLAGS_RELEASE to CFLAGS&lt;/span&gt;
+&lt;span class="nf"&gt;release&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;CFLAGS += $(CFLAGS_RELEASE)&lt;/span&gt;
+&lt;span class="nf"&gt;release&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;myapp&lt;/span&gt;
+
+&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
+&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
+&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;.PHONY&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;debug release&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We’re using &lt;strong&gt;target-specific variables&lt;/strong&gt; to get
+the job done. Notice that we added release and debug
+as phony targets because they don’t generate files
+called release and debug. Also note that both
+target and debug have myapp as a dependency, so
+they will both build the executable we want,
+albeit with different flags.&lt;/p&gt;
+
+&lt;h3 id="taking-into-account-differences-in-operating-systems-or-compilers"&gt;Taking into account differences in operating systems or compilers&lt;/h3&gt;
+
+&lt;p&gt;So now you’ve got your fancy project building in debug and release modes
+and you’re really happy about it, but what when you’ve been developing
+on OSX and want to build &amp;amp; run it on Linux as well? Or what if
+you want to support clang because of its awesome diagnostics?&lt;/p&gt;
+
+&lt;p&gt;With make, you can run some commands to find out what your environment
+looks like and make choices based on that. The long and short of it
+can be found on &lt;a href="http://stackoverflow.com/questions/714100/os-detecting-makefile"&gt;stack overflow&lt;/a&gt;.
+I’ll repaste my own edited version here for posterity:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="cp"&gt;ifeq ($(OS),Windows_NT)&lt;/span&gt;
+    CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D WIN32
+&lt;span class="cp"&gt;    ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D AMD64
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;    ifeq ($(PROCESSOR_ARCHITECTURE),x86)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D IA32
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;else&lt;/span&gt;
+&lt;span class="c"&gt;    # tries to find the compiler name&lt;/span&gt;
+    CC_VERSION :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; --version &lt;span class="p"&gt;|&lt;/span&gt; head -1 &lt;span class="p"&gt;|&lt;/span&gt; cut -f1 -d&lt;span class="s1"&gt;' '&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="c"&gt;    # tries to discern what UNIX-like OS we're running on&lt;/span&gt;
+    UNAME_S :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell uname -s&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="cp"&gt;    ifeq ($(UNAME_S),Linux)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D LINUX
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;    ifeq ($(UNAME_S),Darwin)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D OSX
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+
+&lt;span class="cp"&gt;    ifneq (,$(findstring clang,$(CC_VERSION)))&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D CLANG
+
+&lt;span class="c"&gt;        # -pthread is not necessary when using Clang on Darwin&lt;/span&gt;
+&lt;span class="cp"&gt;        ifneq ($(UNAME_S),Darwin)&lt;/span&gt;
+            CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -pthread
+&lt;span class="cp"&gt;        endif&lt;/span&gt;
+&lt;span class="cp"&gt;    else&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D GCC
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -pthread
+
+&lt;span class="c"&gt;        # at least on OS X 10.7.5, the apple linker does&lt;/span&gt;
+&lt;span class="c"&gt;        # not understand AVX and gcc uses it when you specify&lt;/span&gt;
+&lt;span class="c"&gt;        # -mavx or -march=native and you have a CPU&lt;/span&gt;
+&lt;span class="c"&gt;        # with AVX or better&lt;/span&gt;
+&lt;span class="cp"&gt;        ifeq ($(UNAME_S),Darwin)&lt;/span&gt;
+            CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -mno-avx
+&lt;span class="cp"&gt;        endif&lt;/span&gt;
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+
+    UNAME_P :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell uname -m&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="cp"&gt;    ifeq ($(UNAME_P),x86_64)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D AMD64
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;    ifneq ($(filter %86,$(UNAME_P)),)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D IA32
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;    ifneq ($(filter arm%,$(UNAME_P)),)&lt;/span&gt;
+        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D ARM
+&lt;span class="cp"&gt;    endif&lt;/span&gt;
+&lt;span class="cp"&gt;endif&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It adds define flags so that whenever necessary, it can be used
+to partially define blocks of code based on OS, CPU or compiler.
+Of course I should note that this is best used when there are no
+obvious alternatives, nobody likes &lt;code&gt;#ifdef&lt;/code&gt; soup.&lt;/p&gt;
+
+&lt;p&gt;By the way, I was bashing autotools earlier for being a mess and
+creating unreadable makefiles, but it remains an oft-used toolset for
+cross-platform building.  Is it because of inertia? Well… yes and no.
+Sometimes building on many (very) different operating systems becomes
+quite a chore, and autotools makes some of that, well, easier. It was
+built long ago for the express purpose of generating cross-platform
+makefiles, which is also why it panders to the lowest common denominator
+by not using any of the newer features that modern make has. Which in
+turn generates ugly makefiles.&lt;/p&gt;
+
+&lt;p&gt;There are &lt;a href="http://cgit.freedesktop.org/libva/"&gt;a lot&lt;/a&gt; of
+&lt;a href="http://cgit.freedesktop.org/xorg/driver/xf86-video-intel/"&gt;examples&lt;/a&gt; of
+&lt;a href="http://www.mplayerhq.hu/design7/news.html"&gt;projects&lt;/a&gt; using autotools to
+great effect, even maintaining almost readable autoconf.ac files.  One
+could copy and paste given a bit of effort and after a while you could
+be an autotools adept too (not a wizard, I suppose there are only 3
+people in the world like that).&lt;/p&gt;
+
+&lt;p&gt;A decent alternative is &lt;a href="http://www.cmake.org/"&gt;cmake&lt;/a&gt;, which tends to
+be a bit more readable, and can generate makefiles on UNIX platforms and
+visual studio project files on windows, if that’s your thing.&lt;/p&gt;
+
+&lt;p&gt;But when your project exhibits just slight differences between OS or
+compiler toolchains, there’s no need to take the plunge and migrate to
+autotools, cmake or anything else just yet. We can make do with modern
+make, and still keep it quite readable.&lt;/p&gt;
+
+&lt;p&gt;Oh, and there’s another thing cmake, autotools and its ilk are pretty
+good at: finding dependencies such as libraries. This used to be much
+more important and difficult to do with make. But thanks to the rise of
+&lt;a href="http://www.freedesktop.org/wiki/Software/pkg-config/"&gt;pkg-config&lt;/a&gt;, I
+find that plain make will do fine for smaller projects. An example from
+&lt;a href="https://github.com/aktau/hhpc/blob/master/Makefile"&gt;one of my projects&lt;/a&gt;
+which uses &lt;em&gt;pkg-config&lt;/em&gt; to find where the X11 libraries and headers
+files are located on the target system:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="k"&gt;$(&lt;/span&gt;EXECUTABLE&lt;span class="k"&gt;)&lt;/span&gt;: &lt;span class="k"&gt;$(&lt;/span&gt;OBJECTS&lt;span class="k"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell pkg-config --libs x11&lt;span class="k"&gt;)&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
+
+%.o: %.c
+    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell pkg-config --cflags x11&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class="footnotes"&gt;
+  &lt;ol&gt;
+&lt;li id="fn:1"&gt;
+      &lt;p&gt;Sweet nostalgia, Dev-C++ was my first real IDE, it helped me form my knowledge of C by being easy to use yet not having auto-completion, which cemented a lot of important functions in my muscle memory. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id="fn:2"&gt;
+      &lt;p&gt;Note that I’m describing makefiles for a C project here, but any developer worth her salt should be able to see that it’s applicable to much more. In fact I use make in combination with &lt;a href="https://github.com/jordansissel/fpm"&gt;fpm&lt;/a&gt; to build .deb files for debian/ubuntu, all I have to do is run &lt;code&gt;make deb&lt;/code&gt;. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id="fn:3"&gt;
+      &lt;p&gt;Some might start protesting now, as they’ve seen “outputs” like &lt;strong&gt;install, uninstall, clean, etc.&lt;/strong&gt; that don’t generate files called install, uninstall or clean. The thing is that these targets are special, and they are usually indicated as such by a special target called &lt;strong&gt;.PHONY&lt;/strong&gt;. Make doesn’t need or want to know about the files generated by phony rules. Phony rules will always execute when called, multiple invocations to &lt;code&gt;make install&lt;/code&gt; will, by default, do the same thing. If you forget to add a target such as &lt;strong&gt;install&lt;/strong&gt; to the phony rules, it will still work of course, because your install rules don’t generate a file called install and thus make will keep executing it.  Correctly specifying the phony rules is cleaner though. &lt;a href="#fnref:3" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id="fn:4"&gt;
+      &lt;p&gt;Of course, there are some flags that might be a little bit too pedantic. For example, when doing game development it’s often useful to do some &lt;a href="http://graphics.stanford.edu/~seander/bithacks.html"&gt;bit twiddling&lt;/a&gt;, compare disparate number types and do dirty things with pointers.  In that case it might not be worth it or even possible to prevent all the warnings by casting to the appropriate type. In that case, feel free to disable some flags. &lt;a href="#fnref:4" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+    <summary type="html">&lt;p&gt;Looking for an easy to use build tool? Project not yet large enough to
+warrant cmake? Downright scared of autotools (which generates the
+scariest kind of makefiles)? May I present… make!&lt;/p&gt;
+
+</summary>
+  </entry>
+</feed>
