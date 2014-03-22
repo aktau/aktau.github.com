@@ -75,9 +75,10 @@ The last few fiction books I read were:
 That said I enjoy books related to development as well, some that
 I plan to read or am reading right now:
 
-- **Graphics Programming Black Book**, *by Michael Abrash*
+- **[Graphics Programming Black Book](http://www.jagregory.com/abrash-black-book/)**, *by Michael Abrash*
 - **[SICP](https://github.com/sarabander/sicp-pdf), Structure and Interpretation of Computer Programs**, *by Abelson, Sussman, and Sussman*
 - **[HTDP](http://www.ccs.neu.edu/home/matthias/HtDP2e/), How to Design Programs**, *by Felleisen, Findler, Flatt and Krishnamurthi*
+- **[PiL](http://www.lua.org/pil/), Programming in Lua, 3rd ed.**, *by Roberto Ierusalimschy*
 
 # Copyright
 
