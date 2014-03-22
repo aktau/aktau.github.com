@@ -38,4 +38,9 @@ function hw() {
 }
 ~~~
 
+Research
+--------
+
+1. Google I/O, WebGL optimized drawing of 10000 objects - http://www.youtube.com/watch?v=rfQ8rKGTVlg
+
 [^1]: Not really true, there is an extension called [ANGLE_instanced_arrays](http://blog.tojicode.com/2013/07/webgl-instancing-with.html) which allows you to do instancing even in WebGL.
