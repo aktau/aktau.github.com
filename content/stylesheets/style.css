@@ -16,9 +16,16 @@ h2 {
 }
 
 h3 {
-    font-size: 24px;
+    font-size: 30px;
     line-height: 25px;
     margin-bottom: 10px;
+    font-weight: bold;
+}
+
+h4 {
+    font-size: 26px;
+    line-height: 20px;
+    margin-bottom: 5px;
     font-weight: bold;
 }
 
@@ -31,6 +38,10 @@ p, .read-more {
     line-height: 28px;
     margin-bottom: 35px;
     text-rendering: optimizeLegibility;
+}
+
+.math, p .math {
+    font-size: 14px;
 }
 
 aside {
