@@ -49,3 +49,8 @@ map**.
 #!javascript
 // code here
 ~~~
+
+Research
+--------
+
+1. http://www.gamedev.net/topic/567076-difference-between-bump-mapping-and-normal-mapping/
