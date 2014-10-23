@@ -1,0 +1,923 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Prototype engine, implementing simple physics</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="in this article I try to explain my first foray into game physics">
+        <meta name="keywords" content="games, physics">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="Prototype engine, implementing simple physics">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="http://www.aktau.be/draft/2014/02/21/prototype-engine-implementing-simple-physics/">
+
+        <!-- Google Fonts embed code -->
+        <script>
+            (function() {
+                var link_element = document.createElement("link"),
+                    s = document.getElementsByTagName("script")[0];
+                if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+                    link_element.href = "http:";
+                }
+                link_element.href += "//fonts.googleapis.com/css?family=EB+Garamond:400";
+                link_element.rel = "stylesheet";
+                link_element.type = "text/css";
+                s.parentNode.insertBefore(link_element, s);
+            })();
+        </script>
+        <noscript>
+            <!-- don't leave noscript users out in the cold -->
+            <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
+        </noscript>
+
+        
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        
+
+        <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+    </head>
+    <body>
+        <nav>
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive/">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf" title="Résumé">Curriculum Vitae</a></li>
+                <li><a href="/contact/" title="Personal information">About &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
+            </ul>
+            -->
+        </nav>
+
+        <main id="content">
+            
+    <div class="post">
+        <h1>Prototype engine, implementing simple physics</h1>
+        <aside>February 21, 2014</aside>
+
+        <article>
+            <p>Game physics, a harsh mistress.</p>
+
+<!-- more -->
+
+<h2 id="newtonian-physics">Newtonian physics</h2>
+
+<p>Most people will be familiar with these equations:</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+F(t) = m \cdot a(t) \\
+v(t) = \int{a(t)~dt} \\
+s(t) = \int{v(t)~dt} \\
+\end{align}
+</script>
+
+<p>Sometimes the force is known, sometimes the acceleration is known (e.g.:
+gravity), other times you want to specify the velocity. From all these
+things, the position at some point in time needs to be calculated.</p>
+
+<p>There are several ways to calculate the position if force or
+acceleration are known, ranging from the exact analytical solution to
+various numerical approximations. In most game engines, numerical
+approximations are used, but it is <a href="http://physicsforgames.blogspot.de/2010/02/kinematic-integration.html">possible to mix
+both</a>
+to get the most accurate result possible. It’s not
+common is because it’s not usually necessary for games, the accuracy of
+a good numerical integrator is good enough, even when an analytical
+solution could be worked out.</p>
+
+<p>In this article, we’ll discuss some analytical solutions as well as a
+few well-known numerical integrators along with their pro’s and con’s as
+they relate to game development.</p>
+
+<h3 id="the-joys-of-constant-acceleration">the joys of constant acceleration</h3>
+
+<p>In the case of constant force or acceleration, things can be simplified
+quite a bit. Gravity is a good example of this, as it is – for our
+purposes – constant in time and space. This independence of time means
+that the equations above become trivial to solve analytically.</p>
+
+<p>With constant acceleration, the velocity becomes:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+v(t) =& \int{a~dt} \\
+     =& v_0 + a \cdot t
+\end{align}
+ %]]></script>
+
+<p>Note that even though the acceleration is constant, velocity is not.
+Next, we can use the explicit formula of the velocity to get the
+position:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+s(t) =& \int{v(t)~dt} = \int{(v_0 + at)~dt} \\
+     =& s_0 + v_{0}t + a\frac{t^2}{2}
+\end{align}
+ %]]></script>
+
+<p>So if the cumulative force acting on an object is constant, we could use
+a formula like this instead of numerical methods, and it would always be
+100% accurate. Even if the force is not always constant, this method
+could be used for the intervals in which it <em>is</em> constant.</p>
+
+<h2 id="numerical-integration">Numerical integration</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Numerical_integration">Numerical
+integration</a> is the
+process of integrating in discrete steps instead of trying to work out
+an analytic solution. There are several reasons for doing this:</p>
+
+<ul>
+  <li>The acceleration is known but not a constant, making an analytic solution
+difficult or unwieldy.</li>
+  <li>The acceleration is only known at the current time, making an analytic
+solution impossible.</li>
+  <li>The cumulative force is a combination of many different forces for
+which an analytic solution is known, but combining them sounds like a
+chore.</li>
+  <li>The programmer is too lazy or prefers the simplicity of having a
+“one size fits all” approach: numerical integration for everything.</li>
+</ul>
+
+<p>It’s useful to note that to get the position, acceleration has to be
+integrated twice. Since all integration methods that I know of just
+integrate once (save for Verlet), this can lead to naming confusion.
+It’s entirely possible to use forward Euler for integrating velocity and
+backward Euler for position (this is called semi-implicit Euler). Or
+forward Euler for integrating acceleration, but Runge-Kutta 4 for
+integrating velocity.  That said, when gamedevs talk about using RK4,
+they mean that both velocity and position are calculated with RK4. I’m
+not entirely sure what the effect would be of, for example, using a
+first-order method for velocity and a second-order method for position.
+My best guess is that the total would degrade to first-order. Yet
+another thing for the todo list…</p>
+
+<p>To add to the confusion, many methods go by several different names, and
+have various disparate formulations. These don’t usually look like the
+same thing to the naked eye. That’s why I will note under each method
+any alternative names that I know of. Beware though, it’s entirely
+possible that I’ve made a mistake. The amount of paradoxical statements
+on the internet concerning which method is what is sufficient drive one
+to drink. Corrections are most welcome, after all I wrote this article
+to try to get a handle on things in the first place.</p>
+
+<h3 id="timestep-size">Timestep size</h3>
+
+<p>In general, <a href="http://beltoforion.de/pendulum_revisited/pendulum_revisited_en.html">every method of numerical integration has an ideal
+stepsize</a>.
+The higher the order of the method, the larger you can (and should) make
+the step size. This also offsets the added calculation costs of
+higher-order methods.</p>
+
+<h3 id="static-or-dynamic-timestep">Static or dynamic timestep</h3>
+
+<p>Glenn Fiedler has famously written about <a href="http://gafferongames.com/game-physics/fix-your-timestep/">the benefits of a static
+timestep</a>.
+Some methods require a static timestep (Verlet? Where did I read this?
+It doesn’t make sense at first glance).</p>
+
+<h3 id="energy-conservation">Energy conservation</h3>
+
+<p>Some numerical integration methods lose energy (e.g.: implicit Euler), others
+add it (e.g.: explicit Euler) and others still keep it more or less
+table (e.g.: semi-implicit Euler). Such an energy-conserving integrator
+is often called <em>symplectic</em>. The two properites are not entirely
+synonymous<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, but often sufficiently so.</p>
+
+<p>Many argue that for games, it’s not really necessary to have a
+symplectic integrator. Usually there is damping force being applied by
+the programmer already (friction, drag, …). This will often keep
+energy-adding integrators in check, like a counterbalance. For
+energy-losing integrators, their energy losses get lost in the noise of
+the drag/friction forces.</p>
+
+<p>However, for some types of simulations, such as planetary systems or
+molecular simulations, it’s often useful to have energy conservation.
+Otherwise planets can drop out of orbit or slingshot into space. A good
+illustration of this is one of the earliest computer games ever: <a href="http://blogs.mathworks.com/cleve/2012/06/19/symplectic-spacewar/">Space
+War</a>,
+which – perhaps unknowingly – used a symplectic integrator to good
+effect.</p>
+
+<h3 id="clamping">Clamping</h3>
+
+<p>In games, stability is often enforced by <em>clamping</em> the velocity. This
+might not provide the most physically accurate results, but can look
+good regardless. To quote the famouse gamedev saying: “when it looks
+right, it is right.” Clamping even allows the use of explicit Euler
+without fear of everything exploding.</p>
+
+<h3 id="methods">Methods</h3>
+
+<p>In the following discussion, it is always assumed that the values of
+acceleration, velocity and position of step <em>t</em> and before are known,
+and that we need to calculate the values of step <em>t+1</em>. The time
+difference passed to the integration function is $ \Delta t $.</p>
+
+<p>Most methods presented here only require values from the last step, but
+some require keeping around values from earlier iterations as well.</p>
+
+<h4 id="explicit-euler-first-order">Explicit Euler (first-order)</h4>
+
+<p><strong>Alternative name</strong>: forward Euler</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+v_{t+1} = v_t + a_t \Delta t \\
+s_{t+1} = s_t + v_t \Delta t
+\end{align}
+</script>
+
+<p>The explicit Euler method is one of those which are very intuitive and
+simple. Sadly, it’s also one of the worst numerical integrators.</p>
+
+<p>Note that the calculation of the position and velocity of the next step
+are independent of each other. The position of the next step only uses
+the velocity of the current step for its update. Both acceleration and
+velocity are being integrated by with explicit Euler.</p>
+
+<p>There’s <a href="http://en.wikipedia.org/wiki/Euler_method#Derivation">a couple of ways to derive Euler
+integration</a>.</p>
+
+<p>A serious disadvantage of explicit Euler is that it adds energy into the
+system. Meaning that if no drag or friction is added by the programmer,
+the system will become unstable over time.</p>
+
+<h4 id="implicit-euler-first-order">Implicit Euler (first-order)</h4>
+
+<p><strong>Alternative name</strong>: backward Euler</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+v_{t+1} = v_t + a_{t+1} \Delta t \\
+s_{t+1} = s_t + v_{t+1} \Delta t
+\end{align}
+</script>
+
+<p>Some articles propose the <a href="http://en.wikipedia.org/wiki/Backward_Euler_method">implicit Euler
+method</a> when related
+to gamedev as being similar to the explicit Euler method save for the
+fact that it uses the velocity of the next step to update the position.
+This approach is <a href="http://www.gamedev.net/topic/378497-difference-between-euler-and-forward-explicit-euler/">NOT the implicit Euler
+method</a>
+but the semi-implicit or symplectic Euler method, described later.</p>
+
+<p>The equations listed above cannot be used directly in a program, as the
+acceleration at time <em>t+1</em> is not available at time <em>t</em>. In general it’s
+more difficult to solve implicit numerical integration method: one needs
+to solve a system of equations. I’m not going to discuss how to do that
+here but
+<a href="https://code.google.com/p/opencloth/source/browse/trunk/OpenCloth_ImplicitEuler/OpenCloth_ImplicitEuler/main.cpp">OpenCloth</a>
+has some example implementations.</p>
+
+<p>In contrast to explicit Euler, implicit Euler dissipates energy from the
+system. This makes it look like there’s some sort of friction, which is
+usually what the game developer wants anyway.</p>
+
+<h4 id="semi-implicit-euler-first-order">Semi-Implicit Euler (first-order)</h4>
+
+<p><strong>Alternative name</strong>: symplectic Euler, Euler-Cromer method, sometimes
+called Newton-Störmer-Verlet (e.g.: in
+[<a href="https://web.archive.org/web/20120713004111/http://wiki.vdrift.net/Numerical_Integration#Newton-Stormer-Verlet_.28NSV.29_.2F_Symplectic_Euler_.2F_Euler.E2.80.93Cromer_algorithm">1</a>]
+and
+[<a href="http://encinographic.blogspot.de/2013/05/simulation-class-euler-cromer-time-step.html">2</a>])
+althrough I’ve also seen this name applied to regular Verlet, which is
+discussed later (to ascertain I’d have to check Newton’s Principia).</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+v_{t+1} = v_t + a_t \Delta t \\
+s_{t+1} = s_t + v_{t+1} \Delta t
+\end{align}
+</script>
+
+<p>The name semi-implicit Euler is perhaps poorly chosen as it is an
+explicit method. This is easy to see by the fact that we don’t have to
+solve a system of equations to use it.</p>
+
+<p>I believe the naming is motivated by the fact that the acceleration is
+integrated with the explicit Euler method, but the position is
+integrated with the implicit Euler method. So the only difference with
+explicit Euler is that the velocity of the next step is used, instead of
+the velocity of the current step.</p>
+
+<p>With explicit Euler, the velocity and position could be calculated in
+parallel. However for semi-implicit Euler the velocity has to be
+calculated first, as it will be used for the position.</p>
+
+<p>Semi-implicit Euler is a symplectic integrator, which can be a very
+positive trait and makes it preferred over explicit Euler as a
+first-order method.</p>
+
+<p>This is a very popular integrator in game engines because it is very
+cheap to calculate yet shows good properties in general. It is the best
+first-order method I know of.</p>
+
+<h4 id="verlet-second-to-fourth-order">Verlet (second-to-fourth-order)</h4>
+
+<p><strong>Alternative name</strong>: explicit central difference method,
+Newton-Störmer-Verlet (possibly wrong as I’ve seen the name applied to
+semi-implicit Euler as well)</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+s_{t+1} = 2s_t - s_{t-1} + a_{t} \Delta t^2
+\end{align}
+</script>
+
+<p>This method calculates the position from the two last positions and the
+current acceleration, omitting the velocity. Of course, the velocity at
+some point can be estimated by <a href="http://en.wikipedia.org/wiki/Verlet_integration#Computing_velocities_.E2.80.93_St.C3.B6rmer.E2.80.93Verlet_method">subtracting the last two positions and
+dividing by the timestep
+taken</a>:</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+\tilde{v}{}_{t+1} = \frac{s_{t+1} - s_t}{2}
+\end{align}
+</script>
+
+<p>The absence of velocity makes it difficult to use Verlet integration
+when the acceleration is dependent on velocity, such as with dampers.
+If that’s the case, it’s probably better to use Velocity Verlet, there’s
+a <a href="http://gamedev.stackexchange.com/a/41917/10164">good explanation on gamedev
+overflow</a> and it will be
+discussed later in this article.</p>
+
+<p>In this formulation, <a href="http://www.cs.uu.nl/docs/vakken/mgp/lectures/lecture%205%20Numerical%20Integration.pdf">the position at <em>t-1</em> is
+required</a>,
+so it has to be kept around from earlier iterations. If it’s not
+available yet – for example the simulation has just started – use
+another integrator in the first step (RK4, …) and switch to Verlet
+when there’s enough data.</p>
+
+<p>It has been reported that the accuracy of these starting conditions has
+a large effect on the global accuracy of the method. So it’s a good idea
+to use a locally accurate integrator like RK4 for the first iteration.
+Alternatively, there’s a modified first Verlet step that only requires
+the first position, velocity and acceleration (basically a second-degree
+Taylor polynomial):</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+s_{1} = s_0 + v_0 \Delta t + \frac{a_0}{2} \Delta t^2
+\end{align}
+</script>
+
+<p>The verlet method is symplectic, so it does a good job of conserving
+energy. It is also time-reversible, which means it can be ran backwards
+and you will get the same results, history can be rewound! Especially
+the last one can be a very useful property in gamedev.</p>
+
+<p>It is common belief that Verlet is a good choice when it comes to
+<a href="http://en.wikipedia.org/wiki/Verlet_integration#Constraints">implementing constraints between
+objects</a>.
+Because you can set the position yourself, and let the simulation derive
+the velocities instead of fiddling around with the velocities manually.
+How to make good use of this effect is discussed
+<a href="http://blog.2and2.com.au/?p=883">here</a>, another great example is <a href="http://codepen.io/suffick/pen/KrAwx">this
+tearable cloth simulation</a>.</p>
+
+<p>This ease of specifying constraints is one of the prime reasons why
+Verlet is preferred for physics based games. Add to that the fact that
+it’s also very cheap to calculate and you have a winner. Also look at
+this cool way of <a href="http://gamedevelopment.tutsplus.com/tutorials/simulate-fabric-and-ragdolls-with-simple-verlet-integration--gamedev-519">simulating ragdolls with
+Verlet</a>
+and the <a href="http://www.gotoandplay.it/_articles/2005/08/advCharPhysics.php">article it is based on
+(Jakobsen)</a>.</p>
+
+<p>Some will have noticed that Verlet is classified as a variable-order
+method. <a href="http://archive.gamedev.net/archive/reference/programming/features/verlet/default.html">Under the right conditions, Verlet integration can be a
+fourth-order
+integrator</a>,
+which is incredible (I have not verified this myself, but have
+encountered it twice on the internet). Sadly I haven’t been able to find
+what all of those conditions are. However, I’m sure that one of them is
+a uniform timestep. So if you want your Verlet integrator to perform
+better, use a constant timestep. If the conditions are not met, Verlet
+definitely becomes a second-order symplectic integrator, which is still
+good.</p>
+
+<h4 id="velocity-verlet-second-to-fourth-order">Velocity Verlet (second-to-fourth-order)</h4>
+
+<p><strong>Alternative name</strong>: very similar but not identical to <a href="http://en.wikipedia.org/wiki/Leapfrog_integration">leapfrog
+method</a>, a good
+explanation of the subtle differences
+<a href="http://young.physics.ucsc.edu/115/leapfrog.pdf">here</a>.</p>
+
+<p>An even <a href="http://physics.bu.edu/py502/lectures3/cmotion.pdf">better
+explanation</a>, which
+also explains that the leapfrog method is potentially cheaper to
+calculate and has less error in its velocity step, though the error for
+position is the same.</p>
+
+<!-- $$
+\begin{align}
+v_{t+1} =& v_t + a_{t+\frac{1}{2}} \Delta t \approx v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =& s_t + v_{t+\frac{1}{2}} \Delta t \approx s_t + \frac{v_t + v_{t+1}}{2} \Delta t
+\end{align}
+$$ -->
+
+<p>A formulation of Velocity Verlet as found in
+[<a href="http://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet">1</a>],
+[<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">2</a>]
+and [<a href="http://cds.cern.ch/record/331170/files/9707008.pdf">3</a>]:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =& s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
+        =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
+\end{align}
+ %]]></script>
+
+<p>There’s a simplification when the acceleration is constant:
+http://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
+(he also suggest a way of calculating that’s cheap). This answer is a
+<em>MUST</em> read, because it also suggests a variant with a correction which
+doesn’t evaluate acceleration an extra time but does give extra
+accuracy. Awesome.</p>
+
+<p>I’ve encountered one <a href="https://web.archive.org/web/20120713004111/http://wiki.vdrift.net/Numerical_Integration#Basic_Verlet.2FVelocity_Verlet">alternative
+formulation</a>
+that – near as I can tell – is not identical to the formulation above.
+It looks like <a href="http://en.wikipedia.org/wiki/Leapfrog_integration">leapfrog
+integration</a>, which
+is a close relative of Velocity Verlet.</p>
+
+<p><em>TODO</em>: For constant acceleration, I’ve verified that Improved Euler and
+Velocity Verlet are the same. But is this also the case for non-constant
+accelerations? On first inspection it looks like it won’t be the same,
+Velocity Verlet seems to be have a more accurate velocity calculation
+(it averages with the trapezoidal rule instead of using a forward Euler
+step like imrpoved Euler).</p>
+
+<p>Sometimes the Verlet method is also formulated as the <em>Velocity Verlet</em>
+method, which explicitly calculates the velocity as opposed to regular
+Verlet.  It is <a href="http://www.physics.udel.edu/~bnikolic/teaching/phys660/numerical_ode/node5.html">mathematically
+identical</a>
+to regular Verlet but minimizes roundoff error, is self-starting and
+keeps no memory from past steps, which is why it is sometimes preferred.</p>
+
+<p><em>NOTE</em>: in <a href="http://www.richardlord.net/presentations/physics-for-flash-games">this
+presentation</a>
+it seems like there is a large stability difference between
+Time-Corrected Verlet and Velocity Verlet (improved Euler). Perhaps
+because of different ways of calculating the initial conditions, or the
+time correction. This should definitely be checked since I could find no
+flaw in the aforementioned proof of mathematical identity, something
+smells funny…</p>
+
+<p>Velocity Verlet – like regular Verlet – has great accuracy. In this
+formulation it’s easier to see why this might be the case. It averages
+two accelerations to find the velocity (using the <a href="http://en.wikipedia.org/wiki/Trapezoidal_rule">trapezoidal
+rule</a>). This is a major
+boost to accuracy over just using one acceleration sample like the
+first-order methods. Then there’s another (smaller) accuracy improvement
+by correcting the position with the acceleration in addition to the
+velocity. It’s smaller because it’s multiplied by the square of the
+timestep, which is almost always going to be a very small number.</p>
+
+<p>Some may have noticed that this method is mathematically identical to
+the exact solution for the case of constant acceleration. So no matter
+what the timestep, Verlet will determine the position of a constantly
+accelerated object exactly. Even for non-constant acceleration Verlet
+performs quite well – definitely enough so for game physics – though
+it is not exact.</p>
+
+<p>Note that the acceleration from the next step is needed to calculate the
+velocity. If the acceleration depends on the position (such as for
+spring forces), then the position can be calculated first, after which
+the acceleration for that position can be queried:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+\tilde{s}{}_{t+1} =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2} \\
+a_{t+1} =& acceleration(\tilde{s}{}_{t+1}) \\
+\end{align}
+ %]]></script>
+
+<p>This would provide the next acceleration to calculate the velocity. When
+then velocity for the next step is known, we can use it to correct the
+position value:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =& s_t + v_{t+1} \Delta t
+\end{align}
+ %]]></script>
+
+<p>This approach won’t work if the acceleration also depends on the
+velocity, of course. The correction is <a href="https://web.archive.org/web/20120713004111/http://wiki.vdrift.net/Numerical_Integration#Newton-Stormer-Verlet_.28NSV.29_.2F_Symplectic_Euler_.2F_Euler.E2.80.93Cromer_algorithm">sometimes
+omitted</a>,
+at some point I’m going to test whether the correction actually improves
+things or not (perhaps an average between both would be better? I’d also
+try dividing the contribution of the midpoint acceleration in the
+corrected position by two, to get a similar “factor” as the first
+estimate with hopefully more accuracy).</p>
+
+<p>You can keep thecalculated acceleration at step <em>t+1</em> around for the
+next iteration, which means there only needs to be one calculation of
+force/acceleration per Verlet iteration. This makes Verlet integration
+almost as cheap as any first-order method wile being way more accurate.
+Seen in this light, there’s no real excuse not to use it.</p>
+
+<h4 id="time-corrected-verlet-second-to-fourth-order">Time-corrected Verlet (second-to-fourth-order)</h4>
+
+<p>As described <a href="http://lonesock.net/article/verlet.html">here</a>, the Verlet
+and Velocity Verlet methods work best with a fixed timestep. So if
+you’re getting bad results it might be because your timesteps are not
+uniform. When it’s impossible to <a href="http://gafferongames.com/game-physics/fix-your-timestep/">fix your
+timestep</a>,
+there’s a slight variation on Verlet integration you can use:</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+s_{t+1} = s_t + (s_t + s_{t-1}) \frac{\Delta t_t}{\Delta t_{t-1}} + a_{t} \Delta t^2
+\end{align}
+</script>
+
+<p>It’s easy to see that this method reduces to regular Verlet in case the
+timesteps are in fact constant.</p>
+
+<h4 id="newton-strmer-verlet-nsv-second-order">Newton-Störmer-Verlet (NSV) (second-order)</h4>
+
+<p><strong>Alternative name</strong>: leapfrog method (don’t think so…)</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+s_{t+\frac{1}{2}} = s_t + \frac{v_t}{2} \Delta t \\
+v_{t+1} = v_t + a_{t+\frac{1}{2}} \Delta t \\
+s_{t+1} = s_{t+\frac{1}{2}} + \frac{v_{t+1}}{2} \Delta t
+\end{align}
+</script>
+
+<p>Alternative
+<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">formulation</a>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =& s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
+        =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
+\end{align}
+ %]]></script>
+
+<p>A middle ground between explicit Euler and semi-implicit Euler.</p>
+
+<p>The <a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pd://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">NSV method is symplectic
+</a>.</p>
+
+<h4 id="midpoint-method-second-order">Midpoint method (second-order)</h4>
+
+<p>The main idea behind the midpoint method is that the derivative at the
+midpoint is a better estimate of the “true” derivative than the
+derivative at either the beginning (explicit Euler) or the end (implicit
+Euler) of the time step. An in-depth explanation can be found
+<a href="http://www.darwin3d.com/gamedev/articles/col0499.pdf">here</a>.</p>
+
+<p>Of course you don’t have the exact midpoint, so you estimate that too by
+taking a half-step. Then you compute the derivative at the midpoint and
+use this to take the full step.</p>
+
+<h4 id="heuns-method-first-to-second-order">Heun’s method (first-to-second-order)</h4>
+
+<p><strong>Alternative names</strong>: improved Euler, modified Euler</p>
+
+<script type="math/tex; mode=display">
+\begin{align}
+v_{t+1} = v_t + a_t \Delta t \\
+s_{t+1} = s_t + (\frac{v_t + v_{t+1}}{2}) \Delta t
+\end{align}
+</script>
+
+<p><strong>TODO</strong>: this does not appear to be the true Heun method (<em>or</em> improved
+Euler is different). Someone has suggested that Heun is a true RK2
+because heun also takes the midpoint velocity each time instead of the
+version mentioned above, which does just forward Euler every time. This
+would not mean that you would need to evaluate acceleration twice for
+this midpoint version, as you could just pass in the acceleration from
+the last step as an optimization.</p>
+
+<p>Heun’s method is a refinement of explicit Euler. It looks like another
+combination  of implicit and explicit Euler. The estimated derivative of
+the position is the average of the current velocity (like explicit
+Euler) and the velocity of the next step (like implicit Euler).</p>
+
+<p>Alternatively, one could say the the acceleration is being integrated
+with an explicit Euler step, while the velocity is integrated with some
+sort of <a href="http://en.wikipedia.org/wiki/Trapezoidal_rule_(differential_equations)">trapezoidal
+rule</a>.
+The trapezoidal rule is usually implicit, but it’s explicit in this
+instance because we made an estimate of the velocity at <em>t+1</em> with
+explicit Euler.</p>
+
+<p>The trapezoidal rule for single integration is a second-order Runge Kutta
+method, just like the midpoint method. However, because the first
+integration step happens with explicit Euler, which is first-order, I
+believe the total result will be first-order. This needs to be verified
+though.</p>
+
+<p>Often, improved Euler is defined as using the trapezoidal or midpoint
+rule for <em>both</em> velocity and position. In that case, the improved Euler
+method is identical to Velocity Verlet (easy to work out yourself). This
+is confusing indeed, but at least now you’ll know how to recognize it.
+It gets even more confusing when some example code assumes that
+acceleration is locally constant, which makes even the naive improved
+Euler as specified above and Velocity Verlet identical.</p>
+
+<p>In all events, (Velocity) Verlet integration can be made almost as cheap
+as this version of improved Euler and yields far better results. It is
+better to use Verlet instead.</p>
+
+<p><em>NOTE</em>: <a href="http://books.google.be/books?id=wJAOj6fG4q8C&amp;lpg=PR2&amp;pg=PA136#v=onepage&amp;q&amp;f=false">Some
+authors</a>
+change the usage of the trapezoidal rule with the <a href="http://en.wikipedia.org/wiki/Midpoint_method">midpoint
+rule</a>. Yielding another
+version of improved Euler with similar characteristics. When you see the
+name Heun’s method attached to it, it definitely refers to the
+trapezoidal version and not the midpoint one.</p>
+
+<p>The midpoint version could look like this:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\begin{align}
+v_{t+\frac{1}{2}} =& v_t + a_t \frac{\Delta t}{2} \\
+s_{t+1} =& s_t + v_{t+\frac{1}{2}} \Delta t \\
+v_{t+1} =& v_t + a_t \Delta t
+\end{align}
+ %]]></script>
+
+<h4 id="runge-kutta-4">Runge Kutta 4</h4>
+
+<p>When looking closely at <a href="http://en.wikipedia.org/wiki/Simpson's_rule#Averaging_the_midpoint_and_the_trapezoidal_rules">Simpson’s
+rule</a>,
+it becomes clear where one of the possible derivations for Runge-Kutta 4
+lies.</p>
+
+<p>The works!</p>
+
+<p>As mentioned on Stack Overflow, It is <a href="http://stackoverflow.com/a/2770564/558819">slightly
+dissipative</a>. If you don’t
+want that, then perhaps Verlet integration will suit your needs better.</p>
+
+<p>Note that RK4 as commonly specified is <em>NOT</em> symplectic and will lose
+energy after a while. As mentioned before, this is usually not a big
+deal. There are symplectic higher order method, but I haven’t been able
+to track down a good description of them and they don’t seem to be
+widely used for games. David Whysong has made a few <a href="http://www.projectpluto.com/symp.cpp">symplectic
+higher-order integrators</a> (<a href="https://gist.github.com/aktau/9195266">Gist
+mirror</a>) available as
+open-source.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In essence, both Verlet and RK4 methods seem to be good, each with their
+own <a href="http://gamedev.stackexchange.com/a/33835/10164">pro’s and con’s</a>.</p>
+
+<p>If everything just coasts along in a linear way, it wouldn’t matter what
+method you used, but when something interesting (i.e. non-linear)
+happens, you need to look more carefully, either by considering the
+non-linearity directly (verlet) or by taking smaller timesteps (rk4).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Integrator</th>
+      <th>Order</th>
+      <th>Energy conserving?</th>
+      <th>Best order-n method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Implicit Euler</td>
+      <td>1</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Explicit Euler</td>
+      <td>1</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Semi-Impl. Euler</td>
+      <td>1</td>
+      <td><strong>Yes</strong></td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Heun</td>
+      <td>2</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Midpoint</td>
+      <td>2</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Verlet (+ related)</td>
+      <td>2-4</td>
+      <td><strong>Yes</strong></td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Runge Kutta 4</td>
+      <td>4</td>
+      <td>No</td>
+      <td>Yes <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="unanswered-questions">Unanswered questions</h2>
+
+<p>There’s two big topics in game physics that have yet to be covered:
+rotation, collisions and how to handle fast or really small objects like
+bullets. Until I get the time to write about them, there are some good
+resources on the internet about them:</p>
+
+<ol>
+  <li>
+<a href="http://buildnewgames.com/gamephysics/">Physics for Games by Burak
+Kanber</a>, the easiest explanation
+of rotation and collisions in game physics I’ve seen yet. Als mentions
+contiuous integration for fast or small objects.</li>
+  <li><a href="http://gamedev.stackexchange.com/questions/32611/what-is-the-best-way-to-handle-simultaneous-collisions-in-a-physics-engine">SO: best way to handle simultaneous
+collisions</a></li>
+  <li>
+<a href="http://eudiers.free.fr/Masters_Project/Physics_Paper.pdf">An extensive paper written by a Master’s
+student</a> which
+compiles some common game physics knowledge in the gamedev community. It
+talks about simulation and collisions and even has a chapter about
+deformable bodies.</li>
+  <li><a href="http://www.reddit.com/r/gamedev/comments/1xl9rq/verlet_physics_collision_etc/">A reddit comment about collision handling, broad- and
+narrowphase</a></li>
+</ol>
+
+<h2 id="a-more-advanced-implementation">A more advanced implementation</h2>
+
+<p>The <a href="http://physicsforgames.blogspot.de/2010/02/kinematic-integration.html">kinematic
+integrator</a>,
+is just a plain good idea, use it or lose it!</p>
+
+<h2 id="research">Research</h2>
+
+<ol>
+  <li><a href="http://www.richardlord.net/presentations/physics-for-flash-games">Physics for flash games</a></li>
+  <li><a href="http://gamedev.stackexchange.com/questions/25300/why-use-runge-kutta-integration-over-improved-euler-integration#">SO: why use RK4 over improved Euler?</a></li>
+  <li><a href="http://www.pagines.ma1.upc.edu/~susin/files/AdvancedCharacterPhysics.pdf">Advanced Character Physics (Jakobsen, PDF)</a></li>
+  <li><a href="http://www.cs.rpi.edu/~cutler/classes/advancedgraphics/F05/assignments/final_projects/mccarj7/index.html">Comparison of Simulation Techniques using Particle Systems</a></li>
+  <li><a href="http://lonesock.net/article/verlet.html">Simple time-corrected Verlet</a></li>
+  <li><a href="https://web.archive.org/web/20120713004111/http://wiki.vdrift.net/Numerical_Integration">Comparison of different integrators</a></li>
+  <li><a href="http://physicsforgames.blogspot.de/2010/02/kinematic-integration.html">Combining numeric and exact integrators, for variable and constant forces respectively </a></li>
+  <li><a href="http://beltoforion.de/pendulum_revisited/pendulum_revisited_en.html">The pendulum revisited, comparison of global and local error of numerical integration methods</a></li>
+  <li><a href="http://books.google.be/books?id=CCVenzOGjpcC&amp;pg=PA236&amp;lpg=PA236&amp;dq=is+verlet+integration+4th+order&amp;source=bl&amp;ots=pbx2CogVJE&amp;sig=TPUUgZ1vUczVQCKzdYMNW35Lh_I&amp;hl=en&amp;sa=X&amp;ei=KMELU5PNB8HWtQam5oD4Bg&amp;ved=0CFwQ6AEwBg#v=onepage&amp;q=is%20verlet%20integration%204th%20order&amp;f=false">OpenGL insights, implementing tearable cloth on the GPU with Verlet</a></li>
+</ol>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+
+      <p>Scrolling down in <a href="http://www.reddit.com/r/programming/comments/15f4qc/on_using_rk4_over_euler_to_integrate_for_physics/">this Reddit
+thread</a>
+can provide some insight into why symplecticity doesn’t exactly mean
+energy conversation. Strictly put: an integrator conserves energy
+when it is both symplectic and the Hamiltonian of the system is
+time-independent. Another definition and proof can be found
+<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">here</a>. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+    <li id="fn:2">
+
+      <p>Only one fourth-order method was discussed, making  it the best by
+default. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+
+        <p>Tags: <a href="/tag/games" rel="tag">games</a>, <a href="/tag/physics" rel="tag">physics</a></p>
+    </div>
+
+        </main>
+
+        <!-- mathjax config similar to math.stackexchange -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+              jax: ["input/TeX", "output/HTML-CSS"],
+              tex2jax: {
+                inlineMath: [ ['$', '$'], ["\\(", "\\)"] ],
+                displayMath: [ ['$$', '$$'], ["\\[", "\\]"] ],
+                processEscapes: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+              },
+              "HTML-CSS": { scale: 180 },
+              //displayAlign: "left",
+              //displayIndent: "2em"
+            });
+        </script>
+        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-37726728-1', 'aktau.be');
+            ga('send', 'pageview');
+        </script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    // reload mathjax after a pjax load
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                },
+                "autoAnalytics": true
+            });
+        </script>
+    </body>
+</html>

@@ -9,7 +9,7 @@
         <meta name="description" content="In this article I write about how I finally started making my own 3D game engine, and about how much it sucks.">
         <meta name="keywords" content="sdl, game-engine, open-source, data-driven">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.7">
+        <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Making a good game engine (part 1)">
@@ -101,6 +101,14 @@
                 <li><a href="/tag/imessage">imessage (1)</a></li>
                 
                 <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
                 
             </ul>
             -->
@@ -204,7 +212,7 @@ client code doesn’t have to care that it’s so complex.</p>
 <p>While this may be true, there are two concerns I would like to note:</p>
 
 <ol>
-<li>I don’t particularly like using a piece of code that I couldn’t
+  <li>I don’t particularly like using a piece of code that I couldn’t
 understand without an enormous effort. Template-based code seems to be
 very <em>write once</em> in nature. After a while, not even the author might
 understand it. (Granted, one could say the same about including LuaJIT
@@ -216,7 +224,9 @@ magic doesn’t help, at all. If there’s one thing I hate when I’m working
 on something, it’s a long edit-inspect cycle. I want to be able to see
 my changes a second after I make them. When I don’t, I tend to either
 lose my concentration or become frustrated.</li>
-</ol><p>But is there an alternative for intrepid performance-conscious
+</ol>
+
+<p>But is there an alternative for intrepid performance-conscious
 developers such as ourselves? Certainly, just use intrinsics, wrap them
 in a nice function and let the compiler sort it all out – quickly I
 might add! A good example of this is the incomplete but functional
@@ -247,7 +257,7 @@ give it the right nudge.</p>
 <p>The right nudge in this case is usually two things:</p>
 
 <ol>
-<li>The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
+  <li>The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
 this case)</li>
   <li>The loop in which the data is used has to have a constant number of
 iterations or be manually unrolled.</li>
@@ -255,7 +265,9 @@ iterations or be manually unrolled.</li>
 alias each other. The C99
 <a href="http://en.wikipedia.org/wiki/Restrict">restrict</a> keyword can be very
 helpful with this, in conjunction with const.</li>
-</ol><p>After these simple things, you already have a decent chance the the
+</ol>
+
+<p>After these simple things, you already have a decent chance the the
 compiler will produce some pretty performant code. These requirements
 are easy, for alignment it’s enough to use a special typedef that
 enforces alignment. If you dynamically allocate memory for these types,
@@ -303,7 +315,7 @@ makes it easier to vectorize.</p>
 
 <div class="footnotes">
   <ol>
-<li id="fn:1">
+    <li id="fn:1">
       <p>Also known as “<em>Achting die Kurve!</em>” <a href="#fnref:1" class="reversefootnote">↩</a></p>
     </li>
     <li id="fn:2">
@@ -311,6 +323,7 @@ makes it easier to vectorize.</p>
     </li>
   </ol>
 </div>
+
         </article>
 
         <p>Tags: <a href="/tag/sdl" rel="tag">sdl</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/open-source" rel="tag">open-source</a>, <a href="/tag/data-driven" rel="tag">data-driven</a></p>

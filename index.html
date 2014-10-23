@@ -9,7 +9,7 @@
         <meta name="description" content="The personal blog of Nicolas Hillegeer, developer and engineer">
         <meta name="keywords" content="blog, development, c, c++, lua, freelance, hire, AI">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.7">
+        <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Nicolas Hillegeer - Portfolio and personal blog">
@@ -102,12 +102,43 @@
                 
                 <li><a href="/tag/applescript">applescript (1)</a></li>
                 
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
             </ul>
             -->
         </nav>
 
         <main id="content">
             
+    
+        <div class="post-list">
+            <h2><a href="/2014/10/23/pg-dump-and-pigz-easy-rsyncable-backups-with-postgresql/">pg_dump and pigz, easy rsyncable backups with PostgreSQL</a></h2>
+            <aside>Posted on October 23, 2014</aside>
+
+            <article>
+                <p>Some time ago, I created an ad-hoc offsite backup solution for a MySQL
+database after I recovered it. This happened after a client contacted me
+when one of their legacy databases blew up. The recovery process was
+quite painful because the backups that they had were corrupted and
+incomplete (a monthly cronjob). I ended up with a simple setup that used
+<em>mysqldump</em>, <em>gzip</em> and <em>rsnapshot</em> to great effect. This article talks
+about effectively using a similar backup method with PostgreSQL.</p>
+
+<div class='read-more'><a href="/2014/10/23/pg-dump-and-pigz-easy-rsyncable-backups-with-postgresql/">Continue reading &rsaquo;</a></div>
+            </article>
+        </div>
+    
+
+    
+
+    
+
     
 
     
@@ -155,37 +186,6 @@ clicking, so I automated the task, and
 <a href="https://github.com/aktau/github-release">github-release</a> was born.</p>
 
 <div class='read-more'><a href="/2014/01/31/manage-your-app-releases-from-the-commandline-with-github-release/">Continue reading &rsaquo;</a></div>
-            </article>
-        </div>
-    
-
-    
-        <div class="post-list">
-            <h2><a href="/2013/09/22/detecting-interlaced-video-with-ffmpeg/">Detecting interlaced video with ffmpeg</a></h2>
-            <aside>Posted on September 22, 2013</aside>
-
-            <article>
-                <p>Today I had to determine whether a video file is interlaced or not.
-This has an effect on which flags I pass to the underlying video player
-(<a href="http://mpv.io/">mpv</a> in this case) to enable deinterlacing and get rid
-of that nasty combing effect.</p>
-
-<div class='read-more'><a href="/2013/09/22/detecting-interlaced-video-with-ffmpeg/">Continue reading &rsaquo;</a></div>
-            </article>
-        </div>
-    
-
-    
-
-    
-        <div class="post-list">
-            <h2><a href="/2013/08/13/sdl2-2-0-0-released-at-last/">SDL2 (2.0.0) released at last!</a></h2>
-            <aside>Posted on August 13, 2013</aside>
-
-            <article>
-                <p>For the impatient: <a href="http://www.libsdl.org/">get it here</a> and read the <a href="http://wiki.libsdl.org/moin.fcg/MigrationGuide">migration guide</a>. SDL is an open-source game development library. It’s been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.</p>
-
-<div class='read-more'><a href="/2013/08/13/sdl2-2-0-0-released-at-last/">Continue reading &rsaquo;</a></div>
             </article>
         </div>
     

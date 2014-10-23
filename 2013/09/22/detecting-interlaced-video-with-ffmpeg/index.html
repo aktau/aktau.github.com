@@ -9,7 +9,7 @@
         <meta name="description" content="This small article describes how to use ffmpeg's commandline tools to detect pretty accurately whether or not a video files is interlaced">
         <meta name="keywords" content="ffmpeg">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.7">
+        <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Detecting interlaced video with ffmpeg">
@@ -102,6 +102,14 @@
                 
                 <li><a href="/tag/applescript">applescript (1)</a></li>
                 
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
             </ul>
             -->
         </nav>
@@ -145,7 +153,7 @@ interlaced and non-interlaced file:</p>
 <span class="c"># you extract, the better, though it's never 100% accurate</span>
 
 ffmpeg -filter:v idet <span class="se">\</span>
-    -frames:v 100 <span class="se">\</span>
+    -frames:v <span class="m">100</span> <span class="se">\</span>
     -an <span class="se">\</span>
     -f rawvideo -y /dev/null <span class="se">\</span>
     -i ~/Downloads/some_interlaced_video.mkv
@@ -154,7 +162,7 @@ ffmpeg -filter:v idet <span class="se">\</span>
 <span class="c"># [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0</span>
 
 ffmpeg -filter:v idet <span class="se">\</span>
-    -frames:v 100 <span class="se">\</span>
+    -frames:v <span class="m">100</span> <span class="se">\</span>
     -an <span class="se">\</span>
     -f rawvideo -y /dev/null <span class="se">\</span>
     -i ~/Downloads/some_non_interlaced_video.mkv
@@ -182,10 +190,11 @@ entire HD looking and check them all with the <em>idet</em> filter:</p>
 <pre><code class="language-bash"><span class="c"># scan all files on your HD, uses GNU parallel</span>
 <span class="c"># I believe this works just as well with standard</span>
 <span class="c"># xargs though</span>
-locate -0 <span class="s1">'.mov'</span> <span class="p">|</span> parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i <span class="o">{}</span> 2&gt;<span class="p">&amp;</span>1 <span class="p">|</span> egrep <span class="s1">'idet|Input'</span></code></pre>
+locate -0 <span class="s1">'.mov'</span> <span class="p">|</span> parallel -0 ./ffmpeg -filter:v idet -frames:v <span class="m">100</span> -an -f rawvideo -y /dev/null -i <span class="o">{}</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> egrep <span class="s1">'idet|Input'</span></code></pre>
 
 <p>It turns out I only had 2, interlaced content indeed is quite rare for
 content on a computer, luckily so.</p>
+
         </article>
 
         <p>Tags: <a href="/tag/ffmpeg" rel="tag">ffmpeg</a></p>

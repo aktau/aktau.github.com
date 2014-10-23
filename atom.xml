@@ -2,13 +2,300 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://www.aktau.be/</id>
   <title>Portfolio and personal blog</title>
-  <updated>2014-02-11T23:00:00Z</updated>
+  <updated>2014-10-22T22:00:00Z</updated>
   <link rel="alternate" href="http://www.aktau.be/"/>
   <link rel="self" href="http://www.aktau.be/atom.xml"/>
   <author>
     <name>Nicolas Hillegeer</name>
     <uri>http://www.aktau.be/contact</uri>
   </author>
+  <entry>
+    <id>tag:www.aktau.be,2014-10-23:/2014/10/23/pg-dump-and-pigz-easy-rsyncable-backups-with-postgresql/</id>
+    <title type="html">pg_dump and pigz, easy rsyncable backups with PostgreSQL</title>
+    <published>2014-10-22T22:00:00Z</published>
+    <updated>2014-10-22T22:00:00Z</updated>
+    <link rel="alternate" href="http://www.aktau.be/2014/10/23/pg-dump-and-pigz-easy-rsyncable-backups-with-postgresql/"/>
+    <content type="html">&lt;p&gt;Some time ago, I created an ad-hoc offsite backup solution for a MySQL
+database after I recovered it. This happened after a client contacted me
+when one of their legacy databases blew up. The recovery process was
+quite painful because the backups that they had were corrupted and
+incomplete (a monthly cronjob). I ended up with a simple setup that used
+&lt;em&gt;mysqldump&lt;/em&gt;, &lt;em&gt;gzip&lt;/em&gt; and &lt;em&gt;rsnapshot&lt;/em&gt; to great effect. This article talks
+about effectively using a similar backup method with PostgreSQL.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
+&lt;h2 id="the-solution-in-mysql-space"&gt;The solution in MySQL-space&lt;/h2&gt;
+
+&lt;p&gt;When preparing to deploy a solution I had made into production, I knew I
+needed backups. Its main data store was a PostgreSQL 9.3 database, so I
+remembered my MySQL adventure and went looking for similar tools to the
+ones I used before. The core of the earlier MySQL solution
+looked like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# omitting all the rotation logic&lt;/span&gt;
+mysqldump &lt;span class="nv"&gt;$OPTIONS&lt;/span&gt; --user&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt; --password&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PWD&lt;/span&gt; &lt;span class="nv"&gt;$DB&lt;/span&gt; --routines --no-data --add-drop-database --database &lt;span class="nv"&gt;$DB&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; gzip --rsyncable &amp;gt; &lt;span class="s2"&gt;"$DIR/schema.sql.gz"&lt;/span&gt;
+
+&lt;span class="nv"&gt;TABLES&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;mysql --user&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt; --password&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PWD&lt;/span&gt; -Bse &lt;span class="s1"&gt;'show tables'&lt;/span&gt; &lt;span class="nv"&gt;$DB&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; TABLE in &lt;span class="nv"&gt;$TABLES&lt;/span&gt;
+&lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nv"&gt;BACKUP_FILE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"$DIR/${TABLE}.sql.gz"&lt;/span&gt;
+    &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"dumping $TABLE into $BACKUP_FILE"&lt;/span&gt;
+    mysqldump &lt;span class="nv"&gt;$OPTIONS&lt;/span&gt; --user&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt; --password&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PWD&lt;/span&gt; &lt;span class="nv"&gt;$DB&lt;/span&gt; &lt;span class="nv"&gt;$TABLE&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; gzip --rsyncable &amp;gt; &lt;span class="s2"&gt;"$BACKUP_FILE"&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This dumps the database as separate files: &lt;code&gt;schema.sql.gz&lt;/code&gt; to setup the
+schema and &lt;code&gt;$TABLE.sql.gz&lt;/code&gt; for the row data of each table. This allows
+restoring of partial sets of data easily.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="dev.mysql.com/doc/en/mysqldump.html"&gt;mysqldump&lt;/a&gt; outputs SQL on stdout
+by default, which makes it easy to pipe to &lt;code&gt;gzip&lt;/code&gt; to create compressed
+archives. Data stored in databases is usually quite compressible, so
+piping to &lt;em&gt;gzip&lt;/em&gt; saves a lot of space.&lt;/p&gt;
+
+&lt;p&gt;There’s a catch though. Regular &lt;em&gt;gzip&lt;/em&gt; with no flags has a serious
+disadvantage for offsite backup: a small change in the raw data provokes
+a large change in the compressed data. This means that every time we
+&lt;em&gt;rsync&lt;/em&gt; the latest backup over, it will transfer the entire lot. Said in
+another way, the speedup factor reported with the &lt;code&gt;--stats&lt;/code&gt; flag is more
+or less 1.00. Classic doubleplusungood.&lt;/p&gt;
+
+&lt;p&gt;That’s why we supply the &lt;code&gt;--rsyncable&lt;/code&gt; flag when compressing the data
+with &lt;em&gt;gzip&lt;/em&gt;. This resets the compression dictionary from time to time
+such that the blocks are compressed independently. A small change in the
+source will thus not change the entire compressed archive and the rsync
+delta encoding algorithm can work its magic even on gzipped files!&lt;/p&gt;
+
+&lt;p&gt;Sadly, the &lt;code&gt;--rsyncable&lt;/code&gt; flag is not mainline, it’s a custom patch
+carried by debian (and ubuntu). To top it off, it &lt;a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=708423"&gt;seems that the patch
+was misapplied for Debian
+Wheezy&lt;/a&gt;. It
+doesn’t even error out when using that flag for some reason, so I hadn’t
+noticed until a few days ago. This effectively brought my rsync speedup
+factor to 1.00, poor backup server.&lt;/p&gt;
+
+&lt;p&gt;I went looking for alternatives. One could go for backports, testing
+repositories or even custom packages but I’m always apprehensive of such
+things in production servers. I looked at &lt;em&gt;lz4&lt;/em&gt; (not available in Debian
+Wheezy), &lt;em&gt;bzip2&lt;/em&gt; (slow, large blocks), &lt;em&gt;xz/lzma&lt;/em&gt; until finding what
+appeared to be the solution: &lt;a href="http://zlib.net/pigz/"&gt;pigz&lt;/a&gt;. It’s a
+parallel implementation of &lt;em&gt;gzip&lt;/em&gt;. It has mainlined support of
+&lt;code&gt;--rsyncable&lt;/code&gt; and is in the Wheezy repository.&lt;/p&gt;
+
+&lt;h2 id="backing-up-with-postgres"&gt;Backing up with Postgres&lt;/h2&gt;
+
+&lt;p&gt;&lt;em&gt;mysqldump&lt;/em&gt;’s equivalent in the Postgres world is
+&lt;a href="http://www.postgresql.org/docs/devel/static/app-pgdump.html"&gt;pg_dump&lt;/a&gt;.
+I like &lt;em&gt;pg_dump&lt;/em&gt; better because it allows dumping in several formats
+with accompanying up- and downsides. It also has a sister command
+&lt;a href="http://www.postgresql.org/docs/devel/static/app-pgrestore.html"&gt;pg_restore&lt;/a&gt;
+allowing much more flexibility when restoring a backup. The 4 output
+formats available at the moment of writing are (if you already know them
+you can skip the list, it’s mostly from the Postgres docs):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+&lt;strong&gt;plain&lt;/strong&gt;: like &lt;em&gt;mysqldump&lt;/em&gt;, mostly SQL queries but with faster data
+loading (no &lt;code&gt;INSERT&lt;/code&gt; statements but loading from heredoc-like
+buffers). This is the default. The big advantage of this format is
+that it is human-readable.&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;custom&lt;/strong&gt;: Output a custom-format archive suitable for input into
+pg_restore. Together with the directory output format, this is the
+most flexible output format in that it allows manual selection and
+reordering of archived items during restore. This format is also
+compressed by default. It’s not human-readable though, unless you turn
+off compression with &lt;code&gt;-Z0&lt;/code&gt;, in which case opening it in a text editor
+will allow one to make sense of a lot of things.&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;directory&lt;/strong&gt;: Output a directory-format archive suitable for input
+into &lt;em&gt;pg_restore&lt;/em&gt;. This will create a directory with one file for each
+table and blob being dumped, plus a so-called Table of Contents file
+describing the dumped objects in a machine-readable format that
+&lt;em&gt;pg_restore&lt;/em&gt; can read. A directory format archive can be manipulated
+with standard Unix tools; for example, files in an uncompressed
+archive can be compressed with the gzip tool. This format is
+compressed by default and also supports parallel dumps. This is most
+similar to what I had been forcing &lt;em&gt;mysqldump&lt;/em&gt; to do, except that with
+&lt;em&gt;pg_dump&lt;/em&gt; you only need one command.&lt;/li&gt;
+  &lt;li&gt;
+&lt;strong&gt;tar&lt;/strong&gt;: Output a tar-format archive suitable for input into
+pg_restore.  The tar-format is compatible with the directory-format;
+extracting a tar-format archive produces a valid directory-format
+archive. However, the tar-format does not support compression and has
+a limit of 8 GB on the size of individual tables. Also, the relative
+order of table data items cannot be changed during restore. try not to
+use this as can use &lt;a href="http://serverfault.com/questions/267616/pg-dump-fails-due-to-mistaken-low-disk-space"&gt;a lot of temporary space on your
+harddrive&lt;/a&gt;.
+This might not only wear the underlying HD out and consume needless
+space but also thrash the disk page cache.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;: If you’re using the directory output format the nifty flag
+&lt;code&gt;--jobs&lt;/code&gt; becomes available, allowing parallel dumping.&lt;/p&gt;
+
+&lt;p&gt;It seems that we can get the flexibility of partially restoring a
+database without requesting the tables first by choosing the &lt;em&gt;custom&lt;/em&gt; or
+&lt;em&gt;directory&lt;/em&gt; methods.&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;directory&lt;/em&gt; method creates a folder with some files in it:
+&lt;code&gt;2298.dat.gz&lt;/code&gt;, &lt;code&gt;2300.dat.gz&lt;/code&gt;, … and finally &lt;code&gt;toc.dat&lt;/code&gt;. They are
+compressed by default, but it’s possible to turn this off by passing the
+&lt;code&gt;-Z0&lt;/code&gt; flag to &lt;code&gt;pg_dump&lt;/code&gt;. This allows compressing those files
+with an rsync-friendly method afterwards. The downside is that all those
+uncompressed bytes will get written to disk (and into the page cache).
+The larger your DB, the worse this will become for your system.&lt;/p&gt;
+
+&lt;p&gt;For this reason, the &lt;em&gt;custom&lt;/em&gt; format seems like the best of both worlds.
+The output can be piped straight into a compress filter. Curious as to
+the performance and rsyncability of a few variations on this theme, I
+started benchmarking. The most up-to-date scripts I used are available
+in a &lt;a href="https://gist.github.com/aktau/8e19977f96d56000aa95"&gt;gist&lt;/a&gt;,
+possibly outdated versions are shown below:&lt;/p&gt;
+
+&lt;p&gt;The first script generates a dump of the database in several formats (my
+database is called &lt;em&gt;m2d&lt;/em&gt;, adjust accordingly):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# gen.sh&lt;/span&gt;
+&lt;span class="nv"&gt;DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"$1"&lt;/span&gt;
+
+&lt;span class="o"&gt;[&lt;/span&gt; -d &lt;span class="s2"&gt;"$DIR"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; mkdir -p &lt;span class="s2"&gt;"$DIR"&lt;/span&gt;
+
+&lt;span class="c"&gt;# -Z0 is to force no compression, we supply this flag when we pipe to&lt;/span&gt;
+&lt;span class="c"&gt;# our own compressor&lt;/span&gt;
+pg_dump -Fc m2d &amp;gt; &lt;span class="s2"&gt;"$DIR/m2d.compr.dump"&lt;/span&gt;
+pg_dump -Z0 -Fc m2d &amp;gt; &lt;span class="s2"&gt;"$DIR/m2d.raw.dump"&lt;/span&gt;
+pg_dump -Z0 -Fc m2d &lt;span class="p"&gt;|&lt;/span&gt; pigz &amp;gt; &lt;span class="s2"&gt;"$DIR/m2d.pigz.dump.gz"&lt;/span&gt;
+pg_dump -Z0 -Fc m2d &lt;span class="p"&gt;|&lt;/span&gt; gzip &amp;gt; &lt;span class="s2"&gt;"$DIR/m2d.gzip.dump.gz"&lt;/span&gt;
+pg_dump -Z0 -Fc m2d &lt;span class="p"&gt;|&lt;/span&gt; pigz --rsyncable &amp;gt; &lt;span class="s2"&gt;"$DIR/m2d.arsync.dump.gz"&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The script will generate a few files corresponding to some different
+ways of compressing (or not) the output. Run it once to supply a
+baseline, make some edits to the database and export again:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;./gen.sh orig
+&lt;span class="nv"&gt;$ &lt;/span&gt;psql m2d
+&lt;span class="c"&gt;# make some changes to the database, try to make a small change in the largest tables&lt;/span&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;./gen.sh changed&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Time to test the rsyncability. I switched to another host and used a
+script to rsync every file separately so that I could clearly see the
+speedup factor.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# look out for the speedup factors reported by rsync&lt;/span&gt;
+&lt;span class="c"&gt;#&lt;/span&gt;
+&lt;span class="c"&gt;# NOTE&lt;/span&gt;
+&lt;span class="c"&gt;#  you'll have to change the HOST variable below to&lt;/span&gt;
+&lt;span class="c"&gt;#  point to the host + folder to fetch the files from&lt;/span&gt;
+
+&lt;span class="nv"&gt;HOST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"vagrant:/home/vagrant/pgdumptests"&lt;/span&gt;
+
+&lt;span class="nv"&gt;ORIG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"$1"&lt;/span&gt;
+&lt;span class="nv"&gt;NEW&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"$2"&lt;/span&gt;
+
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$ORIG&lt;/span&gt;/ data/
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$NEW&lt;/span&gt;/m2d.arsync.dump.gz data/
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$NEW&lt;/span&gt;/m2d.compr.dump data/
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$NEW&lt;/span&gt;/m2d.gzip.dump.gz data/
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$NEW&lt;/span&gt;/m2d.pigz.dump.gz data/
+rsync -avh --stats --progress &lt;span class="nv"&gt;$HOST&lt;/span&gt;/&lt;span class="nv"&gt;$NEW&lt;/span&gt;/m2d.raw.dump data/&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I ran it on the other host like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;bench.sh orig changed&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The result:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Method&lt;/th&gt;
+      &lt;th&gt;File size&lt;/th&gt;
+      &lt;th&gt;Speedup&lt;/th&gt;
+      &lt;th&gt;Bytes sent&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;uncompressed&lt;/td&gt;
+      &lt;td&gt;6.40MB&lt;/td&gt;
+      &lt;td&gt;132.77&lt;/td&gt;
+      &lt;td&gt;33.01KB&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;strong&gt;pigz –rsyncable&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;723.35KB&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;15.22&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;42.37KB&lt;/strong&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;pg_dump compress&lt;/td&gt;
+      &lt;td&gt;716.49KB&lt;/td&gt;
+      &lt;td&gt;1.17&lt;/td&gt;
+      &lt;td&gt;608.14KB&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;pigz&lt;/td&gt;
+      &lt;td&gt;686.26KB&lt;/td&gt;
+      &lt;td&gt;1.05&lt;/td&gt;
+      &lt;td&gt;646.27KB&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gzip&lt;/td&gt;
+      &lt;td&gt;689.76KB&lt;/td&gt;
+      &lt;td&gt;0.99&lt;/td&gt;
+      &lt;td&gt;688.32KB&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;It seems that if you’re only concerned about bandwidth, the uncompressed
+variant is actually best in combination with &lt;em&gt;rsync&lt;/em&gt;). Yet the file size
+of my tiny database in uncompressed is &lt;strong&gt;9x&lt;/strong&gt; the size of the compressed
+variant. Since I also like to keep backups on the same server as the DB,
+that becomes a bit hard to stomach for the relatively small servers I’m
+working with.&lt;/p&gt;
+
+&lt;p&gt;The sweet spot between simplicity, low bandwidth off-site backup and low
+disk space usage seems to fall straight into the camp of piping the
+output of &lt;code&gt;pg_dump&lt;/code&gt; into &lt;code&gt;pigz --rsyncable&lt;/code&gt;. Very respectable delta
+encoding speedups (&lt;strong&gt;15x&lt;/strong&gt;) and file size (&lt;strong&gt;9x smaller&lt;/strong&gt;) are within
+reach. Take these numbers with a grain of salt because it obviously
+depends on what’s in the database. If you’re just storing large binary
+blobs in the database, this obviously won’t work nearly as well.&lt;/p&gt;
+
+&lt;p&gt;Since this article is already getting a bit long in the tooth, the
+implementation of the off-site backup server with
+&lt;a href="http://www.rsnapshot.org/"&gt;rsnapshot&lt;/a&gt; is left up to the reader.&lt;/p&gt;
+
+&lt;h2 id="further-benefits--ideas"&gt;Further benefits &amp;amp; ideas&lt;/h2&gt;
+
+&lt;p&gt;On the side of the backup server, it becomes advantageous to use
+something like &lt;a href="http://www.nongnu.org/rdiff-backup/"&gt;rdiff-backup&lt;/a&gt; to be
+able to keep an incredible amount of backups using minimal amounts of
+space using the same delta encoding as &lt;code&gt;rsync&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The astute reader will notice that it might be a good idea to decompress
+the backups before handing them over to &lt;code&gt;rdiff-backup&lt;/code&gt;. From the table
+above we can see that the uncompressed format has the highest delta
+encoding efficiency. This added efficiency &lt;em&gt;might&lt;/em&gt; cause an
+&lt;code&gt;rdiff-backup&lt;/code&gt; based solution to use even less space than the compressed
+variant, because the delta’s could be smaller (look at the &lt;em&gt;bytes sent&lt;/em&gt;
+column). It depends on the churn rate and the type of data in the
+database though.&lt;/p&gt;
+</content>
+    <summary type="html">&lt;p&gt;Some time ago, I created an ad-hoc offsite backup solution for a MySQL
+database after I recovered it. This happened after a client contacted me
+when one of their legacy databases blew up. The recovery process was
+quite painful because the backups that they had were corrupted and
+incomplete (a monthly cronjob). I ended up with a simple setup that used
+&lt;em&gt;mysqldump&lt;/em&gt;, &lt;em&gt;gzip&lt;/em&gt; and &lt;em&gt;rsnapshot&lt;/em&gt; to great effect. This article talks
+about effectively using a similar backup method with PostgreSQL.&lt;/p&gt;
+
+</summary>
+  </entry>
   <entry>
     <id>tag:www.aktau.be,2014-02-12:/2014/02/12/send-imessages-via-the-commandline-on-osx-even-to-yourself/</id>
     <title type="html">Send iMessages via the commandline on OSX, even to yourself</title>
@@ -53,8 +340,8 @@ executable with &lt;code&gt;chmod u+x "thefilename"&lt;/code&gt; and you’re go
 doesn’t even require Ruby, so you can just drop the script in some
 folder in your &lt;code&gt;$PATH&lt;/code&gt; and use it like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;imessage 0487198747 &lt;span class="s2"&gt;"gofinance: your stock AAPL has gone up by 20%"&lt;/span&gt;
-&lt;span class="nv"&gt;$ &lt;/span&gt;imessage 0495876923 &lt;span class="s2"&gt;"knock knock!"&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;imessage &lt;span class="m"&gt;0487198747&lt;/span&gt; &lt;span class="s2"&gt;"gofinance: your stock AAPL has gone up by 20%"&lt;/span&gt;
+&lt;span class="nv"&gt;$ &lt;/span&gt;imessage &lt;span class="m"&gt;0495876923&lt;/span&gt; &lt;span class="s2"&gt;"knock knock!"&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Those are not actual telephone numbers (that I know of), by the way.
 There are even more cool things you could do with this. Someone has even
@@ -64,11 +351,12 @@ possibilities!&lt;/p&gt;
 
 &lt;div class="footnotes"&gt;
   &lt;ol&gt;
-&lt;li id="fn:1"&gt;
+    &lt;li id="fn:1"&gt;
       &lt;p&gt;the ruby utility can be found on &lt;a href="https://github.com/chrisfsampaio/imsg"&gt;github&lt;/a&gt;. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
-&lt;/div&gt;</content>
+&lt;/div&gt;
+</content>
     <summary type="html">&lt;p&gt;Today on HN someone posted a small ruby utility to send iMessages via
 the commandline, which piqued my interest. I would love to send messages
 to my phone when one of my cronscripts discovers something interesting.
@@ -144,7 +432,8 @@ entirely self-contained, makes for the easiest distribution and
 deployment steps I’ve had in years. It’s at least 1/4th of the reason
 why I enjoy making stuff in Go. (others are ease of writing/reading,
 speed, great standard library, …). No more rbenv, virtualenv, pip, or
-whatever shenanigans the next scripting language du jour comes up with.&lt;/p&gt;</content>
+whatever shenanigans the next scripting language du jour comes up with.&lt;/p&gt;
+</content>
     <summary type="html">&lt;p&gt;Recently I started on a new side-project:
 &lt;a href="https://github.com/aktau/gofinance"&gt;gofinance&lt;/a&gt;. It dowloads and stores
 financial data from the likes of Yahoo Finance, Bloomberg et al. It’s
@@ -202,7 +491,7 @@ interlaced and non-interlaced file:&lt;/p&gt;
 &lt;span class="c"&gt;# you extract, the better, though it's never 100% accurate&lt;/span&gt;
 
 ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
-    -frames:v 100 &lt;span class="se"&gt;\&lt;/span&gt;
+    -frames:v &lt;span class="m"&gt;100&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
     -an &lt;span class="se"&gt;\&lt;/span&gt;
     -f rawvideo -y /dev/null &lt;span class="se"&gt;\&lt;/span&gt;
     -i ~/Downloads/some_interlaced_video.mkv
@@ -211,7 +500,7 @@ ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="c"&gt;# [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0&lt;/span&gt;
 
 ffmpeg -filter:v idet &lt;span class="se"&gt;\&lt;/span&gt;
-    -frames:v 100 &lt;span class="se"&gt;\&lt;/span&gt;
+    -frames:v &lt;span class="m"&gt;100&lt;/span&gt; &lt;span class="se"&gt;\&lt;/span&gt;
     -an &lt;span class="se"&gt;\&lt;/span&gt;
     -f rawvideo -y /dev/null &lt;span class="se"&gt;\&lt;/span&gt;
     -i ~/Downloads/some_non_interlaced_video.mkv
@@ -239,10 +528,11 @@ entire HD looking and check them all with the &lt;em&gt;idet&lt;/em&gt; filter:&
 &lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="c"&gt;# scan all files on your HD, uses GNU parallel&lt;/span&gt;
 &lt;span class="c"&gt;# I believe this works just as well with standard&lt;/span&gt;
 &lt;span class="c"&gt;# xargs though&lt;/span&gt;
-locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; parallel -0 ./ffmpeg -filter:v idet -frames:v 100 -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;1 &lt;span class="p"&gt;|&lt;/span&gt; egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+locate -0 &lt;span class="s1"&gt;'.mov'&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; parallel -0 ./ffmpeg -filter:v idet -frames:v &lt;span class="m"&gt;100&lt;/span&gt; -an -f rawvideo -y /dev/null -i &lt;span class="o"&gt;{}&lt;/span&gt; 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; egrep &lt;span class="s1"&gt;'idet|Input'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;It turns out I only had 2, interlaced content indeed is quite rare for
-content on a computer, luckily so.&lt;/p&gt;</content>
+content on a computer, luckily so.&lt;/p&gt;
+</content>
     <summary type="html">&lt;p&gt;Today I had to determine whether a video file is interlaced or not.
 This has an effect on which flags I pass to the underlying video player
 (&lt;a href="http://mpv.io/"&gt;mpv&lt;/a&gt; in this case) to enable deinterlacing and get rid
@@ -267,7 +557,7 @@ input subsystems according to different capabilities and so forth.&lt;/p&gt;
 &lt;p&gt;Copied from the mailing list, here are the most important new features:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Full 3D hardware acceleration&lt;/li&gt;
+  &lt;li&gt;Full 3D hardware acceleration&lt;/li&gt;
   &lt;li&gt;Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)&lt;/li&gt;
   &lt;li&gt;Support for OpenGL ES&lt;/li&gt;
   &lt;li&gt;Support for multiple windows&lt;/li&gt;
@@ -292,7 +582,9 @@ input subsystems according to different capabilities and so forth.&lt;/p&gt;
   &lt;li&gt;A really powerful assert macro&lt;/li&gt;
   &lt;li&gt;Lots of old annoyances from 1.2 are gone&lt;/li&gt;
   &lt;li&gt;Many other things!&lt;/li&gt;
-&lt;/ul&gt;&lt;p&gt;If you develop your code with just SDL, (optionally) OpenGL and the standard
+&lt;/ul&gt;
+
+&lt;p&gt;If you develop your code with just SDL, (optionally) OpenGL and the standard
 C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;
 So it pays off to use it, especially if you’re in the market to develop games commercially: &lt;strong&gt;write once, run on your toaster&lt;/strong&gt;.&lt;/p&gt;
 
@@ -419,9 +711,9 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
     &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
         &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_PollEvent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
             &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_WINDOWEVENT&lt;/span&gt;:
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDL_WINDOWEVENT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                     &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_WINDOWEVENT_RESIZED&lt;/span&gt;:
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDL_WINDOWEVENT_RESIZED&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                         &lt;span class="p"&gt;{&lt;/span&gt;
                             &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;newWidth&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
                             &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;newHeight&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;window&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;data2&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
@@ -438,16 +730,16 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
                     &lt;span class="p"&gt;}&lt;/span&gt;
                     &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_KEYDOWN&lt;/span&gt;:
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDL_KEYDOWN&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                     &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_KEYUP&lt;/span&gt;:
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDL_KEYUP&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                     &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;event&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keysym&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sym&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_ESCAPE&lt;/span&gt;:
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDLK_ESCAPE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                             &lt;span class="n"&gt;done&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
                         &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_v&lt;/span&gt;:
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDLK_v&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                             &lt;span class="n"&gt;vsync&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
                             &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_SetSwapInterval&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;vsync&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -458,7 +750,7 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
                             &lt;span class="p"&gt;}&lt;/span&gt;
                         &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDLK_d&lt;/span&gt;:
+                        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDLK_d&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                             &lt;span class="n"&gt;doublebuf&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
                             &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_SetAttribute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SDL_GL_DOUBLEBUFFER&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;doublebuf&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -471,7 +763,7 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
                     &lt;span class="p"&gt;}&lt;/span&gt;
                     &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="n"&gt;SDL_QUIT&lt;/span&gt;:
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;SDL_QUIT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
                     &lt;span class="n"&gt;done&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
                     &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
@@ -501,397 +793,16 @@ were minor (except for haptics support, which I don’t use).&lt;/p&gt;
 
 &lt;div class="footnotes"&gt;
   &lt;ol&gt;
-&lt;li id="fn:1"&gt;
+    &lt;li id="fn:1"&gt;
       &lt;p&gt;Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id="fn:2"&gt;
       &lt;p&gt;I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
-&lt;/div&gt;</content>
+&lt;/div&gt;
+</content>
     <summary type="html">&lt;p&gt;For the impatient: &lt;a href="http://www.libsdl.org/"&gt;get it here&lt;/a&gt; and read the &lt;a href="http://wiki.libsdl.org/moin.fcg/MigrationGuide"&gt;migration guide&lt;/a&gt;. SDL is an open-source game development library. It’s been a long time coming, and some thought SDL2 was going to follow the path of Duke Nukem Forever: always a spectre on the horizon, but never being released. According to twitter it was in development for 2666 days, but the end result is beautiful.&lt;/p&gt;
-
-</summary>
-  </entry>
-  <entry>
-    <id>tag:www.aktau.be,2013-08-07:/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/</id>
-    <title type="html">A makefile for modern C programming on UNIX-like operating systems</title>
-    <published>2013-08-06T22:00:00Z</published>
-    <updated>2013-08-06T22:00:00Z</updated>
-    <link rel="alternate" href="http://www.aktau.be/2013/08/07/a-makefile-for-modern-c-programming-on-unix-like-operating-systems/"/>
-    <content type="html">&lt;p&gt;Looking for an easy to use build tool? Project not yet large enough to
-warrant cmake? Downright scared of autotools (which generates the
-scariest kind of makefiles)? May I present… make!&lt;/p&gt;
-
-&lt;!-- more --&gt;
-
-&lt;p&gt;Most of you have probably seen what a makefile looks like, either from
-another open source project or automatically generated by tools like
-&lt;a href="http://orwelldevcpp.blogspot.de/"&gt;Dev-C++&lt;/a&gt; &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt; or (god forbid)
-autotools. They usually have one thing in common: &lt;strong&gt;they’re horrendous,
-unreadable messes&lt;/strong&gt;. And it makes you never want to touch make with a
-10-foot pole.&lt;/p&gt;
-
-&lt;p&gt;It was just recently that I learned that it didn’t have to be that way,
-make can be small and simple. Let’s start with the simplest of
-makefiles, which compiles a single .c file into an application. Save the
-following into a file with the name Makefile, next to a main.c file.
-&lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
-    gcc -o myapp main.c -I.&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To run it, execute:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make myapp
-&lt;span class="c"&gt;# or... absent a specific target, make will&lt;/span&gt;
-&lt;span class="c"&gt;# just execute the first one it finds.&lt;/span&gt;
-&lt;span class="nv"&gt;$ &lt;/span&gt;make&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;(if you get strange errors when you try this, it’s because you haven’t
-been indenting your lines with a TAB-character. Make explicitly requires
-that lines be indented with tabs or it will throw a hissy fit and spout
-poorly worded error messages from which it is impossible to infer that
-it actually wants tabs.)&lt;/p&gt;
-
-&lt;p&gt;So, what does this do? Make will try to create the target (&lt;strong&gt;myapp&lt;/strong&gt;) by
-checking if the dependencies (&lt;strong&gt;main.c&lt;/strong&gt;) exist or have been modified
-more recently than an already existing &lt;strong&gt;myapp&lt;/strong&gt;. The way to produce the
-target from the dependencies is specified by the rule, in this case the
-&lt;strong&gt;gcc&lt;/strong&gt; invocation. IF &lt;strong&gt;myapp&lt;/strong&gt; already exists and is more recent than
-&lt;strong&gt;main.c&lt;/strong&gt;, nothing happens:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make
-gcc -o myapp main.c -I.
-
-&lt;span class="nv"&gt;$ &lt;/span&gt;make
-make: Nothing to be &lt;span class="k"&gt;done for&lt;/span&gt; &lt;span class="sb"&gt;`&lt;/span&gt;all&lt;span class="err"&gt;'&lt;/span&gt;.
-
-&lt;span class="nv"&gt;$ &lt;/span&gt;edit main.c
-&lt;span class="nv"&gt;$ &lt;/span&gt;make
-gcc -o myapp main.c -I.
-
-&lt;span class="nv"&gt;$ &lt;/span&gt;rm myapp &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; make
-gcc -o myapp main.c -I.&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If one of the dependencies is missing and make doesn’t know how to make
-it (with another rule), make will error out.  Likewise if one of the
-steps produces an error, make will stop (unless specifically told to
-ignore the error).&lt;/p&gt;
-
-&lt;p&gt;Put more abstractly, make is just trying to produce output, which look
-like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;&amp;lt;output&amp;gt;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;&amp;lt;dependencies&amp;gt;&lt;/span&gt;
-    &amp;lt;steps to make output from dependencies&amp;gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So, in these terms, make’s reasoning becomes clearer: to get &lt;em&gt;output&lt;/em&gt;
-&lt;sup id="fnref:3"&gt;&lt;a href="#fn:3" class="footnote"&gt;3&lt;/a&gt;&lt;/sup&gt;, I need &lt;em&gt;dependencies&lt;/em&gt; and then I need to run &lt;em&gt;steps to make
-output from dependencies&lt;/em&gt;. If the dependencies are lacking, make will
-try to make them if it has a rule for them. Please note that the part
-called output is often also called a target.&lt;/p&gt;
-
-&lt;p&gt;In the case above, &lt;em&gt;main.c&lt;/em&gt; already exists, so it doesn’t need to be made. Lucky for us,
-as we didn’t specify a rule to make &lt;em&gt;main.c&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;In most C projects, there’s a tendency to first generate the object (.o) files and then
-generate the application from them. Doing this presents a nice opportunity to show multiple
-rules working in tandem:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o&lt;/span&gt;
-    gcc main.o -o myapp -I.
-
-&lt;span class="nf"&gt;main.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
-    gcc -c main.c -o main.o&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So now we’re first compiling to object files and then linking them together into
-an executable, great! But what if we want to add another file? Suppose we have
-another file called helper.c that we want to compile and link into our executable,
-we could do this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
-    gcc main.o helper.o -o myapp -I.
-
-&lt;span class="nf"&gt;main.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.c&lt;/span&gt;
-    gcc -c main.c -o main.o
-
-&lt;span class="nf"&gt;helper.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;helper.c&lt;/span&gt;
-    gcc -c helper.c -o helper.o&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that we added helper.o as a new dependency for myapp, and that we specified
-a rule for how to build helper.o from helper.c.&lt;/p&gt;
-
-&lt;p&gt;This works perfectly fine, but it’s getting kind of repetitive. Is there no way we
-can fold the two last rules into one? Basically the only thing that differs
-between them is the filename.&lt;/p&gt;
-
-&lt;p&gt;Sure, but that’s usually where it gets hairy for someone not accustomed to make.
-Make has some special variables you can use inside of a rules to get rid of
-the redundancy, but they’re very (very) poorly named.
-The following four are pretty important, for starters:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;
-&lt;strong&gt;$@&lt;/strong&gt;: the name of the target file (the one before the colon)&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;$&amp;lt;&lt;/strong&gt;: the name of the first (or only) dependency (the first one after the colon)&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;$^&lt;/strong&gt;: the names of all the dependencies (space separated)&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;$&lt;/strong&gt;*: the stem (the bit which matches the % wildcard in a rule definition. (I’m not using this now, but it could be handy someday)&lt;/li&gt;
-&lt;/ul&gt;&lt;p&gt;These special variables, combined with wildcards (the &lt;strong&gt;%&lt;/strong&gt; symbol in make), allow us
-to compactly eliminate all the redundancy. An example will probably clarify it
-better than a thousand words.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
-    gcc &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt;
-
-&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
-&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
-&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
-    gcc -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There, redundancy solved! We only had to specify the name of the executable, and the object files
-that are necessary to build the executable exactly once. If you expand
-the variables in your head, it also looks quite logical.&lt;/p&gt;
-
-&lt;p&gt;Now there are some tiny tweaks that I do quite often to add
-some commandline overridability:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="c"&gt;# if $CC is not set, use gcc as a sensible default&lt;/span&gt;
-&lt;span class="nv"&gt;CC&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; gcc
-
-&lt;span class="c"&gt;# if $CFLAGS is not set, be very pedantic and compile&lt;/span&gt;
-&lt;span class="c"&gt;# as C11, that should catch some common errors, also&lt;/span&gt;
-&lt;span class="c"&gt;# fortify the source, which is a must for security.&lt;/span&gt;
-&lt;span class="nv"&gt;CFLAGS&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; -Wall &lt;span class="se"&gt;\&lt;/span&gt;
-    -D_FORTIFY_SOURCE&lt;span class="o"&gt;=&lt;/span&gt;2 &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wextra -Wcast-align -Wcast-qual -Wpointer-arith &lt;span class="se"&gt;\&lt;/span&gt;
-    -Waggregate-return -Wunreachable-code -Wfloat-equal &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wformat&lt;span class="o"&gt;=&lt;/span&gt;2 -Wredundant-decls -Wundef &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wdisabled-optimization -Wshadow -Wmissing-braces &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wstrict-aliasing&lt;span class="o"&gt;=&lt;/span&gt;2 -Wstrict-overflow&lt;span class="o"&gt;=&lt;/span&gt;5 -Wconversion &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wno-unused-parameter &lt;span class="se"&gt;\&lt;/span&gt;
-    -pedantic -std&lt;span class="o"&gt;=&lt;/span&gt;c11
-
-&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
-&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
-&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That cranks the warnings up to 11, which is often
-a good thing.&lt;sup id="fnref:4"&gt;&lt;a href="#fn:4" class="footnote"&gt;4&lt;/a&gt;&lt;/sup&gt; It’s a good idea to turn the warnings on when
-you start your project. Solving the deluge of warnings that
-can come out of a mature project when going from no flags
-to very pedantic is not fun.&lt;/p&gt;
-
-&lt;h3 id="debug-and-release-builds"&gt;Debug and release builds&lt;/h3&gt;
-
-&lt;p&gt;Quite often, you’d want to compile in debug mode but be
-able to run&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-bash"&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;make release&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you’re done, spitting out a fully optimized and stripped
-executable.&lt;/p&gt;
-
-&lt;p&gt;In make, there are often quite a few ways to achieve the
-same thing, adding to the confusion. For debug and release
-builds, I personally went for something really simple, expanding
-our last example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="c"&gt;# if $CC is not set, use gcc as a sensible default&lt;/span&gt;
-&lt;span class="nv"&gt;CC&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; gcc
-
-&lt;span class="c"&gt;# if $CFLAGS is not set, be very pedantic and compile&lt;/span&gt;
-&lt;span class="c"&gt;# as C11, that should catch some common errors, also&lt;/span&gt;
-&lt;span class="c"&gt;# fortify the source, which is a must for security.&lt;/span&gt;
-&lt;span class="nv"&gt;CFLAGS&lt;/span&gt; &lt;span class="o"&gt;?=&lt;/span&gt; -Wall &lt;span class="se"&gt;\&lt;/span&gt;
-    -D_FORTIFY_SOURCE&lt;span class="o"&gt;=&lt;/span&gt;2 &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wextra -Wcast-align -Wcast-qual -Wpointer-arith &lt;span class="se"&gt;\&lt;/span&gt;
-    -Waggregate-return -Wunreachable-code -Wfloat-equal &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wformat&lt;span class="o"&gt;=&lt;/span&gt;2 -Wredundant-decls -Wundef &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wdisabled-optimization -Wshadow -Wmissing-braces &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wstrict-aliasing&lt;span class="o"&gt;=&lt;/span&gt;2 -Wstrict-overflow&lt;span class="o"&gt;=&lt;/span&gt;5 -Wconversion &lt;span class="se"&gt;\&lt;/span&gt;
-    -Wno-unused-parameter &lt;span class="se"&gt;\&lt;/span&gt;
-    -pedantic -std&lt;span class="o"&gt;=&lt;/span&gt;c11
-
-&lt;span class="nv"&gt;CFLAGS_DEBUG&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; -g3 &lt;span class="se"&gt;\&lt;/span&gt;
-    -O &lt;span class="se"&gt;\&lt;/span&gt;
-    -DDEBUG
-
-&lt;span class="nv"&gt;CFLAGS_RELEASE&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; -O2 &lt;span class="se"&gt;\&lt;/span&gt;
-    -march&lt;span class="o"&gt;=&lt;/span&gt;native &lt;span class="se"&gt;\&lt;/span&gt;
-    -mtune&lt;span class="o"&gt;=&lt;/span&gt;native &lt;span class="se"&gt;\&lt;/span&gt;
-    -ftree-vectorize
-
-&lt;span class="c"&gt;# the default target is debug&lt;/span&gt;
-&lt;span class="nf"&gt;all&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;debug&lt;/span&gt;
-
-&lt;span class="c"&gt;# when the target is debug,&lt;/span&gt;
-&lt;span class="c"&gt;# add CFLAGS_DEBUG to CFLAGS&lt;/span&gt;
-&lt;span class="nf"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;CFLAGS += $(CFLAGS_DEBUG)&lt;/span&gt;
-&lt;span class="nf"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;myapp&lt;/span&gt;
-
-&lt;span class="c"&gt;# when the target is release,&lt;/span&gt;
-&lt;span class="c"&gt;# add CFLAGS_RELEASE to CFLAGS&lt;/span&gt;
-&lt;span class="nf"&gt;release&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;CFLAGS += $(CFLAGS_RELEASE)&lt;/span&gt;
-&lt;span class="nf"&gt;release&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;myapp&lt;/span&gt;
-
-&lt;span class="nf"&gt;myapp&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;main.o helper.o&lt;/span&gt;
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="c"&gt;# when looking for something that ends in .o, look&lt;/span&gt;
-&lt;span class="c"&gt;# for the same thing ending in .c and run gcc on it&lt;/span&gt;
-&lt;span class="nf"&gt;%.o&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;%.c&lt;/span&gt;
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="nf"&gt;.PHONY&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;debug release&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We’re using &lt;strong&gt;target-specific variables&lt;/strong&gt; to get
-the job done. Notice that we added release and debug
-as phony targets because they don’t generate files
-called release and debug. Also note that both
-target and debug have myapp as a dependency, so
-they will both build the executable we want,
-albeit with different flags.&lt;/p&gt;
-
-&lt;h3 id="taking-into-account-differences-in-operating-systems-or-compilers"&gt;Taking into account differences in operating systems or compilers&lt;/h3&gt;
-
-&lt;p&gt;So now you’ve got your fancy project building in debug and release modes
-and you’re really happy about it, but what when you’ve been developing
-on OSX and want to build &amp;amp; run it on Linux as well? Or what if
-you want to support clang because of its awesome diagnostics?&lt;/p&gt;
-
-&lt;p&gt;With make, you can run some commands to find out what your environment
-looks like and make choices based on that. The long and short of it
-can be found on &lt;a href="http://stackoverflow.com/questions/714100/os-detecting-makefile"&gt;stack overflow&lt;/a&gt;.
-I’ll repaste my own edited version here for posterity:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="cp"&gt;ifeq ($(OS),Windows_NT)&lt;/span&gt;
-    CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D WIN32
-&lt;span class="cp"&gt;    ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D AMD64
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;    ifeq ($(PROCESSOR_ARCHITECTURE),x86)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D IA32
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;else&lt;/span&gt;
-&lt;span class="c"&gt;    # tries to find the compiler name&lt;/span&gt;
-    CC_VERSION :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; --version &lt;span class="p"&gt;|&lt;/span&gt; head -1 &lt;span class="p"&gt;|&lt;/span&gt; cut -f1 -d&lt;span class="s1"&gt;' '&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="c"&gt;    # tries to discern what UNIX-like OS we're running on&lt;/span&gt;
-    UNAME_S :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell uname -s&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="cp"&gt;    ifeq ($(UNAME_S),Linux)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D LINUX
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;    ifeq ($(UNAME_S),Darwin)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D OSX
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-
-&lt;span class="cp"&gt;    ifneq (,$(findstring clang,$(CC_VERSION)))&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D CLANG
-
-&lt;span class="c"&gt;        # -pthread is not necessary when using Clang on Darwin&lt;/span&gt;
-&lt;span class="cp"&gt;        ifneq ($(UNAME_S),Darwin)&lt;/span&gt;
-            CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -pthread
-&lt;span class="cp"&gt;        endif&lt;/span&gt;
-&lt;span class="cp"&gt;    else&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D GCC
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -pthread
-
-&lt;span class="c"&gt;        # at least on OS X 10.7.5, the apple linker does&lt;/span&gt;
-&lt;span class="c"&gt;        # not understand AVX and gcc uses it when you specify&lt;/span&gt;
-&lt;span class="c"&gt;        # -mavx or -march=native and you have a CPU&lt;/span&gt;
-&lt;span class="c"&gt;        # with AVX or better&lt;/span&gt;
-&lt;span class="cp"&gt;        ifeq ($(UNAME_S),Darwin)&lt;/span&gt;
-            CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -mno-avx
-&lt;span class="cp"&gt;        endif&lt;/span&gt;
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-
-    UNAME_P :&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell uname -m&lt;span class="k"&gt;)&lt;/span&gt;
-
-&lt;span class="cp"&gt;    ifeq ($(UNAME_P),x86_64)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D AMD64
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;    ifneq ($(filter %86,$(UNAME_P)),)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D IA32
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;    ifneq ($(filter arm%,$(UNAME_P)),)&lt;/span&gt;
-        CCFLAGS +&lt;span class="o"&gt;=&lt;/span&gt; -D ARM
-&lt;span class="cp"&gt;    endif&lt;/span&gt;
-&lt;span class="cp"&gt;endif&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It adds define flags so that whenever necessary, it can be used
-to partially define blocks of code based on OS, CPU or compiler.
-Of course I should note that this is best used when there are no
-obvious alternatives, nobody likes &lt;code&gt;#ifdef&lt;/code&gt; soup.&lt;/p&gt;
-
-&lt;p&gt;By the way, I was bashing autotools earlier for being a mess and
-creating unreadable makefiles, but it remains an oft-used toolset for
-cross-platform building.  Is it because of inertia? Well… yes and no.
-Sometimes building on many (very) different operating systems becomes
-quite a chore, and autotools makes some of that, well, easier. It was
-built long ago for the express purpose of generating cross-platform
-makefiles, which is also why it panders to the lowest common denominator
-by not using any of the newer features that modern make has. Which in
-turn generates ugly makefiles.&lt;/p&gt;
-
-&lt;p&gt;There are &lt;a href="http://cgit.freedesktop.org/libva/"&gt;a lot&lt;/a&gt; of
-&lt;a href="http://cgit.freedesktop.org/xorg/driver/xf86-video-intel/"&gt;examples&lt;/a&gt; of
-&lt;a href="http://www.mplayerhq.hu/design7/news.html"&gt;projects&lt;/a&gt; using autotools to
-great effect, even maintaining almost readable autoconf.ac files.  One
-could copy and paste given a bit of effort and after a while you could
-be an autotools adept too (not a wizard, I suppose there are only 3
-people in the world like that).&lt;/p&gt;
-
-&lt;p&gt;A decent alternative is &lt;a href="http://www.cmake.org/"&gt;cmake&lt;/a&gt;, which tends to
-be a bit more readable, and can generate makefiles on UNIX platforms and
-visual studio project files on windows, if that’s your thing.&lt;/p&gt;
-
-&lt;p&gt;But when your project exhibits just slight differences between OS or
-compiler toolchains, there’s no need to take the plunge and migrate to
-autotools, cmake or anything else just yet. We can make do with modern
-make, and still keep it quite readable.&lt;/p&gt;
-
-&lt;p&gt;Oh, and there’s another thing cmake, autotools and its ilk are pretty
-good at: finding dependencies such as libraries. This used to be much
-more important and difficult to do with make. But thanks to the rise of
-&lt;a href="http://www.freedesktop.org/wiki/Software/pkg-config/"&gt;pkg-config&lt;/a&gt;, I
-find that plain make will do fine for smaller projects. An example from
-&lt;a href="https://github.com/aktau/hhpc/blob/master/Makefile"&gt;one of my projects&lt;/a&gt;
-which uses &lt;em&gt;pkg-config&lt;/em&gt; to find where the X11 libraries and headers
-files are located on the target system:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class="language-make"&gt;&lt;span class="k"&gt;$(&lt;/span&gt;EXECUTABLE&lt;span class="k"&gt;)&lt;/span&gt;: &lt;span class="k"&gt;$(&lt;/span&gt;OBJECTS&lt;span class="k"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell pkg-config --libs x11&lt;span class="k"&gt;)&lt;/span&gt; -o &lt;span class="nv"&gt;$@&lt;/span&gt; &lt;span class="nv"&gt;$^&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;
-
-%.o: %.c
-    &lt;span class="k"&gt;$(&lt;/span&gt;CC&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;shell pkg-config --cflags x11&lt;span class="k"&gt;)&lt;/span&gt; -c &lt;span class="nv"&gt;$&amp;lt;&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;CFLAGS&lt;span class="k"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-
-&lt;div class="footnotes"&gt;
-  &lt;ol&gt;
-&lt;li id="fn:1"&gt;
-      &lt;p&gt;Sweet nostalgia, Dev-C++ was my first real IDE, it helped me form my knowledge of C by being easy to use yet not having auto-completion, which cemented a lot of important functions in my muscle memory. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id="fn:2"&gt;
-      &lt;p&gt;Note that I’m describing makefiles for a C project here, but any developer worth her salt should be able to see that it’s applicable to much more. In fact I use make in combination with &lt;a href="https://github.com/jordansissel/fpm"&gt;fpm&lt;/a&gt; to build .deb files for debian/ubuntu, all I have to do is run &lt;code&gt;make deb&lt;/code&gt;. &lt;a href="#fnref:2" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id="fn:3"&gt;
-      &lt;p&gt;Some might start protesting now, as they’ve seen “outputs” like &lt;strong&gt;install, uninstall, clean, etc.&lt;/strong&gt; that don’t generate files called install, uninstall or clean. The thing is that these targets are special, and they are usually indicated as such by a special target called &lt;strong&gt;.PHONY&lt;/strong&gt;. Make doesn’t need or want to know about the files generated by phony rules. Phony rules will always execute when called, multiple invocations to &lt;code&gt;make install&lt;/code&gt; will, by default, do the same thing. If you forget to add a target such as &lt;strong&gt;install&lt;/strong&gt; to the phony rules, it will still work of course, because your install rules don’t generate a file called install and thus make will keep executing it.  Correctly specifying the phony rules is cleaner though. &lt;a href="#fnref:3" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-    &lt;li id="fn:4"&gt;
-      &lt;p&gt;Of course, there are some flags that might be a little bit too pedantic. For example, when doing game development it’s often useful to do some &lt;a href="http://graphics.stanford.edu/~seander/bithacks.html"&gt;bit twiddling&lt;/a&gt;, compare disparate number types and do dirty things with pointers.  In that case it might not be worth it or even possible to prevent all the warnings by casting to the appropriate type. In that case, feel free to disable some flags. &lt;a href="#fnref:4" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/div&gt;</content>
-    <summary type="html">&lt;p&gt;Looking for an easy to use build tool? Project not yet large enough to
-warrant cmake? Downright scared of autotools (which generates the
-scariest kind of makefiles)? May I present… make!&lt;/p&gt;
 
 </summary>
   </entry>

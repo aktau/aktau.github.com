@@ -9,7 +9,7 @@
         <meta name="description" content="Presents a (hopefully) understandable makefile that can be used for cross-platform, cross-compiler projects in C/C++">
         <meta name="keywords" content="unix, c, make, linux, osx">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.7">
+        <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="A makefile for modern C programming on UNIX-like operating systems">
@@ -102,6 +102,14 @@
                 
                 <li><a href="/tag/applescript">applescript (1)</a></li>
                 
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
             </ul>
             -->
         </nav>
@@ -132,7 +140,7 @@ makefiles, which compiles a single .c file into an application. Save the
 following into a file with the name Makefile, next to a main.c file.
 <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
 
-<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="m">main.c</span>
+<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">c</span>
     gcc -o myapp main.c -I.</code></pre>
 
 <p>To run it, execute:</p>
@@ -159,7 +167,7 @@ target from the dependencies is specified by the rule, in this case the
 gcc -o myapp main.c -I.
 
 <span class="nv">$ </span>make
-make: Nothing to be <span class="k">done for</span> <span class="sb">`</span>all<span class="err">'</span>.
+make: Nothing to be <span class="k">done</span> <span class="k">for</span> <span class="sb">`</span>all<span class="err">'</span>.
 
 <span class="nv">$ </span>edit main.c
 <span class="nv">$ </span>make
@@ -176,7 +184,7 @@ ignore the error).</p>
 <p>Put more abstractly, make is just trying to produce output, which look
 like this:</p>
 
-<pre><code class="language-make"><span class="nf">&lt;output&gt;</span><span class="o">:</span> <span class="m">&lt;dependencies&gt;</span>
+<pre><code class="language-make"><span class="nf">&lt;output&gt;</span><span class="o">:</span> &lt;<span class="n">dependencies</span>&gt;
     &lt;steps to make output from dependencies&gt;</code></pre>
 
 <p>So, in these terms, make’s reasoning becomes clearer: to get <em>output</em>
@@ -192,10 +200,10 @@ as we didn’t specify a rule to make <em>main.c</em>.</p>
 generate the application from them. Doing this presents a nice opportunity to show multiple
 rules working in tandem:</p>
 
-<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o</span>
+<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">o</span>
     gcc main.o -o myapp -I.
 
-<span class="nf">main.o</span><span class="o">:</span> <span class="m">main.c</span>
+<span class="nf">main.o</span><span class="o">:</span> <span class="n">main</span>.<span class="n">c</span>
     gcc -c main.c -o main.o</code></pre>
 
 <p>So now we’re first compiling to object files and then linking them together into
@@ -203,13 +211,13 @@ an executable, great! But what if we want to add another file? Suppose we have
 another file called helper.c that we want to compile and link into our executable,
 we could do this:</p>
 
-<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o helper.o</span>
+<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">o</span> <span class="n">helper</span>.<span class="n">o</span>
     gcc main.o helper.o -o myapp -I.
 
-<span class="nf">main.o</span><span class="o">:</span> <span class="m">main.c</span>
+<span class="nf">main.o</span><span class="o">:</span> <span class="n">main</span>.<span class="n">c</span>
     gcc -c main.c -o main.o
 
-<span class="nf">helper.o</span><span class="o">:</span> <span class="m">helper.c</span>
+<span class="nf">helper.o</span><span class="o">:</span> <span class="n">helper</span>.<span class="n">c</span>
     gcc -c helper.c -o helper.o</code></pre>
 
 <p>Note that we added helper.o as a new dependency for myapp, and that we specified
@@ -225,7 +233,7 @@ the redundancy, but they’re very (very) poorly named.
 The following four are pretty important, for starters:</p>
 
 <ul>
-<li>
+  <li>
 <strong>$@</strong>: the name of the target file (the one before the colon)</li>
   <li>
 <strong>$&lt;</strong>: the name of the first (or only) dependency (the first one after the colon)</li>
@@ -233,16 +241,18 @@ The following four are pretty important, for starters:</p>
 <strong>$^</strong>: the names of all the dependencies (space separated)</li>
   <li>
 <strong>$</strong>*: the stem (the bit which matches the % wildcard in a rule definition. (I’m not using this now, but it could be handy someday)</li>
-</ul><p>These special variables, combined with wildcards (the <strong>%</strong> symbol in make), allow us
+</ul>
+
+<p>These special variables, combined with wildcards (the <strong>%</strong> symbol in make), allow us
 to compactly eliminate all the redundancy. An example will probably clarify it
 better than a thousand words.</p>
 
-<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o helper.o</span>
+<pre><code class="language-make"><span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">o</span> <span class="n">helper</span>.<span class="n">o</span>
     gcc <span class="nv">$^</span> -o <span class="nv">$@</span>
 
 <span class="c"># when looking for something that ends in .o, look</span>
 <span class="c"># for the same thing ending in .c and run gcc on it</span>
-<span class="nf">%.o</span><span class="o">:</span> <span class="m">%.c</span>
+<span class="nf">%.o</span><span class="o">:</span> %.<span class="n">c</span>
     gcc -c <span class="nv">$&lt;</span></code></pre>
 
 <p>There, redundancy solved! We only had to specify the name of the executable, and the object files
@@ -259,21 +269,21 @@ some commandline overridability:</p>
 <span class="c"># as C11, that should catch some common errors, also</span>
 <span class="c"># fortify the source, which is a must for security.</span>
 <span class="nv">CFLAGS</span> <span class="o">?=</span> -Wall <span class="se">\</span>
-    -D_FORTIFY_SOURCE<span class="o">=</span>2 <span class="se">\</span>
+    -D_FORTIFY_SOURCE<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
     -Wextra -Wcast-align -Wcast-qual -Wpointer-arith <span class="se">\</span>
     -Waggregate-return -Wunreachable-code -Wfloat-equal <span class="se">\</span>
-    -Wformat<span class="o">=</span>2 -Wredundant-decls -Wundef <span class="se">\</span>
+    -Wformat<span class="o">=</span><span class="m">2</span> -Wredundant-decls -Wundef <span class="se">\</span>
     -Wdisabled-optimization -Wshadow -Wmissing-braces <span class="se">\</span>
-    -Wstrict-aliasing<span class="o">=</span>2 -Wstrict-overflow<span class="o">=</span>5 -Wconversion <span class="se">\</span>
+    -Wstrict-aliasing<span class="o">=</span><span class="m">2</span> -Wstrict-overflow<span class="o">=</span><span class="m">5</span> -Wconversion <span class="se">\</span>
     -Wno-unused-parameter <span class="se">\</span>
     -pedantic -std<span class="o">=</span>c11
 
-<span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o helper.o</span>
+<span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">o</span> <span class="n">helper</span>.<span class="n">o</span>
     <span class="k">$(</span>CC<span class="k">)</span> <span class="nv">$^</span> -o <span class="nv">$@</span> <span class="k">$(</span>CFLAGS<span class="k">)</span>
 
 <span class="c"># when looking for something that ends in .o, look</span>
 <span class="c"># for the same thing ending in .c and run gcc on it</span>
-<span class="nf">%.o</span><span class="o">:</span> <span class="m">%.c</span>
+<span class="nf">%.o</span><span class="o">:</span> %.<span class="n">c</span>
     <span class="k">$(</span>CC<span class="k">)</span> -c <span class="nv">$&lt;</span> <span class="k">$(</span>CFLAGS<span class="k">)</span></code></pre>
 
 <p>That cranks the warnings up to 11, which is often
@@ -304,12 +314,12 @@ our last example:</p>
 <span class="c"># as C11, that should catch some common errors, also</span>
 <span class="c"># fortify the source, which is a must for security.</span>
 <span class="nv">CFLAGS</span> <span class="o">?=</span> -Wall <span class="se">\</span>
-    -D_FORTIFY_SOURCE<span class="o">=</span>2 <span class="se">\</span>
+    -D_FORTIFY_SOURCE<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
     -Wextra -Wcast-align -Wcast-qual -Wpointer-arith <span class="se">\</span>
     -Waggregate-return -Wunreachable-code -Wfloat-equal <span class="se">\</span>
-    -Wformat<span class="o">=</span>2 -Wredundant-decls -Wundef <span class="se">\</span>
+    -Wformat<span class="o">=</span><span class="m">2</span> -Wredundant-decls -Wundef <span class="se">\</span>
     -Wdisabled-optimization -Wshadow -Wmissing-braces <span class="se">\</span>
-    -Wstrict-aliasing<span class="o">=</span>2 -Wstrict-overflow<span class="o">=</span>5 -Wconversion <span class="se">\</span>
+    -Wstrict-aliasing<span class="o">=</span><span class="m">2</span> -Wstrict-overflow<span class="o">=</span><span class="m">5</span> -Wconversion <span class="se">\</span>
     -Wno-unused-parameter <span class="se">\</span>
     -pedantic -std<span class="o">=</span>c11
 
@@ -323,27 +333,27 @@ our last example:</p>
     -ftree-vectorize
 
 <span class="c"># the default target is debug</span>
-<span class="nf">all</span><span class="o">:</span> <span class="m">debug</span>
+<span class="nf">all</span><span class="o">:</span> <span class="n">debug</span>
 
 <span class="c"># when the target is debug,</span>
 <span class="c"># add CFLAGS_DEBUG to CFLAGS</span>
-<span class="nf">debug</span><span class="o">:</span> <span class="m">CFLAGS += $(CFLAGS_DEBUG)</span>
-<span class="nf">debug</span><span class="o">:</span> <span class="m">myapp</span>
+<span class="nf">debug</span><span class="o">:</span> <span class="n">CFLAGS</span> += <span class="k">$(</span><span class="nv">CFLAGS_DEBUG</span><span class="k">)</span>
+<span class="nf">debug</span><span class="o">:</span> <span class="n">myapp</span>
 
 <span class="c"># when the target is release,</span>
 <span class="c"># add CFLAGS_RELEASE to CFLAGS</span>
-<span class="nf">release</span><span class="o">:</span> <span class="m">CFLAGS += $(CFLAGS_RELEASE)</span>
-<span class="nf">release</span><span class="o">:</span> <span class="m">myapp</span>
+<span class="nf">release</span><span class="o">:</span> <span class="n">CFLAGS</span> += <span class="k">$(</span><span class="nv">CFLAGS_RELEASE</span><span class="k">)</span>
+<span class="nf">release</span><span class="o">:</span> <span class="n">myapp</span>
 
-<span class="nf">myapp</span><span class="o">:</span> <span class="m">main.o helper.o</span>
+<span class="nf">myapp</span><span class="o">:</span> <span class="n">main</span>.<span class="n">o</span> <span class="n">helper</span>.<span class="n">o</span>
     <span class="k">$(</span>CC<span class="k">)</span> <span class="nv">$^</span> -o <span class="nv">$@</span> <span class="k">$(</span>CFLAGS<span class="k">)</span>
 
 <span class="c"># when looking for something that ends in .o, look</span>
 <span class="c"># for the same thing ending in .c and run gcc on it</span>
-<span class="nf">%.o</span><span class="o">:</span> <span class="m">%.c</span>
+<span class="nf">%.o</span><span class="o">:</span> %.<span class="n">c</span>
     <span class="k">$(</span>CC<span class="k">)</span> -c <span class="nv">$&lt;</span> <span class="k">$(</span>CFLAGS<span class="k">)</span>
 
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="m">debug release</span></code></pre>
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">debug</span> <span class="n">release</span></code></pre>
 
 <p>We’re using <strong>target-specific variables</strong> to get
 the job done. Notice that we added release and debug
@@ -461,15 +471,15 @@ find that plain make will do fine for smaller projects. An example from
 which uses <em>pkg-config</em> to find where the X11 libraries and headers
 files are located on the target system:</p>
 
-<pre><code class="language-make"><span class="k">$(</span>EXECUTABLE<span class="k">)</span>: <span class="k">$(</span>OBJECTS<span class="k">)</span>
+<pre><code class="language-make"><span class="nf">$(EXECUTABLE)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
     <span class="k">$(</span>CC<span class="k">)</span> <span class="k">$(</span>shell pkg-config --libs x11<span class="k">)</span> -o <span class="nv">$@</span> <span class="nv">$^</span> <span class="k">$(</span>CFLAGS<span class="k">)</span>
 
-%.o: %.c
+<span class="nf">%.o</span><span class="o">:</span> %.<span class="n">c</span>
     <span class="k">$(</span>CC<span class="k">)</span> <span class="k">$(</span>shell pkg-config --cflags x11<span class="k">)</span> -c <span class="nv">$&lt;</span> <span class="k">$(</span>CFLAGS<span class="k">)</span></code></pre>
 
 <div class="footnotes">
   <ol>
-<li id="fn:1">
+    <li id="fn:1">
       <p>Sweet nostalgia, Dev-C++ was my first real IDE, it helped me form my knowledge of C by being easy to use yet not having auto-completion, which cemented a lot of important functions in my muscle memory. <a href="#fnref:1" class="reversefootnote">↩</a></p>
     </li>
     <li id="fn:2">
@@ -483,6 +493,7 @@ files are located on the target system:</p>
     </li>
   </ol>
 </div>
+
         </article>
 
         <p>Tags: <a href="/tag/unix" rel="tag">unix</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/make" rel="tag">make</a>, <a href="/tag/linux" rel="tag">linux</a>, <a href="/tag/osx" rel="tag">osx</a></p>

@@ -9,7 +9,7 @@
         <meta name="description" content="The second version of the cross-platform game development library SDL was released today. Game developers everywhere rejoice">
         <meta name="keywords" content="sdl, game-engine, open-source">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.6.7">
+        <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="SDL2 (2.0.0) released at last!">
@@ -102,6 +102,14 @@
                 
                 <li><a href="/tag/applescript">applescript (1)</a></li>
                 
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
             </ul>
             -->
         </nav>
@@ -124,7 +132,7 @@ input subsystems according to different capabilities and so forth.</p>
 <p>Copied from the mailing list, here are the most important new features:</p>
 
 <ul>
-<li>Full 3D hardware acceleration</li>
+  <li>Full 3D hardware acceleration</li>
   <li>Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)</li>
   <li>Support for OpenGL ES</li>
   <li>Support for multiple windows</li>
@@ -149,7 +157,9 @@ input subsystems according to different capabilities and so forth.</p>
   <li>A really powerful assert macro</li>
   <li>Lots of old annoyances from 1.2 are gone</li>
   <li>Many other things!</li>
-</ul><p>If you develop your code with just SDL, (optionally) OpenGL and the standard
+</ul>
+
+<p>If you develop your code with just SDL, (optionally) OpenGL and the standard
 C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>
 So it pays off to use it, especially if you’re in the market to develop games commercially: <strong>write once, run on your toaster</strong>.</p>
 
@@ -276,9 +286,9 @@ were minor (except for haptics support, which I don’t use).</p>
     <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">while</span> <span class="p">(</span><span class="n">SDL_PollEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="p">))</span> <span class="p">{</span>
             <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">case</span> <span class="n">SDL_WINDOWEVENT</span>:
+                <span class="k">case</span> <span class="nl">SDL_WINDOWEVENT</span><span class="p">:</span>
                     <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">event</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">case</span> <span class="n">SDL_WINDOWEVENT_RESIZED</span>:
+                        <span class="k">case</span> <span class="nl">SDL_WINDOWEVENT_RESIZED</span><span class="p">:</span>
                         <span class="p">{</span>
                             <span class="kt">int</span> <span class="n">newWidth</span>  <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data1</span><span class="p">;</span>
                             <span class="kt">int</span> <span class="n">newHeight</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data2</span><span class="p">;</span>
@@ -295,16 +305,16 @@ were minor (except for haptics support, which I don’t use).</p>
                     <span class="p">}</span>
                     <span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="n">SDL_KEYDOWN</span>:
+                <span class="k">case</span> <span class="nl">SDL_KEYDOWN</span><span class="p">:</span>
                     <span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="n">SDL_KEYUP</span>:
+                <span class="k">case</span> <span class="nl">SDL_KEYUP</span><span class="p">:</span>
                     <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">key</span><span class="p">.</span><span class="n">keysym</span><span class="p">.</span><span class="n">sym</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">case</span> <span class="n">SDLK_ESCAPE</span>:
+                        <span class="k">case</span> <span class="nl">SDLK_ESCAPE</span><span class="p">:</span>
                             <span class="n">done</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
                         <span class="k">break</span><span class="p">;</span>
 
-                        <span class="k">case</span> <span class="n">SDLK_v</span>:
+                        <span class="k">case</span> <span class="nl">SDLK_v</span><span class="p">:</span>
                             <span class="n">vsync</span> <span class="o">=</span> <span class="o">!</span><span class="n">vsync</span><span class="p">;</span>
 
                             <span class="k">if</span> <span class="p">(</span><span class="n">SDL_GL_SetSwapInterval</span><span class="p">(</span><span class="n">vsync</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
@@ -315,7 +325,7 @@ were minor (except for haptics support, which I don’t use).</p>
                             <span class="p">}</span>
                         <span class="k">break</span><span class="p">;</span>
 
-                        <span class="k">case</span> <span class="n">SDLK_d</span>:
+                        <span class="k">case</span> <span class="nl">SDLK_d</span><span class="p">:</span>
                             <span class="n">doublebuf</span> <span class="o">=</span> <span class="o">!</span><span class="n">doublebuf</span><span class="p">;</span>
 
                             <span class="k">if</span> <span class="p">(</span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DOUBLEBUFFER</span><span class="p">,</span> <span class="n">doublebuf</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
@@ -328,7 +338,7 @@ were minor (except for haptics support, which I don’t use).</p>
                     <span class="p">}</span>
                     <span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="n">SDL_QUIT</span>:
+                <span class="k">case</span> <span class="nl">SDL_QUIT</span><span class="p">:</span>
                     <span class="n">done</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
                     <span class="k">break</span><span class="p">;</span>
 
@@ -358,7 +368,7 @@ were minor (except for haptics support, which I don’t use).</p>
 
 <div class="footnotes">
   <ol>
-<li id="fn:1">
+    <li id="fn:1">
       <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote">↩</a></p>
     </li>
     <li id="fn:2">
@@ -366,6 +376,7 @@ were minor (except for haptics support, which I don’t use).</p>
     </li>
   </ol>
 </div>
+
         </article>
 
         <p>Tags: <a href="/tag/sdl" rel="tag">sdl</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/open-source" rel="tag">open-source</a></p>

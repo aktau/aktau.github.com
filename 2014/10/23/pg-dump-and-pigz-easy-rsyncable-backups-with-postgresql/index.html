@@ -1,0 +1,439 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>pg_dump and pigz, easy rsyncable backups with PostgreSQL</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="Research about the best way to create rsyncable backups with pg_dump">
+        <meta name="keywords" content="postgres, pigz, rsync, sysadmin">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="pg_dump and pigz, easy rsyncable backups with PostgreSQL">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="http://www.aktau.be/2014/10/23/pg-dump-and-pigz-easy-rsyncable-backups-with-postgresql/">
+
+        <!-- Google Fonts embed code -->
+        <script>
+            (function() {
+                var link_element = document.createElement("link"),
+                    s = document.getElementsByTagName("script")[0];
+                if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+                    link_element.href = "http:";
+                }
+                link_element.href += "//fonts.googleapis.com/css?family=EB+Garamond:400";
+                link_element.rel = "stylesheet";
+                link_element.type = "text/css";
+                s.parentNode.insertBefore(link_element, s);
+            })();
+        </script>
+        <noscript>
+            <!-- don't leave noscript users out in the cold -->
+            <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
+        </noscript>
+
+        
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        
+
+        <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+    </head>
+    <body>
+        <nav>
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive/">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf" title="Résumé">Curriculum Vitae</a></li>
+                <li><a href="/contact/" title="Personal information">About &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
+            </ul>
+            -->
+        </nav>
+
+        <main id="content">
+            
+    <div class="post">
+        <h1>pg_dump and pigz, easy rsyncable backups with PostgreSQL</h1>
+        <aside>October 23, 2014</aside>
+
+        <article>
+            <p>Some time ago, I created an ad-hoc offsite backup solution for a MySQL
+database after I recovered it. This happened after a client contacted me
+when one of their legacy databases blew up. The recovery process was
+quite painful because the backups that they had were corrupted and
+incomplete (a monthly cronjob). I ended up with a simple setup that used
+<em>mysqldump</em>, <em>gzip</em> and <em>rsnapshot</em> to great effect. This article talks
+about effectively using a similar backup method with PostgreSQL.</p>
+
+<!-- more -->
+
+<h2 id="the-solution-in-mysql-space">The solution in MySQL-space</h2>
+
+<p>When preparing to deploy a solution I had made into production, I knew I
+needed backups. Its main data store was a PostgreSQL 9.3 database, so I
+remembered my MySQL adventure and went looking for similar tools to the
+ones I used before. The core of the earlier MySQL solution
+looked like this:</p>
+
+<pre><code class="language-bash"><span class="c"># omitting all the rotation logic</span>
+mysqldump <span class="nv">$OPTIONS</span> --user<span class="o">=</span><span class="nv">$USER</span> --password<span class="o">=</span><span class="nv">$PWD</span> <span class="nv">$DB</span> --routines --no-data --add-drop-database --database <span class="nv">$DB</span> <span class="p">|</span> gzip --rsyncable &gt; <span class="s2">"$DIR/schema.sql.gz"</span>
+
+<span class="nv">TABLES</span><span class="o">=</span><span class="k">$(</span>mysql --user<span class="o">=</span><span class="nv">$USER</span> --password<span class="o">=</span><span class="nv">$PWD</span> -Bse <span class="s1">'show tables'</span> <span class="nv">$DB</span><span class="k">)</span>
+<span class="k">for</span> TABLE in <span class="nv">$TABLES</span>
+<span class="k">do</span>
+    <span class="nv">BACKUP_FILE</span><span class="o">=</span><span class="s2">"$DIR/${TABLE}.sql.gz"</span>
+    <span class="nb">echo</span> <span class="s2">"dumping $TABLE into $BACKUP_FILE"</span>
+    mysqldump <span class="nv">$OPTIONS</span> --user<span class="o">=</span><span class="nv">$USER</span> --password<span class="o">=</span><span class="nv">$PWD</span> <span class="nv">$DB</span> <span class="nv">$TABLE</span> <span class="p">|</span> gzip --rsyncable &gt; <span class="s2">"$BACKUP_FILE"</span>
+<span class="k">done</span></code></pre>
+
+<p>This dumps the database as separate files: <code>schema.sql.gz</code> to setup the
+schema and <code>$TABLE.sql.gz</code> for the row data of each table. This allows
+restoring of partial sets of data easily.</p>
+
+<p><a href="dev.mysql.com/doc/en/mysqldump.html">mysqldump</a> outputs SQL on stdout
+by default, which makes it easy to pipe to <code>gzip</code> to create compressed
+archives. Data stored in databases is usually quite compressible, so
+piping to <em>gzip</em> saves a lot of space.</p>
+
+<p>There’s a catch though. Regular <em>gzip</em> with no flags has a serious
+disadvantage for offsite backup: a small change in the raw data provokes
+a large change in the compressed data. This means that every time we
+<em>rsync</em> the latest backup over, it will transfer the entire lot. Said in
+another way, the speedup factor reported with the <code>--stats</code> flag is more
+or less 1.00. Classic doubleplusungood.</p>
+
+<p>That’s why we supply the <code>--rsyncable</code> flag when compressing the data
+with <em>gzip</em>. This resets the compression dictionary from time to time
+such that the blocks are compressed independently. A small change in the
+source will thus not change the entire compressed archive and the rsync
+delta encoding algorithm can work its magic even on gzipped files!</p>
+
+<p>Sadly, the <code>--rsyncable</code> flag is not mainline, it’s a custom patch
+carried by debian (and ubuntu). To top it off, it <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=708423">seems that the patch
+was misapplied for Debian
+Wheezy</a>. It
+doesn’t even error out when using that flag for some reason, so I hadn’t
+noticed until a few days ago. This effectively brought my rsync speedup
+factor to 1.00, poor backup server.</p>
+
+<p>I went looking for alternatives. One could go for backports, testing
+repositories or even custom packages but I’m always apprehensive of such
+things in production servers. I looked at <em>lz4</em> (not available in Debian
+Wheezy), <em>bzip2</em> (slow, large blocks), <em>xz/lzma</em> until finding what
+appeared to be the solution: <a href="http://zlib.net/pigz/">pigz</a>. It’s a
+parallel implementation of <em>gzip</em>. It has mainlined support of
+<code>--rsyncable</code> and is in the Wheezy repository.</p>
+
+<h2 id="backing-up-with-postgres">Backing up with Postgres</h2>
+
+<p><em>mysqldump</em>’s equivalent in the Postgres world is
+<a href="http://www.postgresql.org/docs/devel/static/app-pgdump.html">pg_dump</a>.
+I like <em>pg_dump</em> better because it allows dumping in several formats
+with accompanying up- and downsides. It also has a sister command
+<a href="http://www.postgresql.org/docs/devel/static/app-pgrestore.html">pg_restore</a>
+allowing much more flexibility when restoring a backup. The 4 output
+formats available at the moment of writing are (if you already know them
+you can skip the list, it’s mostly from the Postgres docs):</p>
+
+<ul>
+  <li>
+<strong>plain</strong>: like <em>mysqldump</em>, mostly SQL queries but with faster data
+loading (no <code>INSERT</code> statements but loading from heredoc-like
+buffers). This is the default. The big advantage of this format is
+that it is human-readable.</li>
+  <li>
+<strong>custom</strong>: Output a custom-format archive suitable for input into
+pg_restore. Together with the directory output format, this is the
+most flexible output format in that it allows manual selection and
+reordering of archived items during restore. This format is also
+compressed by default. It’s not human-readable though, unless you turn
+off compression with <code>-Z0</code>, in which case opening it in a text editor
+will allow one to make sense of a lot of things.</li>
+  <li>
+<strong>directory</strong>: Output a directory-format archive suitable for input
+into <em>pg_restore</em>. This will create a directory with one file for each
+table and blob being dumped, plus a so-called Table of Contents file
+describing the dumped objects in a machine-readable format that
+<em>pg_restore</em> can read. A directory format archive can be manipulated
+with standard Unix tools; for example, files in an uncompressed
+archive can be compressed with the gzip tool. This format is
+compressed by default and also supports parallel dumps. This is most
+similar to what I had been forcing <em>mysqldump</em> to do, except that with
+<em>pg_dump</em> you only need one command.</li>
+  <li>
+<strong>tar</strong>: Output a tar-format archive suitable for input into
+pg_restore.  The tar-format is compatible with the directory-format;
+extracting a tar-format archive produces a valid directory-format
+archive. However, the tar-format does not support compression and has
+a limit of 8 GB on the size of individual tables. Also, the relative
+order of table data items cannot be changed during restore. try not to
+use this as can use <a href="http://serverfault.com/questions/267616/pg-dump-fails-due-to-mistaken-low-disk-space">a lot of temporary space on your
+harddrive</a>.
+This might not only wear the underlying HD out and consume needless
+space but also thrash the disk page cache.</li>
+</ul>
+
+<p><strong>NOTE</strong>: If you’re using the directory output format the nifty flag
+<code>--jobs</code> becomes available, allowing parallel dumping.</p>
+
+<p>It seems that we can get the flexibility of partially restoring a
+database without requesting the tables first by choosing the <em>custom</em> or
+<em>directory</em> methods.</p>
+
+<p>The <em>directory</em> method creates a folder with some files in it:
+<code>2298.dat.gz</code>, <code>2300.dat.gz</code>, … and finally <code>toc.dat</code>. They are
+compressed by default, but it’s possible to turn this off by passing the
+<code>-Z0</code> flag to <code>pg_dump</code>. This allows compressing those files
+with an rsync-friendly method afterwards. The downside is that all those
+uncompressed bytes will get written to disk (and into the page cache).
+The larger your DB, the worse this will become for your system.</p>
+
+<p>For this reason, the <em>custom</em> format seems like the best of both worlds.
+The output can be piped straight into a compress filter. Curious as to
+the performance and rsyncability of a few variations on this theme, I
+started benchmarking. The most up-to-date scripts I used are available
+in a <a href="https://gist.github.com/aktau/8e19977f96d56000aa95">gist</a>,
+possibly outdated versions are shown below:</p>
+
+<p>The first script generates a dump of the database in several formats (my
+database is called <em>m2d</em>, adjust accordingly):</p>
+
+<pre><code class="language-bash"><span class="c"># gen.sh</span>
+<span class="nv">DIR</span><span class="o">=</span><span class="s2">"$1"</span>
+
+<span class="o">[</span> -d <span class="s2">"$DIR"</span> <span class="o">]</span> <span class="o">||</span> mkdir -p <span class="s2">"$DIR"</span>
+
+<span class="c"># -Z0 is to force no compression, we supply this flag when we pipe to</span>
+<span class="c"># our own compressor</span>
+pg_dump -Fc m2d &gt; <span class="s2">"$DIR/m2d.compr.dump"</span>
+pg_dump -Z0 -Fc m2d &gt; <span class="s2">"$DIR/m2d.raw.dump"</span>
+pg_dump -Z0 -Fc m2d <span class="p">|</span> pigz &gt; <span class="s2">"$DIR/m2d.pigz.dump.gz"</span>
+pg_dump -Z0 -Fc m2d <span class="p">|</span> gzip &gt; <span class="s2">"$DIR/m2d.gzip.dump.gz"</span>
+pg_dump -Z0 -Fc m2d <span class="p">|</span> pigz --rsyncable &gt; <span class="s2">"$DIR/m2d.arsync.dump.gz"</span></code></pre>
+
+<p>The script will generate a few files corresponding to some different
+ways of compressing (or not) the output. Run it once to supply a
+baseline, make some edits to the database and export again:</p>
+
+<pre><code class="language-bash"><span class="nv">$ </span>./gen.sh orig
+<span class="nv">$ </span>psql m2d
+<span class="c"># make some changes to the database, try to make a small change in the largest tables</span>
+<span class="nv">$ </span>./gen.sh changed</code></pre>
+
+<p>Time to test the rsyncability. I switched to another host and used a
+script to rsync every file separately so that I could clearly see the
+speedup factor.</p>
+
+<pre><code class="language-bash"><span class="c"># look out for the speedup factors reported by rsync</span>
+<span class="c">#</span>
+<span class="c"># NOTE</span>
+<span class="c">#  you'll have to change the HOST variable below to</span>
+<span class="c">#  point to the host + folder to fetch the files from</span>
+
+<span class="nv">HOST</span><span class="o">=</span><span class="s2">"vagrant:/home/vagrant/pgdumptests"</span>
+
+<span class="nv">ORIG</span><span class="o">=</span><span class="s2">"$1"</span>
+<span class="nv">NEW</span><span class="o">=</span><span class="s2">"$2"</span>
+
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$ORIG</span>/ data/
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$NEW</span>/m2d.arsync.dump.gz data/
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$NEW</span>/m2d.compr.dump data/
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$NEW</span>/m2d.gzip.dump.gz data/
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$NEW</span>/m2d.pigz.dump.gz data/
+rsync -avh --stats --progress <span class="nv">$HOST</span>/<span class="nv">$NEW</span>/m2d.raw.dump data/</code></pre>
+
+<p>I ran it on the other host like this:</p>
+
+<pre><code class="language-bash"><span class="nv">$ </span>bench.sh orig changed</code></pre>
+
+<p>The result:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>File size</th>
+      <th>Speedup</th>
+      <th>Bytes sent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>uncompressed</td>
+      <td>6.40MB</td>
+      <td>132.77</td>
+      <td>33.01KB</td>
+    </tr>
+    <tr>
+      <td><strong>pigz –rsyncable</strong></td>
+      <td><strong>723.35KB</strong></td>
+      <td><strong>15.22</strong></td>
+      <td><strong>42.37KB</strong></td>
+    </tr>
+    <tr>
+      <td>pg_dump compress</td>
+      <td>716.49KB</td>
+      <td>1.17</td>
+      <td>608.14KB</td>
+    </tr>
+    <tr>
+      <td>pigz</td>
+      <td>686.26KB</td>
+      <td>1.05</td>
+      <td>646.27KB</td>
+    </tr>
+    <tr>
+      <td>gzip</td>
+      <td>689.76KB</td>
+      <td>0.99</td>
+      <td>688.32KB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>It seems that if you’re only concerned about bandwidth, the uncompressed
+variant is actually best in combination with <em>rsync</em>). Yet the file size
+of my tiny database in uncompressed is <strong>9x</strong> the size of the compressed
+variant. Since I also like to keep backups on the same server as the DB,
+that becomes a bit hard to stomach for the relatively small servers I’m
+working with.</p>
+
+<p>The sweet spot between simplicity, low bandwidth off-site backup and low
+disk space usage seems to fall straight into the camp of piping the
+output of <code>pg_dump</code> into <code>pigz --rsyncable</code>. Very respectable delta
+encoding speedups (<strong>15x</strong>) and file size (<strong>9x smaller</strong>) are within
+reach. Take these numbers with a grain of salt because it obviously
+depends on what’s in the database. If you’re just storing large binary
+blobs in the database, this obviously won’t work nearly as well.</p>
+
+<p>Since this article is already getting a bit long in the tooth, the
+implementation of the off-site backup server with
+<a href="http://www.rsnapshot.org/">rsnapshot</a> is left up to the reader.</p>
+
+<h2 id="further-benefits--ideas">Further benefits &amp; ideas</h2>
+
+<p>On the side of the backup server, it becomes advantageous to use
+something like <a href="http://www.nongnu.org/rdiff-backup/">rdiff-backup</a> to be
+able to keep an incredible amount of backups using minimal amounts of
+space using the same delta encoding as <code>rsync</code>.</p>
+
+<p>The astute reader will notice that it might be a good idea to decompress
+the backups before handing them over to <code>rdiff-backup</code>. From the table
+above we can see that the uncompressed format has the highest delta
+encoding efficiency. This added efficiency <em>might</em> cause an
+<code>rdiff-backup</code> based solution to use even less space than the compressed
+variant, because the delta’s could be smaller (look at the <em>bytes sent</em>
+column). It depends on the churn rate and the type of data in the
+database though.</p>
+
+        </article>
+
+        <p>Tags: <a href="/tag/postgres" rel="tag">postgres</a>, <a href="/tag/pigz" rel="tag">pigz</a>, <a href="/tag/rsync" rel="tag">rsync</a>, <a href="/tag/sysadmin" rel="tag">sysadmin</a></p>
+    </div>
+
+        </main>
+
+        <!-- mathjax config similar to math.stackexchange -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+              jax: ["input/TeX", "output/HTML-CSS"],
+              tex2jax: {
+                inlineMath: [ ['$', '$'], ["\\(", "\\)"] ],
+                displayMath: [ ['$$', '$$'], ["\\[", "\\]"] ],
+                processEscapes: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+              },
+              "HTML-CSS": { scale: 180 },
+              //displayAlign: "left",
+              //displayIndent: "2em"
+            });
+        </script>
+        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-37726728-1', 'aktau.be');
+            ga('send', 'pageview');
+        </script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    // reload mathjax after a pjax load
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                },
+                "autoAnalytics": true
+            });
+        </script>
+    </body>
+</html>
