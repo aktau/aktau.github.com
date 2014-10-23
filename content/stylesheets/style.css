@@ -180,17 +180,9 @@ a:hover {
     background: #b3eecc;
 }
 
-/* inline code shouldn't affect the line-height */
-p code {
-    line-height: 0;
-}
-
-.reversefootnote {
-    font-size: medium;
-}
-
-main ul, main ol, main dl {
-    font-size: 21px;
+strong {
+    /* color: #5E8C6A; */
+    color: #A30006;
 }
 
 article ol {
@@ -250,7 +242,31 @@ nav li {
     line-height: 26px;
 }
 
-/* mobile browser optimisations */
+table {
+    border-collapse: collapse;
+    font-family: Futura, Arial, sans-serif;
+    text-rendering: optimizeLegibility;
+    margin: 0 auto;
+}
+
+caption {
+    font-size: larger;
+    margin: 1em auto;
+}
+
+th, td {
+    padding: .65em;
+}
+
+th, thead {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+}
+
+td {
+    border: 1px solid #777;
+}
 
 /* portrait vs landscape: http://www.javascriptkit.com/dhtmltutors/cssmediaqueries2.shtml */
 
