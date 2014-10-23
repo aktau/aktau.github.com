@@ -66,8 +66,8 @@ namespace :optimize do
   ##
   # Convenient task for performing all optimization techniques at once
   #
-  desc 'Optimize all JPG, PNG, Stylesheet and JavaScript files in the output directory'
-  task :all => [:jpg, :png, :javascripts, :stylesheets]
+  desc 'Optimize all JPG and PNG files in the output directory'
+  task :all => [:jpg, :png]
 end
 
 ##
