@@ -40,17 +40,15 @@ compile /(rss|atom)/ do
     filter :erb unless rep.binary? # e.g. rss.png image
 end
 
-# compile '/stylesheets/*/' do
-#     # don’t filter or layout
-# end
-
 compile '/stylesheets/*' do
   filter :erb
   filter :rainpress if File.basename(item[:content_filename], ".*") == 'all'
 end
 
 compile '/js/*/' do
-    # don’t filter or layout
+    unless @config[:debug]
+        filter :uglify_js
+    end
 end
 
 compile %r{^/(google|robots|Bing)} do

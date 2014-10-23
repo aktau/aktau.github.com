@@ -37,43 +37,6 @@ end
 # A couple of rake tasks that'll optimize JPG, PNG, JavaScripts and Stylesheet files
 #
 namespace :optimize do
-
-  ##
-  # Gem Requirement:
-  #  YUI-Compressor - Bundled in Gemfile
-  #
-  desc 'Compress all stylesheet files'
-  task :stylesheets do
-    require 'yui/compressor'
-    compressor = YUI::CssCompressor.new
-
-    Dir['output/**/*.css'].each do |stylesheet|
-      puts "Compressing Stylesheet: #{stylesheet}"
-      css = File.read(stylesheet)
-      File.open(stylesheet, 'w') do |file|
-        file.write(compressor.compress(css))
-      end
-    end
-  end
-
-  ##
-  # Gem Requirement:
-  #  YUI-Compressor - Bundled in Gemfile
-  #
-  desc 'Compress all javascript files'
-  task :javascripts do
-    require 'yui/compressor'
-    compressor = YUI::JavaScriptCompressor.new(:munge => true)
-
-    Dir['output/**/*.js'].each do |javascript|
-      puts "Compressing JavaScript: #{javascript}"
-      js = File.read(javascript)
-      File.open(javascript, 'w') do |file|
-        file.write(compressor.compress(js))
-      end
-    end
-  end
-
   ##
   # Package Requirement:
   #  jpegoptim
