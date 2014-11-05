@@ -16,9 +16,9 @@
     <updated>2014-11-03T23:00:00Z</updated>
     <link rel="alternate" href="http://www.aktau.be/2014/11/04/neovim-input-encoding-and-you/"/>
     <content type="html">&lt;p&gt;In my guise as a Neovim developer, I was recently looking at how vim
-handles character encoding. This lead me down a whole rabbit hole that I
+handles character encoding. This lead me down a rabbit hole that I
 haven’t seen the end of yet. This article describes what I’ve learned
-and what I still have left to discover.&lt;/p&gt;
+and what’s left to discover.&lt;/p&gt;
 
 &lt;!-- more --&gt;
 
@@ -92,22 +92,42 @@ Neovim, as it was wrought for its brand new event-oriented nature:&lt;/p&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;To summarize, this function copies bytes from the &lt;code&gt;read_buffer&lt;/code&gt; to the
-&lt;code&gt;input_buffer&lt;/code&gt;. The &lt;code&gt;read_buffer&lt;/code&gt; is filled every time there is data
-available on stdin. If &lt;code&gt;input_conv.vc_type&lt;/code&gt; is &lt;code&gt;CONV_NONE&lt;/code&gt;, copying is
-all it really does (&lt;code&gt;rbuffer_write()&lt;/code&gt; is basically &lt;code&gt;memcpy()&lt;/code&gt;). The
-interesting part comes if it isn’t: &lt;code&gt;string_convert_ext()&lt;/code&gt; gets called
-to supposedly convert the character encoding into the desired format.&lt;/p&gt;
+&lt;code&gt;input_buffer&lt;/code&gt;. note: The &lt;code&gt;read_buffer&lt;/code&gt; is filled every time there is
+data available on stdin in another part of the code.&lt;/p&gt;
+
+&lt;p&gt;If &lt;code&gt;input_conv.vc_type&lt;/code&gt; is &lt;code&gt;CONV_NONE&lt;/code&gt;, copying is all it really does
+(&lt;code&gt;rbuffer_write()&lt;/code&gt; is basically &lt;code&gt;memcpy()&lt;/code&gt;). The interesting part comes
+when it isn’t &lt;code&gt;CONV_NONE&lt;/code&gt;: &lt;code&gt;string_convert_ext()&lt;/code&gt; gets called to
+supposedly convert the character encoding into the desired format.&lt;/p&gt;
 
 &lt;p&gt;What’s the desired format? How does that get decided? For that we have
 to search to where &lt;code&gt;input_conv&lt;/code&gt; is initialized. Before looking at the
 code, my assumption was that it had to with either the Vim options
-&lt;code&gt;encoding&lt;/code&gt;, &lt;code&gt;termencoding&lt;/code&gt; or both.&lt;/p&gt;
+&lt;code&gt;encoding&lt;/code&gt;, &lt;code&gt;termencoding&lt;/code&gt; or both. Abridged version of the help:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;encoding&lt;/strong&gt;: Sets the character encoding used inside Vim. It applies
+to text in the buffers, registers, Strings in expressions, text stored
+in the viminfo file, etc.  It sets the kind of characters which Vim
+can work with.  See |encoding-names| for the possible values.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;termencoding&lt;/strong&gt;: Encoding used for the terminal.  This specifies what
+character encoding the keyboard produces and the display will
+understand. For the GUI it only applies to the keyboard ( ‘encoding’
+is used for the display).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I will refer to &lt;code&gt;encoding&lt;/code&gt; as the &lt;strong&gt;internal encoding&lt;/strong&gt;, and to
+&lt;code&gt;termencoding&lt;/code&gt; as the &lt;strong&gt;terminal encoding&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;p&gt;Indeed, in
 &lt;a href="https://github.com/neovim/neovim/blob/04633e3e6bb0da1489050fee2c7514f9a1808327/src/nvim/option.c"&gt;option.c&lt;/a&gt;
-we find one of the two places where &lt;code&gt;input_conv&lt;/code&gt; is set (also the most
-important one). In &lt;code&gt;did_set_string_option()&lt;/code&gt;, which gets called whenever
-an option is changed. The relevant part:&lt;/p&gt;
+we find the most important of only two places where &lt;code&gt;input_conv&lt;/code&gt; is set.
+It’s in &lt;code&gt;did_set_string_option()&lt;/code&gt;, which gets called whenever an option
+is changed. The part that governs the &lt;code&gt;*encoding&lt;/code&gt; options reads like
+this (ignoring &lt;code&gt;printencoding&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/* handle setting 'encoding', 'fileencoding' and 'termecoding' */&lt;/span&gt;
 &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="nf"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;varp&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;p_enc&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;gvarp&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;p_fenc&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="n"&gt;varp&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;p_tenc&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -155,28 +175,32 @@ an option is changed. The relevant part:&lt;/p&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
   &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Luckily, the three encoding options (I’m ignoring &lt;code&gt;printencoding&lt;/code&gt; now)
-are more or less handled in one block, as they’re intertwined.  The
-first part only applies to &lt;code&gt;fileencoding&lt;/code&gt; so we can skip it. The second
-part canonizes the name of the encoding via &lt;code&gt;enc_canonize()&lt;/code&gt;, and if the
-option in question was &lt;code&gt;encoding&lt;/code&gt; then Vim reconfigures itself with
-&lt;code&gt;mb_init()&lt;/code&gt;. Changing &lt;code&gt;encoding&lt;/code&gt; means Vim needs to handle all internal
-text buffers differently. &lt;code&gt;mb_init()&lt;/code&gt; does not change the encoding of
-text already loaded into Vim, it merely makes Vim interpret it
-differently. This is also why the Vim help advises to set it only during
-startup as setting it after loading files could have strange effects
-(especially when going from a more capable encoding like UTF-8 to a less
-capable one like latin-1). I quote:&lt;/p&gt;
+&lt;p&gt;Luckily, the three encoding options are more or less handled in one
+block, as they’re intertwined. The first part only applies to
+&lt;code&gt;fileencoding&lt;/code&gt; so we can skip it for now. The second part canonizes the
+name of the encoding via &lt;code&gt;enc_canonize()&lt;/code&gt;, and if the option in question
+was &lt;code&gt;encoding&lt;/code&gt; then Vim changes its internal encoding by calling
+&lt;code&gt;mb_init()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Changing &lt;code&gt;encoding&lt;/code&gt; means Vim handles all internal text buffers
+differently. &lt;code&gt;mb_init()&lt;/code&gt; does not change the encoding of text already
+loaded into Vim, it merely makes Vim interpret it differently. This is
+also why the Vim help advises to set it only during startup as setting
+it after loading files could have strange effects. Especially when going
+from a more capable encoding like UTF-8 to a less capable one like
+latin-1, expect a lot of very strange symbols. Quoting the Vim help:&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;NOTE: Changing this option will not change the encoding of the
-existing text in Vim.  It may cause non-ASCII text to become invalid.
-It should normally be kept at its default value, or set when Vim
-starts up.  See |multibyte|.  To reload the menus see |:menutrans|.&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;encoding&lt;/strong&gt;: … Changing this option will not change the encoding of
+the existing text in Vim.  It may cause non-ASCII text to become
+invalid.  It should normally be kept at its default value, or set when
+Vim starts up.  See |multibyte|.  To reload the menus see
+|:menutrans|.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;The last part is the one I was originally looking for, to repeat the
-most interesting part:&lt;/p&gt;
+&lt;p&gt;The last part of the code in &lt;strong&gt;options.c&lt;/strong&gt; is the one I was originally
+looking for, as it pertains to input encoding. To repeat the most
+interesting part:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/* When 'termencoding' is not empty and 'encoding' changes or when&lt;/span&gt;
 &lt;span class="cm"&gt; * 'termencoding' changes, need to setup for keyboard input and&lt;/span&gt;
@@ -186,15 +210,21 @@ most interesting part:&lt;/p&gt;
   &lt;span class="n"&gt;convert_setup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;output_conv&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p_enc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p_tenc&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;So, if the internal encoding has changed and &lt;code&gt;termencoding&lt;/code&gt; is
-non-empty, &lt;strong&gt;OR&lt;/strong&gt; the &lt;code&gt;termencoding&lt;/code&gt; has changed, the conversion
-structures are set up. On the &lt;strong&gt;input side&lt;/strong&gt;, a conversion from the
-terminal encoding to the internal encoding is done. On the &lt;strong&gt;output
-side&lt;/strong&gt;, a conversion from the internal encoding to the termencoding is
-done. That makes perfect sense, of course.&lt;/p&gt;
+&lt;p&gt;So, if &lt;code&gt;encoding&lt;/code&gt; has changed and &lt;code&gt;termencoding&lt;/code&gt; is non-empty, &lt;strong&gt;OR&lt;/strong&gt;
+the &lt;code&gt;termencoding&lt;/code&gt; has changed, the conversion structures &lt;code&gt;input_conv&lt;/code&gt;
+and &lt;code&gt;output_conv&lt;/code&gt; are set up.&lt;/p&gt;
 
-&lt;p&gt;It would appear that &lt;code&gt;convert_setup()&lt;/code&gt; is a pretty important function,
-let’s have a look.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;On the &lt;strong&gt;input side&lt;/strong&gt;, i.e. what you type on the keyboard, a
+conversion from the terminal encoding to the internal encoding is
+done.&lt;/li&gt;
+  &lt;li&gt;On the &lt;strong&gt;output side&lt;/strong&gt;, i.e. what you see in the terminal, a
+conversion from the internal encoding to the terminal encoding is
+done.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;That makes perfect sense, of course. It would appear that
+&lt;code&gt;convert_setup()&lt;/code&gt; is a pretty important function, let’s have a look.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/*&lt;/span&gt;
 &lt;span class="cm"&gt; * Setup "vcp" for conversion from "from" to "to".&lt;/span&gt;
@@ -280,9 +310,10 @@ let’s have a look.&lt;/p&gt;
   &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;OK&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;So, &lt;code&gt;convert_setup()&lt;/code&gt; redirects to &lt;code&gt;convert_setup_ex()&lt;/code&gt;. That reminds me of
-my Windows days where I often encountered &lt;a href="http://stackoverflow.com/questions/3963374/what-does-it-mean-when-ex-is-added-to-a-function-method-name"&gt;‘*Ex’ functions&lt;/a&gt; that were more
-difficult to understand.&lt;/p&gt;
+&lt;p&gt;So, &lt;code&gt;convert_setup()&lt;/code&gt; redirects to &lt;code&gt;convert_setup_ex()&lt;/code&gt;. That reminds me
+of my Windows days where I often encountered &lt;a href="http://stackoverflow.com/questions/3963374/what-does-it-mean-when-ex-is-added-to-a-function-method-name"&gt;‘*Ex’
+functions&lt;/a&gt;
+that were more challenging to understand.&lt;/p&gt;
 
 &lt;p&gt;Despite the spaghetti-like qualities of the code, there’s only 3 major
 phases:&lt;/p&gt;
@@ -301,21 +332,20 @@ phases:&lt;/p&gt;
   acts as a fallback if it’s available.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;The fact that Vim provides some native encodings is probably why no-one
-has complained up until now (iconv is temporarily disabled in Neovim,
-this is being fixed &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;). Apparently, there’s not many people using an
-exotic encoding for input. I surmise that UTF-8 is good enough for most.
-Point 1 also implies that the &lt;code&gt;*p_tenc != NUL&lt;/code&gt; check in
+&lt;p&gt;The fact that Vim provides some native encodings is probably why no
+Neovim user has complained up until now (iconv is temporarily disabled
+in Neovim, this is being fixed &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;). Apparently, not many use an exotic
+encoding for input. I surmise that UTF-8 is good enough for most. Point
+1 also implies that the &lt;code&gt;*p_tenc != NUL&lt;/code&gt; check in
 &lt;code&gt;did_set_string_option()&lt;/code&gt; is likely redundant.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;: interestingly the &lt;code&gt;vc_factor&lt;/code&gt; member of the &lt;code&gt;vimconv_T&lt;/code&gt; struct
 structure is written to in &lt;code&gt;convert_setup_ext()&lt;/code&gt; but never read anywhere
-else in the codebase. It holds the maximum byte expansion factor after
-conversion and its usefulness should probably be researched.&lt;/p&gt;
+else in the codebase. More about that later.&lt;/p&gt;
 
-&lt;p&gt;So that explains how the &lt;code&gt;input_conv&lt;/code&gt; variable is set up, let’s pick up
-where we left off: how it is used. The relevant part of &lt;code&gt;convert_input()&lt;/code&gt;
-is pasted below:&lt;/p&gt;
+&lt;p&gt;So that explains how the &lt;code&gt;input_conv&lt;/code&gt; variable is set up. Let’s pick up
+where we left off: how it is used. The relevant part of
+&lt;code&gt;convert_input()&lt;/code&gt; is shown below:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;convert&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="c1"&gt;// Perform input conversion according to `input_conv`&lt;/span&gt;
@@ -327,8 +357,8 @@ is pasted below:&lt;/p&gt;
   &lt;span class="n"&gt;data_length&lt;/span&gt; &lt;span class="o"&gt;-=&lt;/span&gt; &lt;span class="n"&gt;unconverted_length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Looking into &lt;code&gt;string_convert_ext()&lt;/code&gt;, we find a hairy function that
-contains a lot of knowledge:&lt;/p&gt;
+&lt;p&gt;Looking into &lt;code&gt;string_convert_ext()&lt;/code&gt;, we find a function that looks
+daunting but really isn’t:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="cm"&gt;/*&lt;/span&gt;
 &lt;span class="cm"&gt; * Like string_convert(), but when "unconvlenp" is not NULL and there are is&lt;/span&gt;
@@ -467,19 +497,20 @@ contains a lot of knowledge:&lt;/p&gt;
 
 &lt;p&gt;In the end it’s just a switch that looks up a conversion method by
 looking at the &lt;code&gt;vc_type&lt;/code&gt; member that was set up earlier in
-&lt;code&gt;convert_setup()&lt;/code&gt; earlier. Apparently Bram decided that it was simpler
-to have the conversion code inline in the switch. I must say, they are
+&lt;code&gt;convert_setup()&lt;/code&gt;. Apparently Bram decided that it was simpler to have
+the conversion code inline in the switch. I must say, they are
 wonderfully compact (and quite simple, if you read up on the encodings).
 Still, I think it would be better if these various converters were
-extracted into their own little functions (I’m working on it).&lt;/p&gt;
+extracted into their own little functions (I’m working on that).&lt;/p&gt;
 
 &lt;p&gt;On success, the function returns allocated memory with the converted
 bytes in it. This is neat, but it would be nice of the function allowed
-to pass an output buffer to avoid allocations if it’s not necessary.
-Case in point, the snippet that started this entire article could use
-this. Data from &lt;code&gt;read_buffer&lt;/code&gt; is converted, and then copied to
-&lt;code&gt;input_buffer&lt;/code&gt;. It would be more elegant if the data could just be
-written to &lt;code&gt;input_buffer&lt;/code&gt; by &lt;code&gt;string_convert_ext()&lt;/code&gt;.&lt;/p&gt;
+to pass an output buffer. To avoid allocations when they’re not
+necessary. Case in point, the snippet that started this entire article
+could make use of this. Data from &lt;code&gt;read_buffer&lt;/code&gt; is converted (read:
+allocated), and then copied to &lt;code&gt;input_buffer&lt;/code&gt;. It would be more elegant
+if the data could just be written to &lt;code&gt;input_buffer&lt;/code&gt; by
+&lt;code&gt;string_convert_ext()&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;That raises a question though: how should the caller determine how large
 the output buffer should be? It turns out iconv has this exact same
@@ -495,26 +526,29 @@ with &lt;code&gt;errno&lt;/code&gt; set to &lt;code&gt;E2BIG&lt;/code&gt;. After
 buffer and try again. This is a decent strategy, and we could make it
 even better.&lt;/p&gt;
 
-&lt;p&gt;As mentioned above, &lt;code&gt;vimconv_T&lt;/code&gt; has a field called &lt;code&gt;vc_expand&lt;/code&gt; which
-records a factor by which a byte stream can expand if converted with
-said parameters. As we can see in &lt;code&gt;convert_setup()&lt;/code&gt; above. Example: for
-latin-1 this factor is 2. Meaning that by allocating a buffer twice as
-large, there would be no risk of receiving &lt;code&gt;E2BIG&lt;/code&gt;. This is incidentally
-also the size used for the allocation in the current incarnation of
-&lt;code&gt;string_convert_ext()&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;As mentioned above, &lt;code&gt;vimconv_T&lt;/code&gt; has a seemingly unused field called
+&lt;code&gt;vc_expand&lt;/code&gt; which records a factor by which a byte stream can expand if
+converted with said parameters. Check it out in &lt;code&gt;convert_setup()&lt;/code&gt;’s code
+above. Example: for latin-1 to UTF-8 this factor is 2. Meaning that by
+allocating a buffer twice as large as the input buffer, there would be
+no risk of receiving &lt;code&gt;E2BIG&lt;/code&gt;. This is incidentally also the size passed
+to &lt;code&gt;xmalloc()&lt;/code&gt; in the current incarnation of &lt;code&gt;string_convert_ext()&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class="language-c"&gt;&lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;CONV_TO_UTF8&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;            &lt;span class="cm"&gt;/* latin1 to utf-8 conversion */&lt;/span&gt;
   &lt;span class="n"&gt;retval&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;xmalloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;len&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;When Vim uses iconv, the situation is more difficult since the expansion
-factor is a potential unknown. Vim assigns &lt;strong&gt;4&lt;/strong&gt; by default, but notes
-in the comments that it could possibly be larger. In conclusion,
-&lt;code&gt;vc_factor&lt;/code&gt; is a nice yardstick by which to scale the output buffer, but
-it’s not conclusive for all cases.&lt;/p&gt;
+factor is a potential unknown. The user could choose any number of
+exotic variants, including one that expands to 8 times the original
+size. Vim assigns &lt;strong&gt;4&lt;/strong&gt; by default, but notes in the comments that it
+could possibly be larger. In conclusion, &lt;code&gt;vc_factor&lt;/code&gt; is a nice yardstick
+by which to scale the output buffer, but it’s not conclusive for all
+cases. Multiplying the input buffer by &lt;code&gt;vc_factor&lt;/code&gt; would ensure that
+we’re not likely to encounter &lt;code&gt;E2BIG&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;That about wraps up input encoding, when you’re typing characters into
-the keyboard. Something tells me that this is not the end of the story.
-For the next installment, I will discuss file encoding.&lt;/p&gt;
+&lt;p&gt;That about wraps up input encoding the keyboard. Something tells me that
+this is not the end of the story.  For the next installment, I will
+discuss file encoding.&lt;/p&gt;
 
 &lt;div class="footnotes"&gt;
   &lt;ol&gt;
@@ -526,13 +560,11 @@ that I haven’t had the pleasure to alter myself.&lt;/p&gt;
       &lt;p&gt;Recently there have been too few reviewers and some changes were
 perhaps merged prematurely. Luckily this is all quickly rectified by
 the combination of swift bug reports and coverity scans. On second
-thought, perhaps premature merging is not quite right, in a quickly
-moving project like Neovim it might actually be required to
-jumpstart a discussion after a lull.&lt;/p&gt;
-
-      &lt;p&gt;I’m also guilty of reviewing after the fact (read: merge). But since
-Neovim is still in alpha status, I believe we are allowed such
-luxuries. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
+thought, perhaps “premature” is not right. In a quickly moving
+project like Neovim it might be very useful to jumpstart a
+discussion after a lull. After all, we’re only in alpha. I’m also
+guilty of reviewing after the fact (read: merge), but for now it’s
+not causing the world to implode. &lt;a href="#fnref:1" class="reversefootnote"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
     &lt;li id="fn:2"&gt;
       &lt;p&gt;After seeing all the &lt;code&gt;USE_ICONV&lt;/code&gt; conditional parts in the source, I
@@ -551,9 +583,9 @@ been removed by the unifdeffening so that was a piece of cake. &lt;a href="#fnre
 &lt;/div&gt;
 </content>
     <summary type="html">&lt;p&gt;In my guise as a Neovim developer, I was recently looking at how vim
-handles character encoding. This lead me down a whole rabbit hole that I
+handles character encoding. This lead me down a rabbit hole that I
 haven’t seen the end of yet. This article describes what I’ve learned
-and what I still have left to discover.&lt;/p&gt;
+and what’s left to discover.&lt;/p&gt;
 
 </summary>
   </entry>
