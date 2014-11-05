@@ -8,9 +8,9 @@ draft: false
 ---
 
 In my guise as a Neovim developer, I was recently looking at how vim
-handles character encoding. This lead me down a whole rabbit hole that I
+handles character encoding. This lead me down a rabbit hole that I
 haven't seen the end of yet. This article describes what I've learned
-and what I still have left to discover.
+and what's left to discover.
 
 <!-- more -->
 
@@ -89,22 +89,38 @@ static void convert_input(void)
 ~~~
 
 To summarize, this function copies bytes from the `read_buffer` to the
-`input_buffer`. The `read_buffer` is filled every time there is data
-available on stdin. If `input_conv.vc_type` is `CONV_NONE`, copying is
-all it really does (`rbuffer_write()` is basically `memcpy()`). The
-interesting part comes if it isn't: `string_convert_ext()` gets called
-to supposedly convert the character encoding into the desired format.
+`input_buffer`. note: The `read_buffer` is filled every time there is
+data available on stdin in another part of the code.
+
+If `input_conv.vc_type` is `CONV_NONE`, copying is all it really does
+(`rbuffer_write()` is basically `memcpy()`). The interesting part comes
+when it isn't `CONV_NONE`: `string_convert_ext()` gets called to
+supposedly convert the character encoding into the desired format.
 
 What's the desired format? How does that get decided? For that we have
 to search to where `input_conv` is initialized. Before looking at the
 code, my assumption was that it had to with either the Vim options
-`encoding`, `termencoding` or both.
+`encoding`, `termencoding` or both. Abridged version of the help:
+
+> **encoding**: Sets the character encoding used inside Vim. It applies
+> to text in the buffers, registers, Strings in expressions, text stored
+> in the viminfo file, etc.  It sets the kind of characters which Vim
+> can work with.  See |encoding-names| for the possible values.
+
+> **termencoding**: Encoding used for the terminal.  This specifies what
+> character encoding the keyboard produces and the display will
+> understand. For the GUI it only applies to the keyboard ( 'encoding'
+> is used for the display).
+
+I will refer to `encoding` as the **internal encoding**, and to
+`termencoding` as the **terminal encoding**.
 
 Indeed, in
 [option.c](https://github.com/neovim/neovim/blob/04633e3e6bb0da1489050fee2c7514f9a1808327/src/nvim/option.c)
-we find one of the two places where `input_conv` is set (also the most
-important one). In `did_set_string_option()`, which gets called whenever
-an option is changed. The relevant part:
+we find the most important of only two places where `input_conv` is set.
+It's in `did_set_string_option()`, which gets called whenever an option
+is changed. The part that governs the `*encoding` options reads like
+this (ignoring `printencoding`):
 
 ~~~
 #!c
@@ -155,26 +171,30 @@ else if (varp == &p_enc || gvarp == &p_fenc || varp == &p_tenc) {
   }
 ~~~
 
-Luckily, the three encoding options (I'm ignoring `printencoding` now)
-are more or less handled in one block, as they're intertwined.  The
-first part only applies to `fileencoding` so we can skip it. The second
-part canonizes the name of the encoding via `enc_canonize()`, and if the
-option in question was `encoding` then Vim reconfigures itself with
-`mb_init()`. Changing `encoding` means Vim needs to handle all internal
-text buffers differently. `mb_init()` does not change the encoding of
-text already loaded into Vim, it merely makes Vim interpret it
-differently. This is also why the Vim help advises to set it only during
-startup as setting it after loading files could have strange effects
-(especially when going from a more capable encoding like UTF-8 to a less
-capable one like latin-1). I quote:
+Luckily, the three encoding options are more or less handled in one
+block, as they're intertwined. The first part only applies to
+`fileencoding` so we can skip it for now. The second part canonizes the
+name of the encoding via `enc_canonize()`, and if the option in question
+was `encoding` then Vim changes its internal encoding by calling
+`mb_init()`.
 
-> NOTE: Changing this option will not change the encoding of the
-existing text in Vim.  It may cause non-ASCII text to become invalid.
-It should normally be kept at its default value, or set when Vim
-starts up.  See |multibyte|.  To reload the menus see |:menutrans|.
+Changing `encoding` means Vim handles all internal text buffers
+differently. `mb_init()` does not change the encoding of text already
+loaded into Vim, it merely makes Vim interpret it differently. This is
+also why the Vim help advises to set it only during startup as setting
+it after loading files could have strange effects. Especially when going
+from a more capable encoding like UTF-8 to a less capable one like
+latin-1, expect a lot of very strange symbols. Quoting the Vim help:
 
-The last part is the one I was originally looking for, to repeat the
-most interesting part:
+> **encoding**: ... Changing this option will not change the encoding of
+> the existing text in Vim.  It may cause non-ASCII text to become
+> invalid.  It should normally be kept at its default value, or set when
+> Vim starts up.  See |multibyte|.  To reload the menus see
+> |:menutrans|.
+
+The last part of the code in **options.c** is the one I was originally
+looking for, as it pertains to input encoding. To repeat the most
+interesting part:
 
 ~~~
 #!c
@@ -187,15 +207,19 @@ if (((varp == &p_enc && *p_tenc != NUL) || varp == &p_tenc)) {
 }
 ~~~
 
-So, if the internal encoding has changed and `termencoding` is
-non-empty, **OR** the `termencoding` has changed, the conversion
-structures are set up. On the **input side**, a conversion from the
-terminal encoding to the internal encoding is done. On the **output
-side**, a conversion from the internal encoding to the termencoding is
-done. That makes perfect sense, of course.
+So, if `encoding` has changed and `termencoding` is non-empty, **OR**
+the `termencoding` has changed, the conversion structures `input_conv`
+and `output_conv` are set up.
 
-It would appear that `convert_setup()` is a pretty important function,
-let's have a look.
+- On the **input side**, i.e. what you type on the keyboard, a
+  conversion from the terminal encoding to the internal encoding is
+  done.
+- On the **output side**, i.e. what you see in the terminal, a
+  conversion from the internal encoding to the terminal encoding is
+  done.
+
+That makes perfect sense, of course. It would appear that
+`convert_setup()` is a pretty important function, let's have a look.
 
 ~~~
 #!c
@@ -284,9 +308,10 @@ int convert_setup_ext(vimconv_T *vcp, char_u *from, bool from_unicode_is_utf8,
 }
 ~~~
 
-So, `convert_setup()` redirects to `convert_setup_ex()`. That reminds me of
-my Windows days where I often encountered ['*Ex' functions](http://stackoverflow.com/questions/3963374/what-does-it-mean-when-ex-is-added-to-a-function-method-name) that were more
-difficult to understand.
+So, `convert_setup()` redirects to `convert_setup_ex()`. That reminds me
+of my Windows days where I often encountered ['*Ex'
+functions](http://stackoverflow.com/questions/3963374/what-does-it-mean-when-ex-is-added-to-a-function-method-name)
+that were more challenging to understand.
 
 Despite the spaghetti-like qualities of the code, there's only 3 major
 phases:
@@ -303,21 +328,20 @@ phases:
   capable of translating the exotic requests of the user. Iconv thus
   acts as a fallback if it's available.
 
-The fact that Vim provides some native encodings is probably why no-one
-has complained up until now (iconv is temporarily disabled in Neovim,
-this is being fixed [^2]). Apparently, there's not many people using an
-exotic encoding for input. I surmise that UTF-8 is good enough for most.
-Point 1 also implies that the `*p_tenc != NUL` check in
+The fact that Vim provides some native encodings is probably why no
+Neovim user has complained up until now (iconv is temporarily disabled
+in Neovim, this is being fixed [^2]). Apparently, not many use an exotic
+encoding for input. I surmise that UTF-8 is good enough for most. Point
+1 also implies that the `*p_tenc != NUL` check in
 `did_set_string_option()` is likely redundant.
 
 **NOTE**: interestingly the `vc_factor` member of the `vimconv_T` struct
 structure is written to in `convert_setup_ext()` but never read anywhere
-else in the codebase. It holds the maximum byte expansion factor after
-conversion and its usefulness should probably be researched.
+else in the codebase. More about that later.
 
-So that explains how the `input_conv` variable is set up, let's pick up
-where we left off: how it is used. The relevant part of `convert_input()`
-is pasted below:
+So that explains how the `input_conv` variable is set up. Let's pick up
+where we left off: how it is used. The relevant part of
+`convert_input()` is shown below:
 
 ~~~
 #!c
@@ -332,8 +356,8 @@ if (convert) {
 }
 ~~~
 
-Looking into `string_convert_ext()`, we find a hairy function that
-contains a lot of knowledge:
+Looking into `string_convert_ext()`, we find a function that looks
+daunting but really isn't:
 
 ~~~
 #!c
@@ -475,19 +499,20 @@ char_u * string_convert_ext(vimconv_T *vcp, char_u *ptr, int *lenp,
 
 In the end it's just a switch that looks up a conversion method by
 looking at the `vc_type` member that was set up earlier in
-`convert_setup()` earlier. Apparently Bram decided that it was simpler
-to have the conversion code inline in the switch. I must say, they are
+`convert_setup()`. Apparently Bram decided that it was simpler to have
+the conversion code inline in the switch. I must say, they are
 wonderfully compact (and quite simple, if you read up on the encodings).
 Still, I think it would be better if these various converters were
-extracted into their own little functions (I'm working on it).
+extracted into their own little functions (I'm working on that).
 
 On success, the function returns allocated memory with the converted
 bytes in it. This is neat, but it would be nice of the function allowed
-to pass an output buffer to avoid allocations if it's not necessary.
-Case in point, the snippet that started this entire article could use
-this. Data from `read_buffer` is converted, and then copied to
-`input_buffer`. It would be more elegant if the data could just be
-written to `input_buffer` by `string_convert_ext()`.
+to pass an output buffer. To avoid allocations when they're not
+necessary. Case in point, the snippet that started this entire article
+could make use of this. Data from `read_buffer` is converted (read:
+allocated), and then copied to `input_buffer`. It would be more elegant
+if the data could just be written to `input_buffer` by
+`string_convert_ext()`.
 
 That raises a question though: how should the caller determine how large
 the output buffer should be? It turns out iconv has this exact same
@@ -506,13 +531,13 @@ with `errno` set to `E2BIG`. After which you're supposed to enlarge your
 buffer and try again. This is a decent strategy, and we could make it
 even better.
 
-As mentioned above, `vimconv_T` has a field called `vc_expand` which
-records a factor by which a byte stream can expand if converted with
-said parameters. As we can see in `convert_setup()` above. Example: for
-latin-1 this factor is 2. Meaning that by allocating a buffer twice as
-large, there would be no risk of receiving `E2BIG`. This is incidentally
-also the size used for the allocation in the current incarnation of
-`string_convert_ext()`:
+As mentioned above, `vimconv_T` has a seemingly unused field called
+`vc_expand` which records a factor by which a byte stream can expand if
+converted with said parameters. Check it out in `convert_setup()`'s code
+above. Example: for latin-1 to UTF-8 this factor is 2. Meaning that by
+allocating a buffer twice as large as the input buffer, there would be
+no risk of receiving `E2BIG`. This is incidentally also the size passed
+to `xmalloc()` in the current incarnation of `string_convert_ext()`:
 
 ~~~
 #!c
@@ -521,14 +546,17 @@ case CONV_TO_UTF8:            /* latin1 to utf-8 conversion */
 ~~~
 
 When Vim uses iconv, the situation is more difficult since the expansion
-factor is a potential unknown. Vim assigns **4** by default, but notes
-in the comments that it could possibly be larger. In conclusion,
-`vc_factor` is a nice yardstick by which to scale the output buffer, but
-it's not conclusive for all cases.
+factor is a potential unknown. The user could choose any number of
+exotic variants, including one that expands to 8 times the original
+size. Vim assigns **4** by default, but notes in the comments that it
+could possibly be larger. In conclusion, `vc_factor` is a nice yardstick
+by which to scale the output buffer, but it's not conclusive for all
+cases. Multiplying the input buffer by `vc_factor` would ensure that
+we're not likely to encounter `E2BIG`.
 
-That about wraps up input encoding, when you're typing characters into
-the keyboard. Something tells me that this is not the end of the story.
-For the next installment, I will discuss file encoding.
+That about wraps up input encoding the keyboard. Something tells me that
+this is not the end of the story.  For the next installment, I will
+discuss file encoding.
 
 [^1]: Code review is not only massively important for a rapidly changing
     project like Neovim, it also helps me get to grips with some internals
@@ -537,14 +565,11 @@ For the next installment, I will discuss file encoding.
     Recently there have been too few reviewers and some changes were
     perhaps merged prematurely. Luckily this is all quickly rectified by
     the combination of swift bug reports and coverity scans. On second
-    thought, perhaps premature merging is not quite right, in a quickly
-    moving project like Neovim it might actually be required to
-    jumpstart a discussion after a lull.
-
-    I'm also guilty of reviewing after the fact (read: merge). But since
-    Neovim is still in alpha status, I believe we are allowed such
-    luxuries.
-
+    thought, perhaps "premature" is not right. In a quickly moving
+    project like Neovim it might be very useful to jumpstart a
+    discussion after a lull. After all, we're only in alpha. I'm also
+    guilty of reviewing after the fact (read: merge), but for now it's
+    not causing the world to implode.
 
 [^2]: After seeing all the `USE_ICONV` conditional parts in the source, I
     started to wonder when [libiconv](http://en.wikipedia.org/wiki/Iconv) was
