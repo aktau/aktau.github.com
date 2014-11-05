@@ -3,19 +3,19 @@
     <head>
         <meta charset="utf-8">
 
-        <title>tag: gofinance</title>
+        <title>Neovim: file encoding and you</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <meta name="description" content="gofinance">
-        <meta name="keywords" content="notags">
+        <meta name="description" content="Try to explain how vim and neovim handle file encoding">
+        <meta name="keywords" content="neovim, vim, encoding">
         <meta name="author" content="Nicolas Hillegeer">
         <meta name="generator" content="nanoc 3.7.1">
         <meta name="robots" content="index,follow">
 
-        <meta property="og:title" content="tag: gofinance">
+        <meta property="og:title" content="Neovim: file encoding and you">
         <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
         <meta property="og:type" content="blog">
-        <meta property="og:url" content="http://www.aktau.be/tag/gofinance/">
+        <meta property="og:url" content="http://www.aktau.be/draft/2014/11/04/neovim-file-encoding-and-you/">
 
         <!-- Google Fonts embed code -->
         <script>
@@ -122,17 +122,35 @@
 
         <main id="content">
             
-    <h1>
-        tag / gofinance
-    </h1>
+    <div class="post">
+        <h1>Neovim: file encoding and you</h1>
+        <aside>November 4, 2014</aside>
 
-    <ul>
-        
-            <li>
-                2014-01-31 - <a href="/2014/01/31/manage-your-app-releases-from-the-commandline-with-github-release/">Manage your app releases from the commandline with github-release</a>
-            </li>
-        
-    </ul>
+        <article>
+            <p>We’ll pick up where we left off last time, file encoding.</p>
+
+<!-- more -->
+
+<p><em>Disclaimer: when I talk about Vim I will sometimes refer to Vim as
+opposed to Neovim, and sometimes to mean both Vim and Neovim. The
+context should hopefully make clear which one I mean.</em></p>
+
+<h2 id="file-encoding">File encoding</h2>
+
+<p>File encoding is governed by the buffer-local <code>fileencoding</code> flag (which
+for new files is set to the global <code>fileencoding</code> option). This means
+that changing the global <code>fileencoding</code> flag doesn’t have an immediate
+effect. We’ll have to look elsewhere this time.</p>
+
+<h2 id="how-do-we-convert">How do we convert</h2>
+
+<p>TODO:
+- describe where <code>charconvert</code> fits in</p>
+
+        </article>
+
+        <p>Tags: <a href="/tag/neovim" rel="tag">neovim</a>, <a href="/tag/vim" rel="tag">vim</a>, <a href="/tag/encoding" rel="tag">encoding</a></p>
+    </div>
 
         </main>
 

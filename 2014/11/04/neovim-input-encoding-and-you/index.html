@@ -1,0 +1,709 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Neovim: input encoding and you</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="Try to explain how vim and neovim handle input encoding">
+        <meta name="keywords" content="neovim, vim, encoding">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="Neovim: input encoding and you">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="http://www.aktau.be/2014/11/04/neovim-input-encoding-and-you/">
+
+        <!-- Google Fonts embed code -->
+        <script>
+            (function() {
+                var link_element = document.createElement("link"),
+                    s = document.getElementsByTagName("script")[0];
+                if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+                    link_element.href = "http:";
+                }
+                link_element.href += "//fonts.googleapis.com/css?family=EB+Garamond:400";
+                link_element.rel = "stylesheet";
+                link_element.type = "text/css";
+                s.parentNode.insertBefore(link_element, s);
+            })();
+        </script>
+        <noscript>
+            <!-- don't leave noscript users out in the cold -->
+            <link href='http://fonts.googleapis.com/css?family=EB+Garamond:400' rel='stylesheet' type='text/css'>
+        </noscript>
+
+        
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        
+
+        <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+    </head>
+    <body>
+        <nav>
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive/">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf" title="Résumé">Curriculum Vitae</a></li>
+                <li><a href="/contact/" title="Personal information">About &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
+                <li><a href="/tag/neovim">neovim (1)</a></li>
+                
+                <li><a href="/tag/vim">vim (1)</a></li>
+                
+                <li><a href="/tag/encoding">encoding (1)</a></li>
+                
+            </ul>
+            -->
+        </nav>
+
+        <main id="content">
+            
+    <div class="post">
+        <h1>Neovim: input encoding and you</h1>
+        <aside>November 4, 2014</aside>
+
+        <article>
+            <p>In my guise as a Neovim developer, I was recently looking at how vim
+handles character encoding. This lead me down a whole rabbit hole that I
+haven’t seen the end of yet. This article describes what I’ve learned
+and what I still have left to discover.</p>
+
+<!-- more -->
+
+<p><em>Disclaimer: when I talk about Vim I will sometimes refer to Vim as
+opposed to Neovim, and sometimes to mean both Vim and Neovim. The
+context should hopefully make clear which one I mean.</em></p>
+
+<h2 id="the-impetus">The impetus</h2>
+
+<p>It all started when I was reading over the changes of PR
+<a href="https://github.com/neovim/neovim/pull/1357">#1357</a> <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. I’ve always
+wanted to know more about how Vim does character encoding, and there was
+a commit in this PR that started me on the path: <a href="https://github.com/tarruda/neovim/commit/4fd9ee4a6b908d86815f08c8880db73d9dda13dc">input/job: process
+ctrl+c and do conversion in the read
+callback</a>.
+I got curious, what does <code>convert_input()</code> do? Does it have anything to
+do with encoding? Let’s investigate.</p>
+
+<h2 id="input-encoding">Input encoding</h2>
+
+<p>The function is short enough to paste below. It is pretty unique to
+Neovim, as it was wrought for its brand new event-oriented nature:</p>
+
+<pre><code class="language-c"><span class="k">struct</span> <span class="n">rbuffer</span> <span class="p">{</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span>
+  <span class="kt">size_t</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">rpos</span><span class="p">,</span> <span class="n">wpos</span><span class="p">;</span>
+  <span class="n">RStream</span> <span class="o">*</span><span class="n">rstream</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">rbuffer</span> <span class="n">RBuffer</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">RBuffer</span> <span class="o">*</span><span class="n">read_buffer</span><span class="p">,</span> <span class="o">*</span><span class="n">input_buffer</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">convert_input</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">embedded_mode</span> <span class="o">||</span> <span class="o">!</span><span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">))</span> <span class="p">{</span>
+    <span class="c1">// No input buffer space</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">bool</span> <span class="n">convert</span> <span class="o">=</span> <span class="n">input_conv</span><span class="p">.</span><span class="n">vc_type</span> <span class="o">!=</span> <span class="n">CONV_NONE</span><span class="p">;</span>
+  <span class="c1">// Set unconverted data/length</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">data</span> <span class="o">=</span> <span class="n">rbuffer_read_ptr</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
+  <span class="kt">size_t</span> <span class="n">data_length</span> <span class="o">=</span> <span class="n">rbuffer_pending</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
+  <span class="kt">size_t</span> <span class="n">converted_length</span> <span class="o">=</span> <span class="n">data_length</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Perform input conversion according to `input_conv`</span>
+    <span class="kt">size_t</span> <span class="n">unconverted_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
+                                      <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
+                                      <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
+                                      <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
+    <span class="n">data_length</span> <span class="o">-=</span> <span class="n">unconverted_length</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="c1">// The conversion code will be gone eventually, for now assume `input_buffer`</span>
+  <span class="c1">// always has space for the converted data(it's many times the size of</span>
+  <span class="c1">// `read_buffer`, so it's hard to imagine a scenario where the converted data</span>
+  <span class="c1">// doesn't fit)</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">converted_length</span> <span class="o">&lt;=</span> <span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">));</span>
+  <span class="c1">// Write processed data to input buffer.</span>
+  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">rbuffer_write</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">converted_length</span><span class="p">);</span>
+  <span class="c1">// Adjust raw buffer pointers</span>
+  <span class="n">rbuffer_consumed</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">,</span> <span class="n">data_length</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// data points to memory allocated by `string_convert_ext`, free it.</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre>
+
+<p>To summarize, this function copies bytes from the <code>read_buffer</code> to the
+<code>input_buffer</code>. The <code>read_buffer</code> is filled every time there is data
+available on stdin. If <code>input_conv.vc_type</code> is <code>CONV_NONE</code>, copying is
+all it really does (<code>rbuffer_write()</code> is basically <code>memcpy()</code>). The
+interesting part comes if it isn’t: <code>string_convert_ext()</code> gets called
+to supposedly convert the character encoding into the desired format.</p>
+
+<p>What’s the desired format? How does that get decided? For that we have
+to search to where <code>input_conv</code> is initialized. Before looking at the
+code, my assumption was that it had to with either the Vim options
+<code>encoding</code>, <code>termencoding</code> or both.</p>
+
+<p>Indeed, in
+<a href="https://github.com/neovim/neovim/blob/04633e3e6bb0da1489050fee2c7514f9a1808327/src/nvim/option.c">option.c</a>
+we find one of the two places where <code>input_conv</code> is set (also the most
+important one). In <code>did_set_string_option()</code>, which gets called whenever
+an option is changed. The relevant part:</p>
+
+<pre><code class="language-c"><span class="cm">/* handle setting 'encoding', 'fileencoding' and 'termecoding' */</span>
+<span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">||</span> <span class="n">gvarp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_fenc</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">gvarp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_fenc</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_ma</span> <span class="o">&amp;&amp;</span> <span class="n">opt_flags</span> <span class="o">!=</span> <span class="n">OPT_GLOBAL</span><span class="p">)</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">e_modifiable</span><span class="p">;</span>
+      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">vim_strchr</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">,</span> <span class="sc">','</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="cm">/* No comma allowed in 'fileencoding'; catches confusing it</span>
+<span class="cm">         * with 'fileencodings'. */</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">e_invarg</span><span class="p">;</span>
+      <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* May show a "+" in the title now. */</span>
+        <span class="n">redraw_titles</span><span class="p">();</span>
+        <span class="cm">/* Add 'fileencoding' to the swap file. */</span>
+        <span class="n">ml_setflags</span><span class="p">(</span><span class="n">curbuf</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">errmsg</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="cm">/* canonize the value, so that STRCMP() can be used on it */</span>
+      <span class="n">p</span> <span class="o">=</span> <span class="n">enc_canonize</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
+      <span class="n">free</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
+      <span class="o">*</span><span class="n">varp</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">mb_init</span><span class="p">();</span>
+        <span class="n">redraw_titles</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">errmsg</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+      <span class="cm">/* When 'keymap' is used and 'encoding' changes, reload the keymap</span>
+<span class="cm">       * (with another encoding). */</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_keymap</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span>
+        <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">keymap_init</span><span class="p">();</span>
+
+      <span class="cm">/* When 'termencoding' is not empty and 'encoding' changes or when</span>
+<span class="cm">       * 'termencoding' changes, need to setup for keyboard input and</span>
+<span class="cm">       * display output conversion. */</span>
+      <span class="k">if</span> <span class="p">(((</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p_tenc</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">);</span>
+        <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">);</span>
+      <span class="p">}</span>
+
+    <span class="p">}</span>
+  <span class="p">}</span></code></pre>
+
+<p>Luckily, the three encoding options (I’m ignoring <code>printencoding</code> now)
+are more or less handled in one block, as they’re intertwined.  The
+first part only applies to <code>fileencoding</code> so we can skip it. The second
+part canonizes the name of the encoding via <code>enc_canonize()</code>, and if the
+option in question was <code>encoding</code> then Vim reconfigures itself with
+<code>mb_init()</code>. Changing <code>encoding</code> means Vim needs to handle all internal
+text buffers differently. <code>mb_init()</code> does not change the encoding of
+text already loaded into Vim, it merely makes Vim interpret it
+differently. This is also why the Vim help advises to set it only during
+startup as setting it after loading files could have strange effects
+(especially when going from a more capable encoding like UTF-8 to a less
+capable one like latin-1). I quote:</p>
+
+<blockquote>
+  <p>NOTE: Changing this option will not change the encoding of the
+existing text in Vim.  It may cause non-ASCII text to become invalid.
+It should normally be kept at its default value, or set when Vim
+starts up.  See |multibyte|.  To reload the menus see |:menutrans|.</p>
+</blockquote>
+
+<p>The last part is the one I was originally looking for, to repeat the
+most interesting part:</p>
+
+<pre><code class="language-c"><span class="cm">/* When 'termencoding' is not empty and 'encoding' changes or when</span>
+<span class="cm"> * 'termencoding' changes, need to setup for keyboard input and</span>
+<span class="cm"> * display output conversion. */</span>
+<span class="k">if</span> <span class="p">(((</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p_tenc</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span> <span class="p">{</span>
+  <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">);</span>
+  <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+
+<p>So, if the internal encoding has changed and <code>termencoding</code> is
+non-empty, <strong>OR</strong> the <code>termencoding</code> has changed, the conversion
+structures are set up. On the <strong>input side</strong>, a conversion from the
+terminal encoding to the internal encoding is done. On the <strong>output
+side</strong>, a conversion from the internal encoding to the termencoding is
+done. That makes perfect sense, of course.</p>
+
+<p>It would appear that <code>convert_setup()</code> is a pretty important function,
+let’s have a look.</p>
+
+<pre><code class="language-c"><span class="cm">/*</span>
+<span class="cm"> * Setup "vcp" for conversion from "from" to "to".</span>
+<span class="cm"> * The names must have been made canonical with enc_canonize().</span>
+<span class="cm"> * vcp-&gt;vc_type must have been initialized to CONV_NONE.</span>
+<span class="cm"> * Note: cannot be used for conversion from/to ucs-2 and ucs-4 (will use utf-8</span>
+<span class="cm"> * instead).</span>
+<span class="cm"> * Afterwards invoke with "from" and "to" equal to NULL to cleanup.</span>
+<span class="cm"> * Return FAIL when conversion is not supported, OK otherwise.</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">convert_setup</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">to</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">return</span> <span class="n">convert_setup_ext</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * As convert_setup(), but only when from_unicode_is_utf8 is TRUE will all</span>
+<span class="cm"> * "from" unicode charsets be considered utf-8.  Same for "to".</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">convert_setup_ext</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">from_unicode_is_utf8</span><span class="p">,</span>
+                      <span class="n">char_u</span> <span class="o">*</span><span class="n">to</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">to_unicode_is_utf8</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">from_prop</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">to_prop</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">from_is_utf8</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">to_is_utf8</span><span class="p">;</span>
+
+  <span class="cm">/* Reset to no conversion. */</span>
+<span class="cp"># ifdef USE_ICONV</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_ICONV</span> <span class="o">&amp;&amp;</span> <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">iconv_close</span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="p">);</span>
+<span class="cp"># endif</span>
+  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_NONE</span><span class="p">;</span>
+  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+
+  <span class="cm">/* No conversion when one of the names is empty or they are equal. */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">from</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="o">*</span><span class="n">from</span> <span class="o">==</span> <span class="n">NUL</span> <span class="o">||</span> <span class="n">to</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="o">*</span><span class="n">to</span> <span class="o">==</span> <span class="n">NUL</span>
+      <span class="o">||</span> <span class="n">STRCMP</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+
+  <span class="n">from_prop</span> <span class="o">=</span> <span class="n">enc_canon_props</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
+  <span class="n">to_prop</span> <span class="o">=</span> <span class="n">enc_canon_props</span><span class="p">(</span><span class="n">to</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">from_unicode_is_utf8</span><span class="p">)</span>
+    <span class="n">from_is_utf8</span> <span class="o">=</span> <span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
+  <span class="k">else</span>
+    <span class="n">from_is_utf8</span> <span class="o">=</span> <span class="n">from_prop</span> <span class="o">==</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">to_unicode_is_utf8</span><span class="p">)</span>
+    <span class="n">to_is_utf8</span> <span class="o">=</span> <span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
+  <span class="k">else</span>
+    <span class="n">to_is_utf8</span> <span class="o">=</span> <span class="n">to_prop</span> <span class="o">==</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">((</span><span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN1</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">to_is_utf8</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* Internal latin1 -&gt; utf-8 conversion. */</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_UTF8</span><span class="p">;</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>         <span class="cm">/* up to twice as long */</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN9</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">to_is_utf8</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* Internal latin9 -&gt; utf-8 conversion. */</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_9_TO_UTF8</span><span class="p">;</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>         <span class="cm">/* up to three as long (euro sign) */</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">from_is_utf8</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN1</span><span class="p">))</span> <span class="p">{</span>
+    <span class="cm">/* Internal utf-8 -&gt; latin1 conversion. */</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_LATIN1</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">from_is_utf8</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN9</span><span class="p">))</span> <span class="p">{</span>
+    <span class="cm">/* Internal utf-8 -&gt; latin9 conversion. */</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_LATIN9</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="cp"># ifdef USE_ICONV</span>
+  <span class="k">else</span> <span class="p">{</span>
+    <span class="cm">/* Use iconv() for conversion. */</span>
+    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="n">my_iconv_open</span><span class="p">(</span>
+        <span class="n">to_is_utf8</span> <span class="o">?</span> <span class="p">(</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span> <span class="o">:</span> <span class="n">to</span><span class="p">,</span>
+        <span class="n">from_is_utf8</span> <span class="o">?</span> <span class="p">(</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span> <span class="o">:</span> <span class="n">from</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_ICONV</span><span class="p">;</span>
+      <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>       <span class="cm">/* could be longer too... */</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="cp"># endif</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_NONE</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FAIL</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+
+<p>So, <code>convert_setup()</code> redirects to <code>convert_setup_ex()</code>. That reminds me of
+my Windows days where I often encountered <a href="http://stackoverflow.com/questions/3963374/what-does-it-mean-when-ex-is-added-to-a-function-method-name">‘*Ex’ functions</a> that were more
+difficult to understand.</p>
+
+<p>Despite the spaghetti-like qualities of the code, there’s only 3 major
+phases:</p>
+
+<ol>
+  <li>If one either the source or destination encoding are blank, or they
+  are identical, then assign the no-op encoding and exit.</li>
+  <li>Determine the properties of the encodings and do a few tests to see if
+  any of the natively provided encodings can be used: <strong>latin-1 to
+  UTF-8</strong> (+ reversed) and <strong>latin-9 to UTF-8</strong> (+ reversed). These
+  encodings can apparently be used without outside help. If that fails,
+  go to the next step.</li>
+  <li>Check if <code>USE_ICONV</code> has been defined, and if so, open an iconv handle
+  for the requested encoding pair. It’s quite likely that iconv is
+  capable of translating the exotic requests of the user. Iconv thus
+  acts as a fallback if it’s available.</li>
+</ol>
+
+<p>The fact that Vim provides some native encodings is probably why no-one
+has complained up until now (iconv is temporarily disabled in Neovim,
+this is being fixed <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>). Apparently, there’s not many people using an
+exotic encoding for input. I surmise that UTF-8 is good enough for most.
+Point 1 also implies that the <code>*p_tenc != NUL</code> check in
+<code>did_set_string_option()</code> is likely redundant.</p>
+
+<p><strong>NOTE</strong>: interestingly the <code>vc_factor</code> member of the <code>vimconv_T</code> struct
+structure is written to in <code>convert_setup_ext()</code> but never read anywhere
+else in the codebase. It holds the maximum byte expansion factor after
+conversion and its usefulness should probably be researched.</p>
+
+<p>So that explains how the <code>input_conv</code> variable is set up, let’s pick up
+where we left off: how it is used. The relevant part of <code>convert_input()</code>
+is pasted below:</p>
+
+<pre><code class="language-c"><span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Perform input conversion according to `input_conv`</span>
+  <span class="kt">size_t</span> <span class="n">unconverted_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
+  <span class="n">data_length</span> <span class="o">-=</span> <span class="n">unconverted_length</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+
+<p>Looking into <code>string_convert_ext()</code>, we find a hairy function that
+contains a lot of knowledge:</p>
+
+<pre><code class="language-c"><span class="cm">/*</span>
+<span class="cm"> * Like string_convert(), but when "unconvlenp" is not NULL and there are is</span>
+<span class="cm"> * an incomplete sequence at the end it is not converted and "*unconvlenp" is</span>
+<span class="cm"> * set to the number of remaining bytes.</span>
+<span class="cm"> */</span>
+<span class="n">char_u</span> <span class="o">*</span> <span class="nf">string_convert_ext</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">lenp</span><span class="p">,</span>
+                            <span class="kt">int</span> <span class="o">*</span><span class="n">unconvlenp</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">char_u</span>      <span class="o">*</span><span class="n">retval</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">char_u</span>      <span class="o">*</span><span class="n">d</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">l</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">c</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="n">len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">STRLEN</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+  <span class="k">else</span>
+    <span class="n">len</span> <span class="o">=</span> <span class="o">*</span><span class="n">lenp</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vim_strsave</span><span class="p">((</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">""</span><span class="p">);</span>
+
+  <span class="k">switch</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nl">CONV_TO_UTF8</span><span class="p">:</span>            <span class="cm">/* latin1 to utf-8 conversion */</span>
+      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="mh">0x80</span><span class="p">)</span>
+          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+        <span class="k">else</span> <span class="p">{</span>
+          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0xc0</span> <span class="o">+</span> <span class="p">((</span><span class="kt">unsigned</span><span class="p">)</span><span class="n">c</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">);</span>
+          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0x80</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span> <span class="o">&amp;</span> <span class="mh">0x3f</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="nl">CONV_9_TO_UTF8</span><span class="p">:</span>          <span class="cm">/* latin9 to utf-8 conversion */</span>
+      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="k">switch</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">case</span> <span class="mh">0xa4</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x20ac</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* euro */</span>
+          <span class="k">case</span> <span class="mh">0xa6</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0160</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* S hat */</span>
+          <span class="k">case</span> <span class="mh">0xa8</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0161</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* S -hat */</span>
+          <span class="k">case</span> <span class="mh">0xb4</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x017d</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Z hat */</span>
+          <span class="k">case</span> <span class="mh">0xb8</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x017e</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Z -hat */</span>
+          <span class="k">case</span> <span class="mh">0xbc</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0152</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* OE */</span>
+          <span class="k">case</span> <span class="mh">0xbd</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0153</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* oe */</span>
+          <span class="k">case</span> <span class="mh">0xbe</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0178</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Y */</span>
+        <span class="p">}</span>
+        <span class="n">d</span> <span class="o">+=</span> <span class="n">utf_char2bytes</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+
+    <span class="k">case</span> <span class="nl">CONV_TO_LATIN1</span><span class="p">:</span>          <span class="cm">/* utf-8 to latin1 conversion */</span>
+    <span class="k">case</span> <span class="nl">CONV_TO_LATIN9</span><span class="p">:</span>          <span class="cm">/* utf-8 to latin9 conversion */</span>
+      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
+      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">utf_ptr2len_len</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+          <span class="kt">int</span> <span class="n">l_w</span> <span class="o">=</span> <span class="n">utf8len_tab_zero</span><span class="p">[</span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]];</span>
+
+          <span class="k">if</span> <span class="p">(</span><span class="n">l_w</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="cm">/* Illegal utf-8 byte cannot be converted */</span>
+            <span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">unconvlenp</span> <span class="o">!=</span> <span class="nb">NULL</span> <span class="o">&amp;&amp;</span> <span class="n">l_w</span> <span class="o">&gt;</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="cm">/* Incomplete sequence at the end. */</span>
+            <span class="o">*</span><span class="n">unconvlenp</span> <span class="o">=</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+          <span class="p">}</span>
+          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+          <span class="n">c</span> <span class="o">=</span> <span class="n">utf_ptr2char</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_TO_LATIN9</span><span class="p">)</span>
+            <span class="k">switch</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+              <span class="k">case</span> <span class="mh">0x20ac</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa4</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* euro */</span>
+              <span class="k">case</span> <span class="mh">0x0160</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa6</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* S hat */</span>
+              <span class="k">case</span> <span class="mh">0x0161</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa8</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* S -hat */</span>
+              <span class="k">case</span> <span class="mh">0x017d</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xb4</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Z hat */</span>
+              <span class="k">case</span> <span class="mh">0x017e</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xb8</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Z -hat */</span>
+              <span class="k">case</span> <span class="mh">0x0152</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbc</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* OE */</span>
+              <span class="k">case</span> <span class="mh">0x0153</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbd</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* oe */</span>
+              <span class="k">case</span> <span class="mh">0x0178</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbe</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Y */</span>
+              <span class="k">case</span> <span class="mh">0xa4</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xa6</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xa8</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xb4</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xb8</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xbc</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xbd</span><span class="o">:</span>
+              <span class="k">case</span> <span class="mh">0xbe</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x100</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                   <span class="cm">/* not in latin9 */</span>
+            <span class="p">}</span>
+          <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">utf_iscomposing</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="p">{</span>              <span class="cm">/* skip composing chars */</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="mh">0x100</span><span class="p">)</span>
+              <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span><span class="p">)</span> <span class="p">{</span>
+              <span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
+              <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+              <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0xbf</span><span class="p">;</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">utf_char2cells</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="sc">'?'</span><span class="p">;</span>
+            <span class="p">}</span>
+          <span class="p">}</span>
+          <span class="n">i</span> <span class="o">+=</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+
+<span class="cp"># ifdef USE_ICONV</span>
+    <span class="k">case</span> <span class="nl">CONV_ICONV</span><span class="p">:</span>              <span class="cm">/* conversion with output_conv.vc_fd */</span>
+      <span class="n">retval</span> <span class="o">=</span> <span class="n">iconv_string</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">unconvlenp</span><span class="p">,</span> <span class="n">lenp</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+<span class="cp"># endif</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+
+<p>In the end it’s just a switch that looks up a conversion method by
+looking at the <code>vc_type</code> member that was set up earlier in
+<code>convert_setup()</code> earlier. Apparently Bram decided that it was simpler
+to have the conversion code inline in the switch. I must say, they are
+wonderfully compact (and quite simple, if you read up on the encodings).
+Still, I think it would be better if these various converters were
+extracted into their own little functions (I’m working on it).</p>
+
+<p>On success, the function returns allocated memory with the converted
+bytes in it. This is neat, but it would be nice of the function allowed
+to pass an output buffer to avoid allocations if it’s not necessary.
+Case in point, the snippet that started this entire article could use
+this. Data from <code>read_buffer</code> is converted, and then copied to
+<code>input_buffer</code>. It would be more elegant if the data could just be
+written to <code>input_buffer</code> by <code>string_convert_ext()</code>.</p>
+
+<p>That raises a question though: how should the caller determine how large
+the output buffer should be? It turns out iconv has this exact same
+problem:</p>
+
+<pre><code class="language-c"><span class="kt">size_t</span> <span class="nf">iconv</span> <span class="p">(</span><span class="kt">iconv_t</span> <span class="n">cd</span><span class="p">,</span>
+              <span class="kt">char</span> <span class="o">**</span><span class="kr">restrict</span> <span class="n">inbuf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="kr">restrict</span> <span class="n">inbytesleft</span><span class="p">,</span>
+              <span class="kt">char</span> <span class="o">**</span><span class="kr">restrict</span> <span class="n">outbuf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="kr">restrict</span> <span class="n">outbytesleft</span><span class="p">);</span></code></pre>
+
+<p>It has basically the interface I just described for a hypothetically
+improved <code>string_convert_ext()</code>. The solution iconv uses is to return -1
+with <code>errno</code> set to <code>E2BIG</code>. After which you’re supposed to enlarge your
+buffer and try again. This is a decent strategy, and we could make it
+even better.</p>
+
+<p>As mentioned above, <code>vimconv_T</code> has a field called <code>vc_expand</code> which
+records a factor by which a byte stream can expand if converted with
+said parameters. As we can see in <code>convert_setup()</code> above. Example: for
+latin-1 this factor is 2. Meaning that by allocating a buffer twice as
+large, there would be no risk of receiving <code>E2BIG</code>. This is incidentally
+also the size used for the allocation in the current incarnation of
+<code>string_convert_ext()</code>:</p>
+
+<pre><code class="language-c"><span class="k">case</span> <span class="nl">CONV_TO_UTF8</span><span class="p">:</span>            <span class="cm">/* latin1 to utf-8 conversion */</span>
+  <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span></code></pre>
+
+<p>When Vim uses iconv, the situation is more difficult since the expansion
+factor is a potential unknown. Vim assigns <strong>4</strong> by default, but notes
+in the comments that it could possibly be larger. In conclusion,
+<code>vc_factor</code> is a nice yardstick by which to scale the output buffer, but
+it’s not conclusive for all cases.</p>
+
+<p>That about wraps up input encoding, when you’re typing characters into
+the keyboard. Something tells me that this is not the end of the story.
+For the next installment, I will discuss file encoding.</p>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>Code review is not only massively important for a rapidly changing
+project like Neovim, it also helps me get to grips with some internals
+that I haven’t had the pleasure to alter myself.</p>
+
+      <p>Recently there have been too few reviewers and some changes were
+perhaps merged prematurely. Luckily this is all quickly rectified by
+the combination of swift bug reports and coverity scans. On second
+thought, perhaps premature merging is not quite right, in a quickly
+moving project like Neovim it might actually be required to
+jumpstart a discussion after a lull.</p>
+
+      <p>I’m also guilty of reviewing after the fact (read: merge). But since
+Neovim is still in alpha status, I believe we are allowed such
+luxuries. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    </li>
+    <li id="fn:2">
+      <p>After seeing all the <code>USE_ICONV</code> conditional parts in the source, I
+started to wonder when <a href="http://en.wikipedia.org/wiki/Iconv">libiconv</a> was
+actually activated and used.</p>
+
+      <p>A short investigation revealed that iconv was never enabled for Neovim,
+even though most of the code was perfectly functional. Supposedly,
+something happened during the migration from autoconf (Vim) to cmake
+(Neovim) and <code>USE_ICONV</code> was never set. I submitted PR
+<a href="https://github.com/neovim/neovim/pull/1370">#1370</a> to rectify this. The
+relevant source hadn’t diverged that much and no <code>USE_ICONV</code> block had
+been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+
+        <p>Tags: <a href="/tag/neovim" rel="tag">neovim</a>, <a href="/tag/vim" rel="tag">vim</a>, <a href="/tag/encoding" rel="tag">encoding</a></p>
+    </div>
+
+        </main>
+
+        <!-- mathjax config similar to math.stackexchange -->
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+              jax: ["input/TeX", "output/HTML-CSS"],
+              tex2jax: {
+                inlineMath: [ ['$', '$'], ["\\(", "\\)"] ],
+                displayMath: [ ['$$', '$$'], ["\\[", "\\]"] ],
+                processEscapes: true,
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+              },
+              "HTML-CSS": { scale: 180 },
+              //displayAlign: "left",
+              //displayIndent: "2em"
+            });
+        </script>
+        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-37726728-1', 'aktau.be');
+            ga('send', 'pageview');
+        </script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    // reload mathjax after a pjax load
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                },
+                "autoAnalytics": true
+            });
+        </script>
+    </body>
+</html>
