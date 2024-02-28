@@ -9,7 +9,7 @@
         <meta name="description" content="This small article describes how to use ffmpeg's commandline tools to detect pretty accurately whether or not a video files is interlaced">
         <meta name="keywords" content="ffmpeg">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Detecting interlaced video with ffmpeg">
@@ -155,34 +155,34 @@ believe, the one in the debian wheezy repository is not recent enough).
 Here’s an example of how to use it and what happens when I try it on an
 interlaced and non-interlaced file:</p>
 
-<pre><code class="language-bash"><span class="c"># detect interlacing with the ffmpeg "idet" filter, the more frames</span>
-<span class="c"># you extract, the better, though it's never 100% accurate</span>
+<pre><code class="language-bash"><span class="c1"># detect interlacing with the ffmpeg "idet" filter, the more frames</span>
+<span class="c1"># you extract, the better, though it's never 100% accurate</span>
 
-ffmpeg -filter:v idet <span class="se">\</span>
-    -frames:v <span class="m">100</span> <span class="se">\</span>
-    -an <span class="se">\</span>
-    -f rawvideo -y /dev/null <span class="se">\</span>
-    -i ~/Downloads/some_interlaced_video.mkv
-<span class="c"># Example output (this is interlaced, TFF style)</span>
-<span class="c"># [Parsed_idet_0 @ 0x1ccf7c0] Single frame detection: TFF:167 BFF:0 Progressive:1 Undetermined:0</span>
-<span class="c"># [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0</span>
+ffmpeg<span class="w"> </span>-filter:v<span class="w"> </span>idet<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-frames:v<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-an<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-f<span class="w"> </span>rawvideo<span class="w"> </span>-y<span class="w"> </span>/dev/null<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-i<span class="w"> </span>~/Downloads/some_interlaced_video.mkv
+<span class="c1"># Example output (this is interlaced, TFF style)</span>
+<span class="c1"># [Parsed_idet_0 @ 0x1ccf7c0] Single frame detection: TFF:167 BFF:0 Progressive:1 Undetermined:0</span>
+<span class="c1"># [Parsed_idet_0 @ 0x1ccf7c0] Multi frame detection: TFF:168 BFF:0 Progressive:0 Undetermined:0</span>
 
-ffmpeg -filter:v idet <span class="se">\</span>
-    -frames:v <span class="m">100</span> <span class="se">\</span>
-    -an <span class="se">\</span>
-    -f rawvideo -y /dev/null <span class="se">\</span>
-    -i ~/Downloads/some_non_interlaced_video.mkv
-<span class="c"># Example output (this is not interlaced):</span>
-<span class="c"># [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84</span>
-<span class="c"># [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25</span>
+ffmpeg<span class="w"> </span>-filter:v<span class="w"> </span>idet<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-frames:v<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-an<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-f<span class="w"> </span>rawvideo<span class="w"> </span>-y<span class="w"> </span>/dev/null<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-i<span class="w"> </span>~/Downloads/some_non_interlaced_video.mkv
+<span class="c1"># Example output (this is not interlaced):</span>
+<span class="c1"># [Parsed_idet_0 @ 0x1bcf720] Single frame detection: TFF:0 BFF:0 Progressive:564 Undetermined:84</span>
+<span class="c1"># [Parsed_idet_0 @ 0x1bcf720] Multi frame detection: TFF:0 BFF:0 Progressive:623 Undetermined:25</span>
 
-<span class="c"># flags:</span>
-<span class="c"># -an            = discard audio, we don't need it</span>
-<span class="c"># -f rawvideo    = output raw video</span>
-<span class="c"># -y /dev/null   = discard the output</span>
-<span class="c"># -i ...         = the input file to check</span>
-<span class="c"># -frames:v 100  = extract the first 100 frames</span>
-<span class="c"># -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames</span></code></pre>
+<span class="c1"># flags:</span>
+<span class="c1"># -an            = discard audio, we don't need it</span>
+<span class="c1"># -f rawvideo    = output raw video</span>
+<span class="c1"># -y /dev/null   = discard the output</span>
+<span class="c1"># -i ...         = the input file to check</span>
+<span class="c1"># -frames:v 100  = extract the first 100 frames</span>
+<span class="c1"># -filter:v idet = insert the "idet" filter, which will output whether it has detected interlaced frames</span></code></pre>
 
 <p>If you see many frames next to <em>TFF</em> or <em>BFF</em>, that means a video is
 interlaced. On the other hand if there are many in progressive, that
@@ -193,10 +193,10 @@ me yet.</p>
 <p>Armed with this new tool I thought it would be a good idea to scan my
 entire HD looking and check them all with the <em>idet</em> filter:</p>
 
-<pre><code class="language-bash"><span class="c"># scan all files on your HD, uses GNU parallel</span>
-<span class="c"># I believe this works just as well with standard</span>
-<span class="c"># xargs though</span>
-locate -0 <span class="s1">'.mov'</span> <span class="p">|</span> parallel -0 ./ffmpeg -filter:v idet -frames:v <span class="m">100</span> -an -f rawvideo -y /dev/null -i <span class="o">{}</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> egrep <span class="s1">'idet|Input'</span></code></pre>
+<pre><code class="language-bash"><span class="c1"># scan all files on your HD, uses GNU parallel</span>
+<span class="c1"># I believe this works just as well with standard</span>
+<span class="c1"># xargs though</span>
+locate<span class="w"> </span>-0<span class="w"> </span><span class="s1">'.mov'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>parallel<span class="w"> </span>-0<span class="w"> </span>./ffmpeg<span class="w"> </span>-filter:v<span class="w"> </span>idet<span class="w"> </span>-frames:v<span class="w"> </span><span class="m">100</span><span class="w"> </span>-an<span class="w"> </span>-f<span class="w"> </span>rawvideo<span class="w"> </span>-y<span class="w"> </span>/dev/null<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>egrep<span class="w"> </span><span class="s1">'idet|Input'</span></code></pre>
 
 <p>It turns out I only had 2, interlaced content indeed is quite rare for
 content on a computer, luckily so.</p>
@@ -223,7 +223,7 @@ content on a computer, luckily so.</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -246,3 +246,4 @@ content on a computer, luckily so.</p>
         </script>
     </body>
 </html>
+

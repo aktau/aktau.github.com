@@ -9,7 +9,7 @@
         <meta name="description" content="github-release is a small commandline app writtin in Golang that allows you to manage github releases -- information and artifacts (= binaries) -- from the comfort of the commandline.">
         <meta name="keywords" content="github, github-release, gofinance, golang, cross-compiling">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Manage your app releases from the commandline with github-release">
@@ -154,17 +154,17 @@ care of the dirty work for you.</p>
 example of some output I get out of the current version for the
 <code>github-release</code> repo itself:</p>
 
-<pre><code class="language-bash"><span class="nv">$ </span>github-release info -u aktau -r github-release
-git tags:
-- v0.3 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/b30980cb2a0850689e9f68a75549e52f73893e0d<span class="o">)</span>
-- v0.2 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/264d2373ef74f60e94726ef37c5a7ee9164412d2<span class="o">)</span>
-- v0.1 <span class="o">(</span>commit: https://api.github.com/repos/aktau/github-release/commits/20fa17d227789813e8a7bc24137d384f8e7e7a33<span class="o">)</span>
+<pre><code class="language-bash">$<span class="w"> </span>github-release<span class="w"> </span>info<span class="w"> </span>-u<span class="w"> </span>aktau<span class="w"> </span>-r<span class="w"> </span>github-release
+git<span class="w"> </span>tags:
+-<span class="w"> </span>v0.3<span class="w"> </span><span class="o">(</span>commit:<span class="w"> </span>https://api.github.com/repos/aktau/github-release/commits/b30980cb2a0850689e9f68a75549e52f73893e0d<span class="o">)</span>
+-<span class="w"> </span>v0.2<span class="w"> </span><span class="o">(</span>commit:<span class="w"> </span>https://api.github.com/repos/aktau/github-release/commits/264d2373ef74f60e94726ef37c5a7ee9164412d2<span class="o">)</span>
+-<span class="w"> </span>v0.1<span class="w"> </span><span class="o">(</span>commit:<span class="w"> </span>https://api.github.com/repos/aktau/github-release/commits/20fa17d227789813e8a7bc24137d384f8e7e7a33<span class="o">)</span>
 releases:
--  v0.3, name: <span class="s1">'v0.3'</span>, description: <span class="s1">'v0.3'</span>, id: 167330, tagged: 30/01/2014 at 23:27, published: 30/01/2014 at 23:27, draft: ✔, prerelease: ✔
-  - artifact: darwin-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68861
-  - artifact: freebsd-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68862
-  - artifact: linux-amd64-github-release.tar.bz2, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.0MB, id: 68863
-  - artifact: windows-amd64-github-release.zip, downloads: 0, state: uploaded, <span class="nb">type</span>: application/octet-stream, size: 2.1MB, id: 68864</code></pre>
+-<span class="w">  </span>v0.3,<span class="w"> </span>name:<span class="w"> </span><span class="s1">'v0.3'</span>,<span class="w"> </span>description:<span class="w"> </span><span class="s1">'v0.3'</span>,<span class="w"> </span>id:<span class="w"> </span><span class="m">167330</span>,<span class="w"> </span>tagged:<span class="w"> </span><span class="m">30</span>/01/2014<span class="w"> </span>at<span class="w"> </span><span class="m">23</span>:27,<span class="w"> </span>published:<span class="w"> </span><span class="m">30</span>/01/2014<span class="w"> </span>at<span class="w"> </span><span class="m">23</span>:27,<span class="w"> </span>draft:<span class="w"> </span>✔,<span class="w"> </span>prerelease:<span class="w"> </span>✔
+<span class="w">  </span>-<span class="w"> </span>artifact:<span class="w"> </span>darwin-amd64-github-release.tar.bz2,<span class="w"> </span>downloads:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span>state:<span class="w"> </span>uploaded,<span class="w"> </span>type:<span class="w"> </span>application/octet-stream,<span class="w"> </span>size:<span class="w"> </span><span class="m">2</span>.0MB,<span class="w"> </span>id:<span class="w"> </span><span class="m">68861</span>
+<span class="w">  </span>-<span class="w"> </span>artifact:<span class="w"> </span>freebsd-amd64-github-release.tar.bz2,<span class="w"> </span>downloads:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span>state:<span class="w"> </span>uploaded,<span class="w"> </span>type:<span class="w"> </span>application/octet-stream,<span class="w"> </span>size:<span class="w"> </span><span class="m">2</span>.0MB,<span class="w"> </span>id:<span class="w"> </span><span class="m">68862</span>
+<span class="w">  </span>-<span class="w"> </span>artifact:<span class="w"> </span>linux-amd64-github-release.tar.bz2,<span class="w"> </span>downloads:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span>state:<span class="w"> </span>uploaded,<span class="w"> </span>type:<span class="w"> </span>application/octet-stream,<span class="w"> </span>size:<span class="w"> </span><span class="m">2</span>.0MB,<span class="w"> </span>id:<span class="w"> </span><span class="m">68863</span>
+<span class="w">  </span>-<span class="w"> </span>artifact:<span class="w"> </span>windows-amd64-github-release.zip,<span class="w"> </span>downloads:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span>state:<span class="w"> </span>uploaded,<span class="w"> </span>type:<span class="w"> </span>application/octet-stream,<span class="w"> </span>size:<span class="w"> </span><span class="m">2</span>.1MB,<span class="w"> </span>id:<span class="w"> </span><span class="m">68864</span></code></pre>
 
 <p>So there are 3 tags, and only one of them has a formal github release
 (v0.3).  It has 4 artifacts, all about 2MB in size. I’ve automated this
@@ -178,7 +178,7 @@ on the <a href="https://github.com/aktau/github-release">project page</a>.</p>
 I can make a windows binary from the comfort of my OSX environment by
 just issuing:</p>
 
-<pre><code class="language-bash"><span class="nv">$ GOARCH</span><span class="o">=</span>amd64 <span class="nv">GOOS</span><span class="o">=</span>windows go build</code></pre>
+<pre><code class="language-bash">$<span class="w"> </span><span class="nv">GOARCH</span><span class="o">=</span>amd64<span class="w"> </span><span class="nv">GOOS</span><span class="o">=</span>windows<span class="w"> </span>go<span class="w"> </span>build</code></pre>
 
 <p>And presto, there’s a brand new <code>app.exe</code> in the directory. This,
 combined with the fact that Go generates static binaries that are
@@ -210,7 +210,7 @@ whatever shenanigans the next scripting language du jour comes up with.</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -233,3 +233,4 @@ whatever shenanigans the next scripting language du jour comes up with.</p>
         </script>
     </body>
 </html>
+

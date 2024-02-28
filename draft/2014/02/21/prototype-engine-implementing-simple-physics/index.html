@@ -9,7 +9,7 @@
         <meta name="description" content="in this article I try to explain my first foray into game physics">
         <meta name="keywords" content="games, physics">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Prototype engine, implementing simple physics">
@@ -135,13 +135,11 @@
 
 <p>Most people will be familiar with these equations:</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 F(t) = m \cdot a(t) \\
 v(t) = \int{a(t)~dt} \\
 s(t) = \int{v(t)~dt} \\
-\end{align}
-</script>
+\end{align}\]
 
 <p>Sometimes the force is known, sometimes the acceleration is known (e.g.:
 gravity), other times you want to specify the velocity. From all these
@@ -170,25 +168,19 @@ that the equations above become trivial to solve analytically.</p>
 
 <p>With constant acceleration, the velocity becomes:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-v(t) =& \int{a~dt} \\
-     =& v_0 + a \cdot t
-\end{align}
- %]]></script>
+\[\begin{align}
+v(t) =&amp; \int{a~dt} \\
+     =&amp; v_0 + a \cdot t
+\end{align}\]
 
 <p>Note that even though the acceleration is constant, velocity is not.
 Next, we can use the explicit formula of the velocity to get the
 position:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-s(t) =& \int{v(t)~dt} = \int{(v_0 + at)~dt} \\
-     =& s_0 + v_{0}t + a\frac{t^2}{2}
-\end{align}
- %]]></script>
+\[\begin{align}
+s(t) =&amp; \int{v(t)~dt} = \int{(v_0 + at)~dt} \\
+     =&amp; s_0 + v_{0}t + a\frac{t^2}{2}
+\end{align}\]
 
 <p>So if the cumulative force acting on an object is constant, we could use
 a formula like this instead of numerical methods, and it would always be
@@ -257,7 +249,7 @@ It doesn’t make sense at first glance).</p>
 add it (e.g.: explicit Euler) and others still keep it more or less
 table (e.g.: semi-implicit Euler). Such an energy-conserving integrator
 is often called <em>symplectic</em>. The two properites are not entirely
-synonymous<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, but often sufficiently so.</p>
+synonymous<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, but often sufficiently so.</p>
 
 <p>Many argue that for games, it’s not really necessary to have a
 symplectic integrator. Usually there is damping force being applied by
@@ -296,12 +288,10 @@ some require keeping around values from earlier iterations as well.</p>
 
 <p><strong>Alternative name</strong>: forward Euler</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 v_{t+1} = v_t + a_t \Delta t \\
 s_{t+1} = s_t + v_t \Delta t
-\end{align}
-</script>
+\end{align}\]
 
 <p>The explicit Euler method is one of those which are very intuitive and
 simple. Sadly, it’s also one of the worst numerical integrators.</p>
@@ -322,12 +312,10 @@ the system will become unstable over time.</p>
 
 <p><strong>Alternative name</strong>: backward Euler</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 v_{t+1} = v_t + a_{t+1} \Delta t \\
 s_{t+1} = s_t + v_{t+1} \Delta t
-\end{align}
-</script>
+\end{align}\]
 
 <p>Some articles propose the <a href="http://en.wikipedia.org/wiki/Backward_Euler_method">implicit Euler
 method</a> when related
@@ -359,12 +347,10 @@ and
 althrough I’ve also seen this name applied to regular Verlet, which is
 discussed later (to ascertain I’d have to check Newton’s Principia).</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 v_{t+1} = v_t + a_t \Delta t \\
 s_{t+1} = s_t + v_{t+1} \Delta t
-\end{align}
-</script>
+\end{align}\]
 
 <p>The name semi-implicit Euler is perhaps poorly chosen as it is an
 explicit method. This is easy to see by the fact that we don’t have to
@@ -394,11 +380,9 @@ first-order method I know of.</p>
 Newton-Störmer-Verlet (possibly wrong as I’ve seen the name applied to
 semi-implicit Euler as well)</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 s_{t+1} = 2s_t - s_{t-1} + a_{t} \Delta t^2
-\end{align}
-</script>
+\end{align}\]
 
 <p>This method calculates the position from the two last positions and the
 current acceleration, omitting the velocity. Of course, the velocity at
@@ -406,11 +390,9 @@ some point can be estimated by <a href="http://en.wikipedia.org/wiki/Verlet_inte
 dividing by the timestep
 taken</a>:</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 \tilde{v}{}_{t+1} = \frac{s_{t+1} - s_t}{2}
-\end{align}
-</script>
+\end{align}\]
 
 <p>The absence of velocity makes it difficult to use Verlet integration
 when the acceleration is dependent on velocity, such as with dampers.
@@ -433,11 +415,9 @@ Alternatively, there’s a modified first Verlet step that only requires
 the first position, velocity and acceleration (basically a second-degree
 Taylor polynomial):</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 s_{1} = s_0 + v_0 \Delta t + \frac{a_0}{2} \Delta t^2
-\end{align}
-</script>
+\end{align}\]
 
 <p>The verlet method is symplectic, so it does a good job of conserving
 energy. It is also time-reversible, which means it can be ran backwards
@@ -498,14 +478,11 @@ $$ -->
 [<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">2</a>]
 and [<a href="http://cds.cern.ch/record/331170/files/9707008.pdf">3</a>]:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
-s_{t+1} =& s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
-        =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
-\end{align}
- %]]></script>
+\[\begin{align}
+v_{t+1} =&amp; v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =&amp; s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
+        =&amp; s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
+\end{align}\]
 
 <p>There’s a simplification when the acceleration is constant:
 http://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
@@ -566,25 +543,19 @@ velocity. If the acceleration depends on the position (such as for
 spring forces), then the position can be calculated first, after which
 the acceleration for that position can be queried:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-\tilde{s}{}_{t+1} =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2} \\
-a_{t+1} =& acceleration(\tilde{s}{}_{t+1}) \\
-\end{align}
- %]]></script>
+\[\begin{align}
+\tilde{s}{}_{t+1} =&amp; s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2} \\
+a_{t+1} =&amp; acceleration(\tilde{s}{}_{t+1}) \\
+\end{align}\]
 
 <p>This would provide the next acceleration to calculate the velocity. When
 then velocity for the next step is known, we can use it to correct the
 position value:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
-s_{t+1} =& s_t + v_{t+1} \Delta t
-\end{align}
- %]]></script>
+\[\begin{align}
+v_{t+1} =&amp; v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =&amp; s_t + v_{t+1} \Delta t
+\end{align}\]
 
 <p>This approach won’t work if the acceleration also depends on the
 velocity, of course. The correction is <a href="https://web.archive.org/web/20120713004111/http://wiki.vdrift.net/Numerical_Integration#Newton-Stormer-Verlet_.28NSV.29_.2F_Symplectic_Euler_.2F_Euler.E2.80.93Cromer_algorithm">sometimes
@@ -610,11 +581,9 @@ uniform. When it’s impossible to <a href="http://gafferongames.com/game-physic
 timestep</a>,
 there’s a slight variation on Verlet integration you can use:</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 s_{t+1} = s_t + (s_t + s_{t-1}) \frac{\Delta t_t}{\Delta t_{t-1}} + a_{t} \Delta t^2
-\end{align}
-</script>
+\end{align}\]
 
 <p>It’s easy to see that this method reduces to regular Verlet in case the
 timesteps are in fact constant.</p>
@@ -623,25 +592,20 @@ timesteps are in fact constant.</p>
 
 <p><strong>Alternative name</strong>: leapfrog method (don’t think so…)</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 s_{t+\frac{1}{2}} = s_t + \frac{v_t}{2} \Delta t \\
 v_{t+1} = v_t + a_{t+\frac{1}{2}} \Delta t \\
 s_{t+1} = s_{t+\frac{1}{2}} + \frac{v_{t+1}}{2} \Delta t
-\end{align}
-</script>
+\end{align}\]
 
 <p>Alternative
 <a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">formulation</a>:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-v_{t+1} =& v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
-s_{t+1} =& s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
-        =& s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
-\end{align}
- %]]></script>
+\[\begin{align}
+v_{t+1} =&amp; v_t + \frac{a_t + a_{t+1}}{2} \Delta t \\
+s_{t+1} =&amp; s_t + (v_t + a_t \frac{\Delta t}{2}) \Delta t \\
+        =&amp; s_t + v_t \Delta t + a_t \frac{\Delta t^2}{2}
+\end{align}\]
 
 <p>A middle ground between explicit Euler and semi-implicit Euler.</p>
 
@@ -664,12 +628,10 @@ use this to take the full step.</p>
 
 <p><strong>Alternative names</strong>: improved Euler, modified Euler</p>
 
-<script type="math/tex; mode=display">
-\begin{align}
+\[\begin{align}
 v_{t+1} = v_t + a_t \Delta t \\
 s_{t+1} = s_t + (\frac{v_t + v_{t+1}}{2}) \Delta t
-\end{align}
-</script>
+\end{align}\]
 
 <p><strong>TODO</strong>: this does not appear to be the true Heun method (<em>or</em> improved
 Euler is different). Someone has suggested that Heun is a true RK2
@@ -720,14 +682,11 @@ trapezoidal version and not the midpoint one.</p>
 
 <p>The midpoint version could look like this:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align}
-v_{t+\frac{1}{2}} =& v_t + a_t \frac{\Delta t}{2} \\
-s_{t+1} =& s_t + v_{t+\frac{1}{2}} \Delta t \\
-v_{t+1} =& v_t + a_t \Delta t
-\end{align}
- %]]></script>
+\[\begin{align}
+v_{t+\frac{1}{2}} =&amp; v_t + a_t \frac{\Delta t}{2} \\
+s_{t+1} =&amp; s_t + v_{t+\frac{1}{2}} \Delta t \\
+v_{t+1} =&amp; v_t + a_t \Delta t
+\end{align}\]
 
 <h4 id="runge-kutta-4">Runge Kutta 4</h4>
 
@@ -811,7 +770,7 @@ non-linearity directly (verlet) or by taking smaller timesteps (rk4).</p>
       <td>Runge Kutta 4</td>
       <td>4</td>
       <td>No</td>
-      <td>Yes <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>
+      <td>Yes <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>
 </td>
     </tr>
   </tbody>
@@ -862,9 +821,9 @@ is just a plain good idea, use it or lose it!</p>
   <li><a href="http://books.google.be/books?id=CCVenzOGjpcC&amp;pg=PA236&amp;lpg=PA236&amp;dq=is+verlet+integration+4th+order&amp;source=bl&amp;ots=pbx2CogVJE&amp;sig=TPUUgZ1vUczVQCKzdYMNW35Lh_I&amp;hl=en&amp;sa=X&amp;ei=KMELU5PNB8HWtQam5oD4Bg&amp;ved=0CFwQ6AEwBg#v=onepage&amp;q=is%20verlet%20integration%204th%20order&amp;f=false">OpenGL insights, implementing tearable cloth on the GPU with Verlet</a></li>
 </ol>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
+    <li id="fn:1" role="doc-endnote">
 
       <p>Scrolling down in <a href="http://www.reddit.com/r/programming/comments/15f4qc/on_using_rk4_over_euler_to_integrate_for_physics/">this Reddit
 thread</a>
@@ -872,12 +831,12 @@ can provide some insight into why symplecticity doesn’t exactly mean
 energy conversation. Strictly put: an integrator conserves energy
 when it is both symplectic and the Hamiltonian of the system is
 time-independent. Another definition and proof can be found
-<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">here</a>. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+<a href="https://www.math.ethz.ch/education/bachelor/seminars/fs2008/nas/crivelli.pdf">here</a>. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2">
+    <li id="fn:2" role="doc-endnote">
 
       <p>Only one fourth-order method was discussed, making  it the best by
-default. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+default. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -904,7 +863,7 @@ default. <a href="#fnref:2" class="reversefootnote">↩</a></p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -927,3 +886,4 @@ default. <a href="#fnref:2" class="reversefootnote">↩</a></p>
         </script>
     </body>
 </html>
+

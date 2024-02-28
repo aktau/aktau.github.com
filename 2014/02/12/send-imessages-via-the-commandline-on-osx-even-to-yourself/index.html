@@ -9,7 +9,7 @@
         <meta name="description" content="this little applescript allows one to easily send an iMessage to anyone in your contact list by communicating with Messages.app">
         <meta name="keywords" content="imessage, osx, applescript">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Send iMessages via the commandline on OSX, even to yourself">
@@ -137,7 +137,7 @@ it doesn’t even require ruby anymore!</p>
 
 <!-- more -->
 
-<p>After realizing the utility worked through applescript <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>, I perused
+<p>After realizing the utility worked through applescript <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, I perused
 google to find a way to circumvent the inability to send to self. Lo and
 behold, <a href="http://stackoverflow.com/questions/11812184/how-to-send-an-imessage-text-with-applescript-only-in-provided-service">Stack Overflow has the
 answer</a>!</p>
@@ -165,8 +165,8 @@ executable with <code>chmod u+x "thefilename"</code> and you’re good to go. It
 doesn’t even require Ruby, so you can just drop the script in some
 folder in your <code>$PATH</code> and use it like this:</p>
 
-<pre><code class="language-bash"><span class="nv">$ </span>imessage <span class="m">0487198747</span> <span class="s2">"gofinance: your stock AAPL has gone up by 20%"</span>
-<span class="nv">$ </span>imessage <span class="m">0495876923</span> <span class="s2">"knock knock!"</span></code></pre>
+<pre><code class="language-bash">$<span class="w"> </span>imessage<span class="w"> </span><span class="m">0487198747</span><span class="w"> </span><span class="s2">"gofinance: your stock AAPL has gone up by 20%"</span>
+$<span class="w"> </span>imessage<span class="w"> </span><span class="m">0495876923</span><span class="w"> </span><span class="s2">"knock knock!"</span></code></pre>
 
 <p>Those are not actual telephone numbers (that I know of), by the way.
 There are even more cool things you could do with this. Someone has even
@@ -174,10 +174,10 @@ made a <a href="https://46b.it/2012/hacking-with-imessage">Lisp REPL that works 
 iMessage</a>. Oh the
 possibilities!</p>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>the ruby utility can be found on <a href="https://github.com/chrisfsampaio/imsg">github</a>. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>the ruby utility can be found on <a href="https://github.com/chrisfsampaio/imsg">github</a>. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -204,7 +204,7 @@ possibilities!</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -227,3 +227,4 @@ possibilities!</p>
         </script>
     </body>
 </html>
+

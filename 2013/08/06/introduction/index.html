@@ -9,7 +9,7 @@
         <meta name="description" content="Introducing my blog to the world">
         <meta name="keywords" content="introduction, nanoc, pygments, github">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Introduction">
@@ -164,50 +164,50 @@ Gemfile and change one line in the Rules file.</p>
 <p>There are plenty of tutorials on how to get started, but here’s a nudge:
 (might have to be adapted slightly if you’re not on OSX)</p>
 
-<pre><code class="language-bash"><span class="c"># get the latest and greatest ruby</span>
-<span class="nv">$ </span>brew install ruby
+<pre><code class="language-bash"><span class="c1"># get the latest and greatest ruby</span>
+$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>ruby
 
-<span class="c"># make sure the local ruby and gem paths are added to $PAH, make sure</span>
-<span class="c"># `which gem` gives the local gem executable</span>
-<span class="c"># instead of the system default</span>
-<span class="nv">$ </span>edit ~/.zshrc <span class="c"># or ~/.bashrc ...</span>
+<span class="c1"># make sure the local ruby and gem paths are added to $PAH, make sure</span>
+<span class="c1"># `which gem` gives the local gem executable</span>
+<span class="c1"># instead of the system default</span>
+$<span class="w"> </span>edit<span class="w"> </span>~/.zshrc<span class="w"> </span><span class="c1"># or ~/.bashrc ...</span>
 
-<span class="nv">$ </span>gem install bundler
+$<span class="w"> </span>gem<span class="w"> </span>install<span class="w"> </span>bundler
 
-<span class="c"># clone this repo or your own or start from scratch</span>
-<span class="c"># the repo has a gemfile with most of the things you</span>
-<span class="c"># need to get started</span>
-<span class="nv">$ </span>git clone ...
+<span class="c1"># clone this repo or your own or start from scratch</span>
+<span class="c1"># the repo has a gemfile with most of the things you</span>
+<span class="c1"># need to get started</span>
+$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>...
 
-<span class="c"># if you want code highlighting, install pygments</span>
-<span class="c"># (alternatively you can use the built-in CodeRay)</span>
-<span class="nv">$ </span>sudo easy_install Pygments
+<span class="c1"># if you want code highlighting, install pygments</span>
+<span class="c1"># (alternatively you can use the built-in CodeRay)</span>
+$<span class="w"> </span>sudo<span class="w"> </span>easy_install<span class="w"> </span>Pygments
 
-<span class="nv">$ </span><span class="nb">cd </span>aktau.github.com
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>aktau.github.com
 
-<span class="c"># make sure bundler exports its executables to /usr/local/bin</span>
-<span class="nv">$ </span><span class="nb">export </span><span class="nv">BUNDLE_BIN</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span>
-<span class="nv">$ </span>bundle install
+<span class="c1"># make sure bundler exports its executables to /usr/local/bin</span>
+$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">BUNDLE_BIN</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span>
+$<span class="w"> </span>bundle<span class="w"> </span>install
 
-<span class="c"># compile with nanoc</span>
-<span class="nv">$ </span>nanoc <span class="c"># (or bundle exec nanoc, if you want to be specific about versions)</span>
+<span class="c1"># compile with nanoc</span>
+$<span class="w"> </span>nanoc<span class="w"> </span><span class="c1"># (or bundle exec nanoc, if you want to be specific about versions)</span>
 
-<span class="c"># if you want to have guard watch your folders and automatically</span>
-<span class="c"># recompile while you're editing, which is really handy, just</span>
-<span class="c"># do this once:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard init nanoc
+<span class="c1"># if you want to have guard watch your folders and automatically</span>
+<span class="c1"># recompile while you're editing, which is really handy, just</span>
+<span class="c1"># do this once:</span>
+$<span class="w"> </span>bundle<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>guard<span class="w"> </span>init<span class="w"> </span>nanoc
 
-<span class="c">#start watching:</span>
-<span class="nv">$ </span>bundle <span class="nb">exec </span>guard
+<span class="c1">#start watching:</span>
+$<span class="w"> </span>bundle<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>guard
 
-<span class="c"># run nanoc's internal webserver to preview what you just did</span>
-<span class="nv">$ </span>nanoc view <span class="p">&amp;</span>
-<span class="nv">$ </span>open localhost:3000
+<span class="c1"># run nanoc's internal webserver to preview what you just did</span>
+$<span class="w"> </span>nanoc<span class="w"> </span>view<span class="w"> </span><span class="p">&amp;</span>
+$<span class="w"> </span>open<span class="w"> </span>localhost:3000
 
-<span class="c"># alternatively use nginx instead of nanoc view</span>
-<span class="nv">$ </span>brew install nginx
-<span class="nv">$ </span>ln -s /Users/Me/github/aktau/aktau.github.com/output /usr/local/var/www
-<span class="nv">$ </span>open localhost:8080</code></pre>
+<span class="c1"># alternatively use nginx instead of nanoc view</span>
+$<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>nginx
+$<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>/Users/Me/github/aktau/aktau.github.com/output<span class="w"> </span>/usr/local/var/www
+$<span class="w"> </span>open<span class="w"> </span>localhost:8080</code></pre>
 
         </article>
 
@@ -231,7 +231,7 @@ Gemfile and change one line in the Rules file.</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -254,3 +254,4 @@ Gemfile and change one line in the Rules file.</p>
         </script>
     </body>
 </html>
+

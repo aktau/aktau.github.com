@@ -9,7 +9,7 @@
         <meta name="description" content="The second version of the cross-platform game development library SDL was released today. Game developers everywhere rejoice">
         <meta name="keywords" content="sdl, game-engine, open-source">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="SDL2 (2.0.0) released at last!">
@@ -166,7 +166,7 @@ input subsystems according to different capabilities and so forth.</p>
 </ul>
 
 <p>If you develop your code with just SDL, (optionally) OpenGL and the standard
-C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>
+C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>
 So it pays off to use it, especially if you’re in the market to develop games commercially: <strong>write once, run on your toaster</strong>.</p>
 
 <p>SDL also features a drawing API, which is now hardware accelerated when possible thanks to SDL2. They worked very hard on this feature, though I
@@ -177,208 +177,208 @@ to go with SDL2 even though it was still in release candidate status. It has wor
 I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
 were minor (except for haptics support, which I don’t use).</p>
 
-<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
+<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></p>
 
-<pre><code class="language-c"><span class="cp">#include &lt;stdlib.h&gt;</span>
-<span class="cp">#include &lt;stdio.h&gt;</span>
-<span class="cp">#include &lt;string.h&gt;</span>
-<span class="cp">#include &lt;math.h&gt;</span>
-<span class="cp">#include &lt;stdint.h&gt;</span>
-<span class="cp">#include &lt;limits.h&gt;</span>
+<pre><code class="language-c"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;math.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;limits.h&gt;</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * this is mac only, probably gl/gl3.h for linux and something else for win.</span>
 <span class="cm"> * For win we will likely also need glew or another extension loader.</span>
 <span class="cm"> */</span>
 <span class="cp">#define GL3_PROTOTYPES</span>
-<span class="cp">#include &lt;OpenGL/gl3.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;OpenGL/gl3.h&gt;</span>
 
-<span class="cp">#include "SDL.h"</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"SDL.h"</span>
 
-<span class="cp">#include "util.h"</span>
-<span class="cp">#include "vec.h"</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"util.h"</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"vec.h"</span>
 
-<span class="k">static</span> <span class="kt">void</span> <span class="nf">printGlInfo</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s">"version"</span><span class="p">,</span>
-        <span class="s">"renderer"</span><span class="p">,</span>
-        <span class="s">"vendor"</span><span class="p">,</span>
-        <span class="s">"shading_language_version"</span>
-    <span class="p">};</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">printGlInfo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s">"version"</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"renderer"</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"vendor"</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"shading_language_version"</span>
+<span class="w">    </span><span class="p">};</span>
 
-    <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">constant</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">GL_VERSION</span><span class="p">,</span>
-        <span class="n">GL_RENDERER</span><span class="p">,</span>
-        <span class="n">GL_VENDOR</span><span class="p">,</span>
-        <span class="n">GL_SHADING_LANGUAGE_VERSION</span>
-    <span class="p">};</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">constant</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">GL_VERSION</span><span class="p">,</span>
+<span class="w">        </span><span class="n">GL_RENDERER</span><span class="p">,</span>
+<span class="w">        </span><span class="n">GL_VENDOR</span><span class="p">,</span>
+<span class="w">        </span><span class="n">GL_SHADING_LANGUAGE_VERSION</span>
+<span class="w">    </span><span class="p">};</span>
 
-    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">ARRAY_SIZE</span><span class="p">(</span><span class="n">constant</span><span class="p">);</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">info</span> <span class="o">=</span> <span class="n">glGetString</span><span class="p">(</span><span class="n">constant</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="n">ARRAY_SIZE</span><span class="p">(</span><span class="n">constant</span><span class="p">);</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glGetString</span><span class="p">(</span><span class="n">constant</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">info</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">trace</span><span class="p">(</span><span class="s">"could not retrieve %s information, aborting</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">info</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">trace</span><span class="p">(</span><span class="s">"could not retrieve %s information, aborting</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 
-            <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">else</span> <span class="p">{</span>
-            <span class="n">trace</span><span class="p">(</span><span class="s">"%s: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">info</span><span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<span class="w">            </span><span class="n">exit</span><span class="p">(</span><span class="mi">-1</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">trace</span><span class="p">(</span><span class="s">"%s: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">str</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">info</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">GLint</span> <span class="n">major</span><span class="p">;</span>
-    <span class="n">GLint</span> <span class="n">minor</span><span class="p">;</span>
+<span class="w">    </span><span class="n">GLint</span><span class="w"> </span><span class="n">major</span><span class="p">;</span>
+<span class="w">    </span><span class="n">GLint</span><span class="w"> </span><span class="n">minor</span><span class="p">;</span>
 
-    <span class="n">glGetIntegerv</span><span class="p">(</span><span class="n">GL_MAJOR_VERSION</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">major</span><span class="p">);</span>
-    <span class="n">glGetIntegerv</span><span class="p">(</span><span class="n">GL_MINOR_VERSION</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">minor</span><span class="p">);</span>
+<span class="w">    </span><span class="n">glGetIntegerv</span><span class="p">(</span><span class="n">GL_MAJOR_VERSION</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">major</span><span class="p">);</span>
+<span class="w">    </span><span class="n">glGetIntegerv</span><span class="p">(</span><span class="n">GL_MINOR_VERSION</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">minor</span><span class="p">);</span>
 
-    <span class="n">trace</span><span class="p">(</span><span class="s">"context version double check: %d.%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">major</span><span class="p">,</span> <span class="n">minor</span><span class="p">);</span>
+<span class="w">    </span><span class="n">trace</span><span class="p">(</span><span class="s">"context version double check: %d.%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">major</span><span class="p">,</span><span class="w"> </span><span class="n">minor</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">vsync</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="n">doublebuf</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">vsync</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">doublebuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 
-    <span class="cm">/* 16:9 =&gt; 704x440 */</span>
-    <span class="kt">int</span> <span class="n">width</span>  <span class="o">=</span> <span class="mi">800</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* 16:9 =&gt; 704x440 */</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">width</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">800</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">600</span><span class="p">;</span>
 
-    <span class="n">SDL_Init</span><span class="p">(</span><span class="n">SDL_INIT_VIDEO</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_Init</span><span class="p">(</span><span class="n">SDL_INIT_VIDEO</span><span class="p">);</span>
 
-    <span class="cm">/* set the opengl context version, this is the latest that OSX can handle, for now... */</span>
-    <span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_MAJOR_VERSION</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
-    <span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_MINOR_VERSION</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* set the opengl context version, this is the latest that OSX can handle, for now... */</span>
+<span class="w">    </span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_MAJOR_VERSION</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_MINOR_VERSION</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
-    <span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DOUBLEBUFFER</span><span class="p">,</span> <span class="n">doublebuf</span><span class="p">);</span>
-    <span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DEPTH_SIZE</span><span class="p">,</span> <span class="mi">24</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DOUBLEBUFFER</span><span class="p">,</span><span class="w"> </span><span class="n">doublebuf</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DEPTH_SIZE</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="p">);</span>
 
-    <span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_PROFILE_MASK</span><span class="p">,</span> <span class="n">SDL_GL_CONTEXT_PROFILE_CORE</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_CONTEXT_PROFILE_MASK</span><span class="p">,</span><span class="w"> </span><span class="n">SDL_GL_CONTEXT_PROFILE_CORE</span><span class="p">);</span>
 
-    <span class="n">SDL_Window</span> <span class="o">*</span><span class="n">window</span> <span class="o">=</span> <span class="n">SDL_CreateWindow</span><span class="p">(</span>
-        <span class="s">"SDL2/OpenGL prototype"</span><span class="p">,</span>
-        <span class="n">SDL_WINDOWPOS_UNDEFINED</span><span class="p">,</span>
-        <span class="n">SDL_WINDOWPOS_UNDEFINED</span><span class="p">,</span>
-        <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span>
-        <span class="n">SDL_WINDOW_OPENGL</span> <span class="o">|</span> <span class="n">SDL_WINDOW_RESIZABLE</span>
-    <span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_Window</span><span class="w"> </span><span class="o">*</span><span class="n">window</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDL_CreateWindow</span><span class="p">(</span>
+<span class="w">        </span><span class="s">"SDL2/OpenGL prototype"</span><span class="p">,</span>
+<span class="w">        </span><span class="n">SDL_WINDOWPOS_UNDEFINED</span><span class="p">,</span>
+<span class="w">        </span><span class="n">SDL_WINDOWPOS_UNDEFINED</span><span class="p">,</span>
+<span class="w">        </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span>
+<span class="w">        </span><span class="n">SDL_WINDOW_OPENGL</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">SDL_WINDOW_RESIZABLE</span>
+<span class="w">    </span><span class="p">);</span>
 
-    <span class="n">SDL_GLContext</span> <span class="n">glcontext</span> <span class="o">=</span> <span class="n">SDL_GL_CreateContext</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GLContext</span><span class="w"> </span><span class="n">glcontext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SDL_GL_CreateContext</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
 
-    <span class="n">printGlInfo</span><span class="p">();</span>
+<span class="w">    </span><span class="n">printGlInfo</span><span class="p">();</span>
 
-    <span class="cm">/* set the background black */</span>
-    <span class="n">glClearColor</span><span class="p">(</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">0.0f</span><span class="p">,</span> <span class="mf">1.0f</span> <span class="p">);</span>
-    <span class="n">glClearDepth</span><span class="p">(</span> <span class="mf">1.0f</span> <span class="p">);</span>
-    <span class="n">glDisable</span><span class="p">(</span><span class="n">GL_DITHER</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* set the background black */</span>
+<span class="w">    </span><span class="n">glClearColor</span><span class="p">(</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">glClearDepth</span><span class="p">(</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">glDisable</span><span class="p">(</span><span class="n">GL_DITHER</span><span class="p">);</span>
 
-    <span class="n">SDL_Event</span> <span class="n">event</span><span class="p">;</span>
-    <span class="n">Uint8</span> <span class="n">done</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SDL_Event</span><span class="w"> </span><span class="n">event</span><span class="p">;</span>
+<span class="w">    </span><span class="n">Uint8</span><span class="w"> </span><span class="n">done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">SDL_GL_SetSwapInterval</span><span class="p">(</span><span class="n">vsync</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired vsync mode: %d"</span><span class="p">,</span> <span class="n">vsync</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">SDL_GL_SetSwapInterval</span><span class="p">(</span><span class="n">vsync</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired vsync mode: %d"</span><span class="p">,</span><span class="w"> </span><span class="n">vsync</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="n">trace</span><span class="p">(</span><span class="s">"starting to render, vsync is %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">SDL_GL_GetSwapInterval</span><span class="p">());</span>
+<span class="w">    </span><span class="n">trace</span><span class="p">(</span><span class="s">"starting to render, vsync is %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">SDL_GL_GetSwapInterval</span><span class="p">());</span>
 
-    <span class="n">setupTransform</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setupTransform</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">);</span>
 
-    <span class="cm">/* implementation not shown, lots of tutorials on the net, or check the original source */</span>
-    <span class="n">GLuint</span> <span class="n">vtShader</span><span class="p">,</span> <span class="n">fgShader</span><span class="p">,</span> <span class="n">program</span><span class="p">;</span>
-    <span class="n">setupShaders</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vtShader</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fgShader</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">program</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* implementation not shown, lots of tutorials on the net, or check the original source */</span>
+<span class="w">    </span><span class="n">GLuint</span><span class="w"> </span><span class="n">vtShader</span><span class="p">,</span><span class="w"> </span><span class="n">fgShader</span><span class="p">,</span><span class="w"> </span><span class="n">program</span><span class="p">;</span>
+<span class="w">    </span><span class="n">setupShaders</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vtShader</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fgShader</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">program</span><span class="p">);</span>
 
-    <span class="n">GLuint</span> <span class="n">vao</span><span class="p">,</span> <span class="n">vbo</span><span class="p">,</span> <span class="n">cbo</span><span class="p">,</span> <span class="n">ibo</span><span class="p">;</span>
-    <span class="n">genTriangle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vao</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vbo</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cbo</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ibo</span><span class="p">);</span>
+<span class="w">    </span><span class="n">GLuint</span><span class="w"> </span><span class="n">vao</span><span class="p">,</span><span class="w"> </span><span class="n">vbo</span><span class="p">,</span><span class="w"> </span><span class="n">cbo</span><span class="p">,</span><span class="w"> </span><span class="n">ibo</span><span class="p">;</span>
+<span class="w">    </span><span class="n">genTriangle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vao</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vbo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cbo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ibo</span><span class="p">);</span>
 
-    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">SDL_PollEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="p">))</span> <span class="p">{</span>
-            <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">case</span> <span class="nl">SDL_WINDOWEVENT</span><span class="p">:</span>
-                    <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">event</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">case</span> <span class="nl">SDL_WINDOWEVENT_RESIZED</span><span class="p">:</span>
-                        <span class="p">{</span>
-                            <span class="kt">int</span> <span class="n">newWidth</span>  <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data1</span><span class="p">;</span>
-                            <span class="kt">int</span> <span class="n">newHeight</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">SDL_PollEvent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">event</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDL_WINDOWEVENT</span><span class="p">:</span>
+<span class="w">                    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">case</span><span class="w"> </span><span class="no">SDL_WINDOWEVENT_RESIZED</span><span class="p">:</span>
+<span class="w">                        </span><span class="p">{</span>
+<span class="w">                            </span><span class="kt">int</span><span class="w"> </span><span class="n">newWidth</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data1</span><span class="p">;</span>
+<span class="w">                            </span><span class="kt">int</span><span class="w"> </span><span class="n">newHeight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">data2</span><span class="p">;</span>
 
-                            <span class="n">trace</span><span class="p">(</span>
-                                <span class="s">"Window %d resized to %dx%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
-                                <span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">windowID</span><span class="p">,</span>
-                                <span class="n">newWidth</span><span class="p">,</span> <span class="n">newHeight</span>
-                            <span class="p">);</span>
+<span class="w">                            </span><span class="n">trace</span><span class="p">(</span>
+<span class="w">                                </span><span class="s">"Window %d resized to %dx%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">event</span><span class="p">.</span><span class="n">window</span><span class="p">.</span><span class="n">windowID</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">newWidth</span><span class="p">,</span><span class="w"> </span><span class="n">newHeight</span>
+<span class="w">                            </span><span class="p">);</span>
 
-                            <span class="n">setupTransform</span><span class="p">(</span><span class="n">newWidth</span><span class="p">,</span> <span class="n">newHeight</span><span class="p">);</span>
-                        <span class="p">}</span>
-                        <span class="k">break</span><span class="p">;</span>
-                    <span class="p">}</span>
-                    <span class="k">break</span><span class="p">;</span>
+<span class="w">                            </span><span class="n">setupTransform</span><span class="p">(</span><span class="n">newWidth</span><span class="p">,</span><span class="w"> </span><span class="n">newHeight</span><span class="p">);</span>
+<span class="w">                        </span><span class="p">}</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="nl">SDL_KEYDOWN</span><span class="p">:</span>
-                    <span class="k">break</span><span class="p">;</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDL_KEYDOWN</span><span class="p">:</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="nl">SDL_KEYUP</span><span class="p">:</span>
-                    <span class="k">switch</span> <span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">key</span><span class="p">.</span><span class="n">keysym</span><span class="p">.</span><span class="n">sym</span><span class="p">)</span> <span class="p">{</span>
-                        <span class="k">case</span> <span class="nl">SDLK_ESCAPE</span><span class="p">:</span>
-                            <span class="n">done</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-                        <span class="k">break</span><span class="p">;</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDL_KEYUP</span><span class="p">:</span>
+<span class="w">                    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">key</span><span class="p">.</span><span class="n">keysym</span><span class="p">.</span><span class="n">sym</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">case</span><span class="w"> </span><span class="no">SDLK_ESCAPE</span><span class="p">:</span>
+<span class="w">                            </span><span class="n">done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
 
-                        <span class="k">case</span> <span class="nl">SDLK_v</span><span class="p">:</span>
-                            <span class="n">vsync</span> <span class="o">=</span> <span class="o">!</span><span class="n">vsync</span><span class="p">;</span>
+<span class="w">                        </span><span class="k">case</span><span class="w"> </span><span class="no">SDLK_v</span><span class="p">:</span>
+<span class="w">                            </span><span class="n">vsync</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">vsync</span><span class="p">;</span>
 
-                            <span class="k">if</span> <span class="p">(</span><span class="n">SDL_GL_SetSwapInterval</span><span class="p">(</span><span class="n">vsync</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                                <span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired vsync mode: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="n">vsync</span> <span class="o">?</span> <span class="s">"on"</span> <span class="o">:</span> <span class="s">"off"</span><span class="p">));</span>
-                            <span class="p">}</span>
-                            <span class="k">else</span> <span class="p">{</span>
-                                <span class="n">trace</span><span class="p">(</span><span class="s">"turned vsync %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="n">vsync</span> <span class="o">?</span> <span class="s">"on"</span> <span class="o">:</span> <span class="s">"off"</span><span class="p">));</span>
-                            <span class="p">}</span>
-                        <span class="k">break</span><span class="p">;</span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">SDL_GL_SetSwapInterval</span><span class="p">(</span><span class="n">vsync</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                </span><span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired vsync mode: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">vsync</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"on"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"off"</span><span class="p">));</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                            </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                </span><span class="n">trace</span><span class="p">(</span><span class="s">"turned vsync %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">vsync</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"on"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"off"</span><span class="p">));</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
 
-                        <span class="k">case</span> <span class="nl">SDLK_d</span><span class="p">:</span>
-                            <span class="n">doublebuf</span> <span class="o">=</span> <span class="o">!</span><span class="n">doublebuf</span><span class="p">;</span>
+<span class="w">                        </span><span class="k">case</span><span class="w"> </span><span class="no">SDLK_d</span><span class="p">:</span>
+<span class="w">                            </span><span class="n">doublebuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="n">doublebuf</span><span class="p">;</span>
 
-                            <span class="k">if</span> <span class="p">(</span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DOUBLEBUFFER</span><span class="p">,</span> <span class="n">doublebuf</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-                                <span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired doublebuf mode: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">doublebuf</span><span class="p">);</span>
-                            <span class="p">}</span>
-                            <span class="k">else</span> <span class="p">{</span>
-                                <span class="n">trace</span><span class="p">(</span><span class="s">"turned doublebuf %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="n">doublebuf</span> <span class="o">?</span> <span class="s">"on"</span> <span class="o">:</span> <span class="s">"off"</span><span class="p">));</span>
-                            <span class="p">}</span>
-                        <span class="k">break</span><span class="p">;</span>
-                    <span class="p">}</span>
-                    <span class="k">break</span><span class="p">;</span>
+<span class="w">                            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">SDL_GL_SetAttribute</span><span class="p">(</span><span class="n">SDL_GL_DOUBLEBUFFER</span><span class="p">,</span><span class="w"> </span><span class="n">doublebuf</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                </span><span class="n">trace</span><span class="p">(</span><span class="s">"could not set desired doublebuf mode: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">doublebuf</span><span class="p">);</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                            </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                </span><span class="n">trace</span><span class="p">(</span><span class="s">"turned doublebuf %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">doublebuf</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"on"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"off"</span><span class="p">));</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
 
-                <span class="k">case</span> <span class="nl">SDL_QUIT</span><span class="p">:</span>
-                    <span class="n">done</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-                    <span class="k">break</span><span class="p">;</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="no">SDL_QUIT</span><span class="p">:</span>
+<span class="w">                    </span><span class="n">done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span>
 
-                <span class="c1">// default:</span>
-                <span class="c1">//     trace("unkown even type received: %d\n", event.type);</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
+<span class="w">                </span><span class="c1">// default:</span>
+<span class="w">                </span><span class="c1">//     trace("unkown even type received: %d\n", event.type);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-        <span class="n">render</span><span class="p">();</span>
+<span class="w">        </span><span class="n">render</span><span class="p">();</span>
 
-        <span class="n">SDL_GL_SwapWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">        </span><span class="n">SDL_GL_SwapWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
 
-        <span class="n">diagFrameDone</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="w">        </span><span class="n">diagFrameDone</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="cm">/* implementation not shown, lots of tutorials on the net, or check the original source */</span>
-    <span class="n">destroyTriangle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vao</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vbo</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cbo</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ibo</span><span class="p">);</span>
-    <span class="n">destroyShaders</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vtShader</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fgShader</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">program</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* implementation not shown, lots of tutorials on the net, or check the original source */</span>
+<span class="w">    </span><span class="n">destroyTriangle</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vao</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vbo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cbo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ibo</span><span class="p">);</span>
+<span class="w">    </span><span class="n">destroyShaders</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vtShader</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fgShader</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">program</span><span class="p">);</span>
 
-    <span class="n">SDL_GL_DeleteContext</span><span class="p">(</span><span class="n">glcontext</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_GL_DeleteContext</span><span class="p">(</span><span class="n">glcontext</span><span class="p">);</span>
 
-    <span class="n">SDL_DestroyWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
-    <span class="n">SDL_Quit</span><span class="p">();</span>
+<span class="w">    </span><span class="n">SDL_DestroyWindow</span><span class="p">(</span><span class="n">window</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SDL_Quit</span><span class="p">();</span>
 
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2">
-      <p>I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+    <li id="fn:2" role="doc-endnote">
+      <p>I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -405,7 +405,7 @@ were minor (except for haptics support, which I don’t use).</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -428,3 +428,4 @@ were minor (except for haptics support, which I don’t use).</p>
         </script>
     </body>
 </html>
+

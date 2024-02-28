@@ -9,7 +9,7 @@
         <meta name="description" content="A small analysis of the WebGL cubes demo as seen on Google Chrome Experiments">
         <meta name="keywords" content="opengl, webgl">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="OpenGL analysis, WebGL cubes">
@@ -135,7 +135,7 @@ menu and had a look.</p>
 
 <p>My first hunch was that it used instanced rendering so as to tax the GPU
 as little as possible. However WebGL doesn’t support instanced
-rendering.<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> So how does it do what it does?</p>
+rendering.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> So how does it do what it does?</p>
 
 <p>First of all, if you ever encounter a WebGL demo where you want to a
 quick overview of what is happening, or don’t want to learn a framework
@@ -148,11 +148,11 @@ often the first thing I activate when I find something new.</p>
 values of each triangle. Each face of a cube consists of 2 triangles,
 and each cube consists of 6 faces, which</p>
 
-<pre><code class="language-javascript"><span class="kd">var</span> <span class="nx">triangles</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="mi">150000</span><span class="p">;</span>
-<span class="kd">var</span> <span class="nx">geometry</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">THREE</span><span class="p">.</span><span class="nx">BufferGeometry</span><span class="p">();</span>
+<pre><code class="language-javascript"><span class="kd">var</span><span class="w"> </span><span class="nx">triangles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">150000</span><span class="p">;</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">THREE</span><span class="p">.</span><span class="nx">BufferGeometry</span><span class="p">();</span>
 
-<span class="kd">function</span> <span class="nx">hw</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Hello, graphics language world"</span><span class="p">);</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">hw</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Hello, graphics language world"</span><span class="p">);</span>
 <span class="p">}</span></code></pre>
 
 <h2 id="research">Research</h2>
@@ -161,10 +161,10 @@ and each cube consists of 6 faces, which</p>
   <li>Google I/O, WebGL optimized drawing of 10000 objects - http://www.youtube.com/watch?v=rfQ8rKGTVlg</li>
 </ol>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>Not really true, there is an extension called <a href="http://blog.tojicode.com/2013/07/webgl-instancing-with.html">ANGLE_instanced_arrays</a> which allows you to do instancing even in WebGL. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>Not really true, there is an extension called <a href="http://blog.tojicode.com/2013/07/webgl-instancing-with.html">ANGLE_instanced_arrays</a> which allows you to do instancing even in WebGL. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -191,7 +191,7 @@ and each cube consists of 6 faces, which</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -214,3 +214,4 @@ and each cube consists of 6 faces, which</p>
         </script>
     </body>
 </html>
+

@@ -9,7 +9,7 @@
         <meta name="description" content="In this article I write about how I finally started making my own 3D game engine, and about how much it sucks.">
         <meta name="keywords" content="sdl, game-engine, open-source, data-driven">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Making a good game engine (part 1)">
@@ -138,10 +138,10 @@ to me…</p>
 <!-- more -->
 
 <p><strong>DISCLAIMER</strong>: I’ve never written an actual game engine before. When I was young I coded up a
-<a href="http://zatacka.sourceforge.net/index.php?id=screens">Zatacka</a><sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>-clone in SDL after
+<a href="http://zatacka.sourceforge.net/index.php?id=screens">Zatacka</a><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>-clone in SDL after
 following <a href="http://sol.gfxile.net/gp/index.html">Jari Komppa</a>’s tutorial. I loved that falling snow! After that my game-making tapered
 off a bit and I can painfully remember that I couldn’t even muster up the discipline to code up a tetris-clone. I guess I liked my
-win32 wildcard filename searcher better <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
+win32 wildcard filename searcher better <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
 with OpenGL) that was supposed to teach butterfly evolution to a bunch of pre-schoolers. I learned C++ specifically for the project
 because that’s what game programmers did, or so I had read once. Needless to say, this was a mistake:
 new language + not experienced at game making = frantic coding to make up for lost time. It did provide me with a handle on C++ and a bit more
@@ -280,15 +280,15 @@ enforces alignment. If you dynamically allocate memory for these types,
 you have to tell your <code>malloc</code> variant to give you 16-byte aligned
 memory though. These are the types from threedee-simd:</p>
 
-<pre><code class="language-c"><span class="k">typedef</span> <span class="kt">float</span> <span class="n">vec4</span> <span class="nf">__attribute__</span><span class="p">((</span><span class="n">vector_size</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
-<span class="k">typedef</span> <span class="kt">float</span> <span class="n">scalar</span><span class="p">;</span>
+<pre><code class="language-c"><span class="k">typedef</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">__attribute__</span><span class="p">((</span><span class="n">vector_size</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">scalar</span><span class="p">;</span>
 
-<span class="k">struct</span> <span class="kt">mat4_t</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">mat4_t</span>
 <span class="p">{</span>
-      <span class="n">vec4</span> <span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
-<span class="p">}</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">aligned</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+<span class="w">      </span><span class="n">vec4</span><span class="w"> </span><span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">aligned</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
 
-<span class="k">typedef</span> <span class="k">struct</span> <span class="kt">mat4_t</span> <span class="n">mat4</span><span class="p">;</span></code></pre>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">mat4_t</span><span class="w"> </span><span class="n">mat4</span><span class="p">;</span></code></pre>
 
 <p>When you use these types, any on-stack variables with these types will
 be aligned correctly. What’s more, when you pass these variables to
@@ -301,31 +301,31 @@ makes it easier to vectorize.</p>
 <span class="cm"> *</span>
 <span class="cm"> * [axis.x, axis.y, axis.z, angle] =&gt; quaternion</span>
 <span class="cm"> */</span>
-<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
-<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">vec4</span> <span class="n">vsn</span><span class="p">,</span> <span class="n">vcs</span><span class="p">;</span>
-    <span class="n">vsincos</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span> <span class="o">*</span> <span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">vsn</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">vcs</span><span class="p">);</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">vec4</span><span class="w"> </span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="n">vcs</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vsincos</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vcs</span><span class="p">);</span>
 
-    <span class="n">vec4</span> <span class="n">sincos</span> <span class="o">=</span> <span class="n">vshuffle</span><span class="p">(</span><span class="n">vsn</span><span class="p">,</span> <span class="n">vcs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span> <span class="o">*</span> <span class="n">vshuffle</span><span class="p">(</span><span class="n">sincos</span><span class="p">,</span> <span class="n">sincos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">vec4</span><span class="w"> </span><span class="n">sincos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vshuffle</span><span class="p">(</span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="n">vcs</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vshuffle</span><span class="p">(</span><span class="n">sincos</span><span class="p">,</span><span class="w"> </span><span class="n">sincos</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * a little bit faster, especially when you have FMA instructions, but</span>
 <span class="cm"> * less readable too</span>
 <span class="cm"> */</span>
-<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
-<span class="k">static</span> <span class="kr">inline</span> <span class="n">vec4</span> <span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span> <span class="n">axisangle</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span> <span class="o">*</span> <span class="n">vsin</span><span class="p">(</span><span class="n">vmadd</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span> <span class="n">vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">M_PI_F</span> <span class="o">*</span> <span class="mf">0.5f</span><span class="p">)));</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vsin</span><span class="p">(</span><span class="n">vmadd</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span><span class="w"> </span><span class="n">vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">M_PI_F</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">)));</span>
 <span class="p">}</span></code></pre>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>Also known as “<em>Achting die Kurve!</em>” <a href="#fnref:1" class="reversefootnote">↩</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>Also known as “<em>Achting die Kurve!</em>” <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2">
-      <p>Years later, I encountered <a href="http://www.voidtools.com/">everything</a>, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, <em>real</em> fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+    <li id="fn:2" role="doc-endnote">
+      <p>Years later, I encountered <a href="http://www.voidtools.com/">everything</a>, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, <em>real</em> fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -352,7 +352,7 @@ makes it easier to vectorize.</p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -375,3 +375,4 @@ makes it easier to vectorize.</p>
         </script>
     </body>
 </html>
+

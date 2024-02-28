@@ -9,7 +9,7 @@
         <meta name="description" content="Try to explain how vim and neovim handle input encoding">
         <meta name="keywords" content="neovim, vim, encoding">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Neovim: input encoding and you">
@@ -141,7 +141,7 @@ context should hopefully make clear which one I mean.</em></p>
 <h2 id="the-impetus">The impetus</h2>
 
 <p>It all started when I was reading over the changes of PR
-<a href="https://github.com/neovim/neovim/pull/1357">#1357</a> <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>. I’ve always
+<a href="https://github.com/neovim/neovim/pull/1357">#1357</a> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. I’ve always
 wanted to know more about how Vim does character encoding, and there was
 a commit in this PR that started me on the path: <a href="https://github.com/tarruda/neovim/commit/4fd9ee4a6b908d86815f08c8880db73d9dda13dc">input/job: process
 ctrl+c and do conversion in the read
@@ -154,53 +154,53 @@ do with encoding? Let’s investigate.</p>
 <p>The function is short enough to paste below. It is pretty unique to
 Neovim, as it was wrought for its brand new event-oriented nature:</p>
 
-<pre><code class="language-c"><span class="k">struct</span> <span class="n">rbuffer</span> <span class="p">{</span>
-  <span class="kt">char</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span>
-  <span class="kt">size_t</span> <span class="n">capacity</span><span class="p">,</span> <span class="n">rpos</span><span class="p">,</span> <span class="n">wpos</span><span class="p">;</span>
-  <span class="n">RStream</span> <span class="o">*</span><span class="n">rstream</span><span class="p">;</span>
+<pre><code class="language-c"><span class="k">struct</span><span class="w"> </span><span class="nc">rbuffer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">capacity</span><span class="p">,</span><span class="w"> </span><span class="n">rpos</span><span class="p">,</span><span class="w"> </span><span class="n">wpos</span><span class="p">;</span>
+<span class="w">  </span><span class="n">RStream</span><span class="w"> </span><span class="o">*</span><span class="n">rstream</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">rbuffer</span> <span class="n">RBuffer</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">rbuffer</span><span class="w"> </span><span class="n">RBuffer</span><span class="p">;</span>
 
-<span class="k">static</span> <span class="n">RBuffer</span> <span class="o">*</span><span class="n">read_buffer</span><span class="p">,</span> <span class="o">*</span><span class="n">input_buffer</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">RBuffer</span><span class="w"> </span><span class="o">*</span><span class="n">read_buffer</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">input_buffer</span><span class="p">;</span>
 
-<span class="k">static</span> <span class="kt">void</span> <span class="nf">convert_input</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">convert_input</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">embedded_mode</span> <span class="o">||</span> <span class="o">!</span><span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">))</span> <span class="p">{</span>
-    <span class="c1">// No input buffer space</span>
-    <span class="k">return</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">embedded_mode</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// No input buffer space</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="kt">bool</span> <span class="n">convert</span> <span class="o">=</span> <span class="n">input_conv</span><span class="p">.</span><span class="n">vc_type</span> <span class="o">!=</span> <span class="n">CONV_NONE</span><span class="p">;</span>
-  <span class="c1">// Set unconverted data/length</span>
-  <span class="kt">char</span> <span class="o">*</span><span class="n">data</span> <span class="o">=</span> <span class="n">rbuffer_read_ptr</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
-  <span class="kt">size_t</span> <span class="n">data_length</span> <span class="o">=</span> <span class="n">rbuffer_pending</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
-  <span class="kt">size_t</span> <span class="n">converted_length</span> <span class="o">=</span> <span class="n">data_length</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">convert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input_conv</span><span class="p">.</span><span class="n">vc_type</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">CONV_NONE</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// Set unconverted data/length</span>
+<span class="w">  </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rbuffer_read_ptr</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">data_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rbuffer_pending</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">);</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">converted_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_length</span><span class="p">;</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Perform input conversion according to `input_conv`</span>
-    <span class="kt">size_t</span> <span class="n">unconverted_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
-                                      <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
-                                      <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
-                                      <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
-    <span class="n">data_length</span> <span class="o">-=</span> <span class="n">unconverted_length</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">convert</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Perform input conversion according to `input_conv`</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">unconverted_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
+<span class="w">                                      </span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
+<span class="w">                                      </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
+<span class="w">                                      </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
+<span class="w">    </span><span class="n">data_length</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">unconverted_length</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// The conversion code will be gone eventually, for now assume `input_buffer`</span>
-  <span class="c1">// always has space for the converted data(it's many times the size of</span>
-  <span class="c1">// `read_buffer`, so it's hard to imagine a scenario where the converted data</span>
-  <span class="c1">// doesn't fit)</span>
-  <span class="n">assert</span><span class="p">(</span><span class="n">converted_length</span> <span class="o">&lt;=</span> <span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">));</span>
-  <span class="c1">// Write processed data to input buffer.</span>
-  <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">rbuffer_write</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">converted_length</span><span class="p">);</span>
-  <span class="c1">// Adjust raw buffer pointers</span>
-  <span class="n">rbuffer_consumed</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">,</span> <span class="n">data_length</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// The conversion code will be gone eventually, for now assume `input_buffer`</span>
+<span class="w">  </span><span class="c1">// always has space for the converted data(it's many times the size of</span>
+<span class="w">  </span><span class="c1">// `read_buffer`, so it's hard to imagine a scenario where the converted data</span>
+<span class="w">  </span><span class="c1">// doesn't fit)</span>
+<span class="w">  </span><span class="n">assert</span><span class="p">(</span><span class="n">converted_length</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">rbuffer_available</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">));</span>
+<span class="w">  </span><span class="c1">// Write processed data to input buffer.</span>
+<span class="w">  </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">rbuffer_write</span><span class="p">(</span><span class="n">input_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">converted_length</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// Adjust raw buffer pointers</span>
+<span class="w">  </span><span class="n">rbuffer_consumed</span><span class="p">(</span><span class="n">read_buffer</span><span class="p">,</span><span class="w"> </span><span class="n">data_length</span><span class="p">);</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// data points to memory allocated by `string_convert_ext`, free it.</span>
-    <span class="n">free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">convert</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// data points to memory allocated by `string_convert_ext`, free it.</span>
+<span class="w">    </span><span class="n">free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span></code></pre>
 
 <p>To summarize, this function copies bytes from the <code>read_buffer</code> to the
@@ -242,50 +242,50 @@ is changed. The part that governs the <code>*encoding</code> options reads like
 this (ignoring <code>printencoding</code>):</p>
 
 <pre><code class="language-c"><span class="cm">/* handle setting 'encoding', 'fileencoding' and 'termecoding' */</span>
-<span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">||</span> <span class="n">gvarp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_fenc</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">gvarp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_fenc</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_ma</span> <span class="o">&amp;&amp;</span> <span class="n">opt_flags</span> <span class="o">!=</span> <span class="n">OPT_GLOBAL</span><span class="p">)</span>
-        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">e_modifiable</span><span class="p">;</span>
-      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">vim_strchr</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">,</span> <span class="sc">','</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-        <span class="cm">/* No comma allowed in 'fileencoding'; catches confusing it</span>
+<span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_enc</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">gvarp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_fenc</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">gvarp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_fenc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_ma</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">opt_flags</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">OPT_GLOBAL</span><span class="p">)</span>
+<span class="w">        </span><span class="n">errmsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e_modifiable</span><span class="p">;</span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vim_strchr</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">,</span><span class="w"> </span><span class="sc">','</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">        </span><span class="cm">/* No comma allowed in 'fileencoding'; catches confusing it</span>
 <span class="cm">         * with 'fileencodings'. */</span>
-        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">e_invarg</span><span class="p">;</span>
-      <span class="k">else</span> <span class="p">{</span>
-        <span class="cm">/* May show a "+" in the title now. */</span>
-        <span class="n">redraw_titles</span><span class="p">();</span>
-        <span class="cm">/* Add 'fileencoding' to the swap file. */</span>
-        <span class="n">ml_setflags</span><span class="p">(</span><span class="n">curbuf</span><span class="p">);</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
+<span class="w">        </span><span class="n">errmsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">e_invarg</span><span class="p">;</span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="cm">/* May show a "+" in the title now. */</span>
+<span class="w">        </span><span class="n">redraw_titles</span><span class="p">();</span>
+<span class="w">        </span><span class="cm">/* Add 'fileencoding' to the swap file. */</span>
+<span class="w">        </span><span class="n">ml_setflags</span><span class="p">(</span><span class="n">curbuf</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">errmsg</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
-      <span class="cm">/* canonize the value, so that STRCMP() can be used on it */</span>
-      <span class="n">p</span> <span class="o">=</span> <span class="n">enc_canonize</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
-      <span class="n">free</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
-      <span class="o">*</span><span class="n">varp</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">errmsg</span> <span class="o">=</span> <span class="n">mb_init</span><span class="p">();</span>
-        <span class="n">redraw_titles</span><span class="p">();</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errmsg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="cm">/* canonize the value, so that STRCMP() can be used on it */</span>
+<span class="w">      </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">enc_canonize</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
+<span class="w">      </span><span class="n">free</span><span class="p">(</span><span class="o">*</span><span class="n">varp</span><span class="p">);</span>
+<span class="w">      </span><span class="o">*</span><span class="n">varp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_enc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">errmsg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mb_init</span><span class="p">();</span>
+<span class="w">        </span><span class="n">redraw_titles</span><span class="p">();</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
 
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">errmsg</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
-      <span class="cm">/* When 'keymap' is used and 'encoding' changes, reload the keymap</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errmsg</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="cm">/* When 'keymap' is used and 'encoding' changes, reload the keymap</span>
 <span class="cm">       * (with another encoding). */</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_keymap</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span>
-        <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">keymap_init</span><span class="p">();</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_enc</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">*</span><span class="n">curbuf</span><span class="o">-&gt;</span><span class="n">b_p_keymap</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">NUL</span><span class="p">)</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">keymap_init</span><span class="p">();</span>
 
-      <span class="cm">/* When 'termencoding' is not empty and 'encoding' changes or when</span>
+<span class="w">      </span><span class="cm">/* When 'termencoding' is not empty and 'encoding' changes or when</span>
 <span class="cm">       * 'termencoding' changes, need to setup for keyboard input and</span>
 <span class="cm">       * display output conversion. */</span>
-      <span class="k">if</span> <span class="p">(((</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p_tenc</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span> <span class="p">{</span>
-        <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">);</span>
-        <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">);</span>
-      <span class="p">}</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(((</span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_enc</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">*</span><span class="n">p_tenc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">NUL</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span><span class="w"> </span><span class="n">p_tenc</span><span class="p">,</span><span class="w"> </span><span class="n">p_enc</span><span class="p">);</span>
+<span class="w">        </span><span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span><span class="w"> </span><span class="n">p_enc</span><span class="p">,</span><span class="w"> </span><span class="n">p_tenc</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
 
-    <span class="p">}</span>
-  <span class="p">}</span></code></pre>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span></code></pre>
 
 <p>Luckily, the three encoding options are more or less handled in one
 block, as they’re intertwined. The first part only applies to
@@ -317,9 +317,9 @@ interesting part:</p>
 <pre><code class="language-c"><span class="cm">/* When 'termencoding' is not empty and 'encoding' changes or when</span>
 <span class="cm"> * 'termencoding' changes, need to setup for keyboard input and</span>
 <span class="cm"> * display output conversion. */</span>
-<span class="k">if</span> <span class="p">(((</span><span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_enc</span> <span class="o">&amp;&amp;</span> <span class="o">*</span><span class="n">p_tenc</span> <span class="o">!=</span> <span class="n">NUL</span><span class="p">)</span> <span class="o">||</span> <span class="n">varp</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span> <span class="p">{</span>
-  <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">);</span>
-  <span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span> <span class="n">p_enc</span><span class="p">,</span> <span class="n">p_tenc</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(((</span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_enc</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">*</span><span class="n">p_tenc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">NUL</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">varp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p_tenc</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span><span class="w"> </span><span class="n">p_tenc</span><span class="p">,</span><span class="w"> </span><span class="n">p_enc</span><span class="p">);</span>
+<span class="w">  </span><span class="n">convert_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">output_conv</span><span class="p">,</span><span class="w"> </span><span class="n">p_enc</span><span class="p">,</span><span class="w"> </span><span class="n">p_tenc</span><span class="p">);</span>
 <span class="p">}</span></code></pre>
 
 <p>So, if <code>encoding</code> has changed and <code>termencoding</code> is non-empty, <strong>OR</strong>
@@ -347,79 +347,79 @@ done.</li>
 <span class="cm"> * Afterwards invoke with "from" and "to" equal to NULL to cleanup.</span>
 <span class="cm"> * Return FAIL when conversion is not supported, OK otherwise.</span>
 <span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">convert_setup</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">to</span><span class="p">)</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">convert_setup</span><span class="p">(</span><span class="n">vimconv_T</span><span class="w"> </span><span class="o">*</span><span class="n">vcp</span><span class="p">,</span><span class="w"> </span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="n">to</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">return</span> <span class="n">convert_setup_ext</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="nb">true</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">convert_setup_ext</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span><span class="w"> </span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">to</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="cm">/*</span>
 <span class="cm"> * As convert_setup(), but only when from_unicode_is_utf8 is TRUE will all</span>
 <span class="cm"> * "from" unicode charsets be considered utf-8.  Same for "to".</span>
 <span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">convert_setup_ext</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">from</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">from_unicode_is_utf8</span><span class="p">,</span>
-                      <span class="n">char_u</span> <span class="o">*</span><span class="n">to</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">to_unicode_is_utf8</span><span class="p">)</span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">convert_setup_ext</span><span class="p">(</span><span class="n">vimconv_T</span><span class="w"> </span><span class="o">*</span><span class="n">vcp</span><span class="p">,</span><span class="w"> </span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">from_unicode_is_utf8</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="n">to</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">to_unicode_is_utf8</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="kt">int</span> <span class="n">from_prop</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">to_prop</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">from_is_utf8</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">to_is_utf8</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">from_prop</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">to_prop</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">from_is_utf8</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">to_is_utf8</span><span class="p">;</span>
 
-  <span class="cm">/* Reset to no conversion. */</span>
+<span class="w">  </span><span class="cm">/* Reset to no conversion. */</span>
 <span class="cp"># ifdef USE_ICONV</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_ICONV</span> <span class="o">&amp;&amp;</span> <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">iconv_close</span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CONV_ICONV</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="p">(</span><span class="n">iconv_t</span><span class="p">)</span><span class="mi">-1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">iconv_close</span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="p">);</span>
 <span class="cp"># endif</span>
-  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_NONE</span><span class="p">;</span>
-  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-  <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="w">  </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_NONE</span><span class="p">;</span>
+<span class="w">  </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 
-  <span class="cm">/* No conversion when one of the names is empty or they are equal. */</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">from</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="o">*</span><span class="n">from</span> <span class="o">==</span> <span class="n">NUL</span> <span class="o">||</span> <span class="n">to</span> <span class="o">==</span> <span class="nb">NULL</span> <span class="o">||</span> <span class="o">*</span><span class="n">to</span> <span class="o">==</span> <span class="n">NUL</span>
-      <span class="o">||</span> <span class="n">STRCMP</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="w">  </span><span class="cm">/* No conversion when one of the names is empty or they are equal. */</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">from</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">*</span><span class="n">from</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">NUL</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">*</span><span class="n">to</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">NUL</span>
+<span class="w">      </span><span class="o">||</span><span class="w"> </span><span class="n">STRCMP</span><span class="p">(</span><span class="n">from</span><span class="p">,</span><span class="w"> </span><span class="n">to</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OK</span><span class="p">;</span>
 
-  <span class="n">from_prop</span> <span class="o">=</span> <span class="n">enc_canon_props</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
-  <span class="n">to_prop</span> <span class="o">=</span> <span class="n">enc_canon_props</span><span class="p">(</span><span class="n">to</span><span class="p">);</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">from_unicode_is_utf8</span><span class="p">)</span>
-    <span class="n">from_is_utf8</span> <span class="o">=</span> <span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
-  <span class="k">else</span>
-    <span class="n">from_is_utf8</span> <span class="o">=</span> <span class="n">from_prop</span> <span class="o">==</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">to_unicode_is_utf8</span><span class="p">)</span>
-    <span class="n">to_is_utf8</span> <span class="o">=</span> <span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
-  <span class="k">else</span>
-    <span class="n">to_is_utf8</span> <span class="o">=</span> <span class="n">to_prop</span> <span class="o">==</span> <span class="n">ENC_UNICODE</span><span class="p">;</span>
+<span class="w">  </span><span class="n">from_prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">enc_canon_props</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
+<span class="w">  </span><span class="n">to_prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">enc_canon_props</span><span class="p">(</span><span class="n">to</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">from_unicode_is_utf8</span><span class="p">)</span>
+<span class="w">    </span><span class="n">from_is_utf8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_UNICODE</span><span class="p">;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="n">from_is_utf8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">from_prop</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ENC_UNICODE</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">to_unicode_is_utf8</span><span class="p">)</span>
+<span class="w">    </span><span class="n">to_is_utf8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">to_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_UNICODE</span><span class="p">;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="n">to_is_utf8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">to_prop</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ENC_UNICODE</span><span class="p">;</span>
 
-  <span class="k">if</span> <span class="p">((</span><span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN1</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">to_is_utf8</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Internal latin1 -&gt; utf-8 conversion. */</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_UTF8</span><span class="p">;</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>         <span class="cm">/* up to twice as long */</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">from_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN9</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">to_is_utf8</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* Internal latin9 -&gt; utf-8 conversion. */</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_9_TO_UTF8</span><span class="p">;</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>         <span class="cm">/* up to three as long (euro sign) */</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">from_is_utf8</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN1</span><span class="p">))</span> <span class="p">{</span>
-    <span class="cm">/* Internal utf-8 -&gt; latin1 conversion. */</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_LATIN1</span><span class="p">;</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">from_is_utf8</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">to_prop</span> <span class="o">&amp;</span> <span class="n">ENC_LATIN9</span><span class="p">))</span> <span class="p">{</span>
-    <span class="cm">/* Internal utf-8 -&gt; latin9 conversion. */</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_TO_LATIN9</span><span class="p">;</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">from_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_LATIN1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">to_is_utf8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Internal latin1 -&gt; utf-8 conversion. */</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_TO_UTF8</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">         </span><span class="cm">/* up to twice as long */</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">from_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_LATIN9</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">to_is_utf8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Internal latin9 -&gt; utf-8 conversion. */</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_9_TO_UTF8</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">         </span><span class="cm">/* up to three as long (euro sign) */</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">from_is_utf8</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">to_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_LATIN1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Internal utf-8 -&gt; latin1 conversion. */</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_TO_LATIN1</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">from_is_utf8</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">to_prop</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ENC_LATIN9</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Internal utf-8 -&gt; latin9 conversion. */</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_TO_LATIN9</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="cp"># ifdef USE_ICONV</span>
-  <span class="k">else</span> <span class="p">{</span>
-    <span class="cm">/* Use iconv() for conversion. */</span>
-    <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="n">my_iconv_open</span><span class="p">(</span>
-        <span class="n">to_is_utf8</span> <span class="o">?</span> <span class="p">(</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span> <span class="o">:</span> <span class="n">to</span><span class="p">,</span>
-        <span class="n">from_is_utf8</span> <span class="o">?</span> <span class="p">(</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span> <span class="o">:</span> <span class="n">from</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span> <span class="o">!=</span> <span class="p">(</span><span class="kt">iconv_t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-      <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">=</span> <span class="n">CONV_ICONV</span><span class="p">;</span>
-      <span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>       <span class="cm">/* could be longer too... */</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Use iconv() for conversion. */</span>
+<span class="w">    </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">iconv_t</span><span class="p">)</span><span class="n">my_iconv_open</span><span class="p">(</span>
+<span class="w">        </span><span class="n">to_is_utf8</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">to</span><span class="p">,</span>
+<span class="w">        </span><span class="n">from_is_utf8</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="s">"utf-8"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">from</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fd</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="p">(</span><span class="n">iconv_t</span><span class="p">)</span><span class="mi">-1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CONV_ICONV</span><span class="p">;</span>
+<span class="w">      </span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">       </span><span class="cm">/* could be longer too... */</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="cp"># endif</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_NONE</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">FAIL</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CONV_NONE</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">FAIL</span><span class="p">;</span>
 
-  <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">OK</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 
 <p>So, <code>convert_setup()</code> redirects to <code>convert_setup_ex()</code>. That reminds me
@@ -446,7 +446,7 @@ phases:</p>
 
 <p>The fact that Vim provides some native encodings is probably why no
 Neovim user has complained up until now (iconv is temporarily disabled
-in Neovim, this is being fixed <sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>). Apparently, not many use an exotic
+in Neovim, this is being fixed <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>). Apparently, not many use an exotic
 encoding for input. I surmise that UTF-8 is good enough for most. Point
 1 also implies that the <code>*p_tenc != NUL</code> check in
 <code>did_set_string_option()</code> is likely redundant.</p>
@@ -459,14 +459,14 @@ else in the codebase. More about that later.</p>
 where we left off: how it is used. The relevant part of
 <code>convert_input()</code> is shown below:</p>
 
-<pre><code class="language-c"><span class="k">if</span> <span class="p">(</span><span class="n">convert</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Perform input conversion according to `input_conv`</span>
-  <span class="kt">size_t</span> <span class="n">unconverted_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
-                                    <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
-                                    <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
-                                    <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
-  <span class="n">data_length</span> <span class="o">-=</span> <span class="n">unconverted_length</span><span class="p">;</span>
+<pre><code class="language-c"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">convert</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Perform input conversion according to `input_conv`</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">unconverted_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">string_convert_ext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">input_conv</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">converted_length</span><span class="p">,</span>
+<span class="w">                                    </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">unconverted_length</span><span class="p">);</span>
+<span class="w">  </span><span class="n">data_length</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">unconverted_length</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 
 <p>Looking into <code>string_convert_ext()</code>, we find a function that looks
@@ -477,134 +477,134 @@ daunting but really isn’t:</p>
 <span class="cm"> * an incomplete sequence at the end it is not converted and "*unconvlenp" is</span>
 <span class="cm"> * set to the number of remaining bytes.</span>
 <span class="cm"> */</span>
-<span class="n">char_u</span> <span class="o">*</span> <span class="nf">string_convert_ext</span><span class="p">(</span><span class="n">vimconv_T</span> <span class="o">*</span><span class="n">vcp</span><span class="p">,</span> <span class="n">char_u</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">lenp</span><span class="p">,</span>
-                            <span class="kt">int</span> <span class="o">*</span><span class="n">unconvlenp</span><span class="p">)</span>
+<span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">string_convert_ext</span><span class="p">(</span><span class="n">vimconv_T</span><span class="w"> </span><span class="o">*</span><span class="n">vcp</span><span class="p">,</span><span class="w"> </span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">lenp</span><span class="p">,</span>
+<span class="w">                            </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">unconvlenp</span><span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">char_u</span>      <span class="o">*</span><span class="n">retval</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-  <span class="n">char_u</span>      <span class="o">*</span><span class="n">d</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">len</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">l</span><span class="p">;</span>
-  <span class="kt">int</span> <span class="n">c</span><span class="p">;</span>
+<span class="w">  </span><span class="n">char_u</span><span class="w">      </span><span class="o">*</span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">  </span><span class="n">char_u</span><span class="w">      </span><span class="o">*</span><span class="n">d</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">l</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
 
-  <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
-    <span class="n">len</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">STRLEN</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
-  <span class="k">else</span>
-    <span class="n">len</span> <span class="o">=</span> <span class="o">*</span><span class="n">lenp</span><span class="p">;</span>
-  <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">vim_strsave</span><span class="p">((</span><span class="n">char_u</span> <span class="o">*</span><span class="p">)</span><span class="s">""</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lenp</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">    </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">STRLEN</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">lenp</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vim_strsave</span><span class="p">((</span><span class="n">char_u</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="s">""</span><span class="p">);</span>
 
-  <span class="k">switch</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="nl">CONV_TO_UTF8</span><span class="p">:</span>            <span class="cm">/* latin1 to utf-8 conversion */</span>
-      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
-      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="mh">0x80</span><span class="p">)</span>
-          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
-        <span class="k">else</span> <span class="p">{</span>
-          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0xc0</span> <span class="o">+</span> <span class="p">((</span><span class="kt">unsigned</span><span class="p">)</span><span class="n">c</span> <span class="o">&gt;&gt;</span> <span class="mi">6</span><span class="p">);</span>
-          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0x80</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span> <span class="o">&amp;</span> <span class="mh">0x3f</span><span class="p">);</span>
-        <span class="p">}</span>
-      <span class="p">}</span>
-      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">CONV_TO_UTF8</span><span class="p">:</span><span class="w">            </span><span class="cm">/* latin1 to utf-8 conversion */</span>
+<span class="w">      </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">retval</span><span class="p">;</span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">0x80</span><span class="p">)</span>
+<span class="w">          </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xc0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">((</span><span class="kt">unsigned</span><span class="p">)</span><span class="n">c</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">6</span><span class="p">);</span>
+<span class="w">          </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0x3f</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="o">*</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NUL</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lenp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">        </span><span class="o">*</span><span class="n">lenp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">retval</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-    <span class="k">case</span> <span class="nl">CONV_9_TO_UTF8</span><span class="p">:</span>          <span class="cm">/* latin9 to utf-8 conversion */</span>
-      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
-      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-        <span class="k">switch</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-          <span class="k">case</span> <span class="mh">0xa4</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x20ac</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* euro */</span>
-          <span class="k">case</span> <span class="mh">0xa6</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0160</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* S hat */</span>
-          <span class="k">case</span> <span class="mh">0xa8</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0161</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* S -hat */</span>
-          <span class="k">case</span> <span class="mh">0xb4</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x017d</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Z hat */</span>
-          <span class="k">case</span> <span class="mh">0xb8</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x017e</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Z -hat */</span>
-          <span class="k">case</span> <span class="mh">0xbc</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0152</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* OE */</span>
-          <span class="k">case</span> <span class="mh">0xbd</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0153</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* oe */</span>
-          <span class="k">case</span> <span class="mh">0xbe</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x0178</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                 <span class="cm">/* Y */</span>
-        <span class="p">}</span>
-        <span class="n">d</span> <span class="o">+=</span> <span class="n">utf_char2bytes</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">CONV_9_TO_UTF8</span><span class="p">:</span><span class="w">          </span><span class="cm">/* latin9 to utf-8 conversion */</span>
+<span class="w">      </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">retval</span><span class="p">;</span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa4</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x20ac</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* euro */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa6</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0160</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* S hat */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa8</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0161</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* S -hat */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xb4</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x017d</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* Z hat */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xb8</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x017e</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* Z -hat */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbc</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0152</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* OE */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbd</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0153</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* oe */</span>
+<span class="w">          </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbe</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0178</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* Y */</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">d</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">utf_char2bytes</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="o">*</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NUL</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lenp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">        </span><span class="o">*</span><span class="n">lenp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">retval</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
-    <span class="k">case</span> <span class="nl">CONV_TO_LATIN1</span><span class="p">:</span>          <span class="cm">/* utf-8 to latin1 conversion */</span>
-    <span class="k">case</span> <span class="nl">CONV_TO_LATIN9</span><span class="p">:</span>          <span class="cm">/* utf-8 to latin9 conversion */</span>
-      <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-      <span class="n">d</span> <span class="o">=</span> <span class="n">retval</span><span class="p">;</span>
-      <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">l</span> <span class="o">=</span> <span class="n">utf_ptr2len_len</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">);</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
-        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-          <span class="kt">int</span> <span class="n">l_w</span> <span class="o">=</span> <span class="n">utf8len_tab_zero</span><span class="p">[</span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]];</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">CONV_TO_LATIN1</span><span class="p">:</span><span class="w">          </span><span class="cm">/* utf-8 to latin1 conversion */</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">CONV_TO_LATIN9</span><span class="p">:</span><span class="w">          </span><span class="cm">/* utf-8 to latin9 conversion */</span>
+<span class="w">      </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">      </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">retval</span><span class="p">;</span>
+<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf_ptr2len_len</span><span class="p">(</span><span class="n">ptr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">          </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NUL</span><span class="p">;</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="kt">int</span><span class="w"> </span><span class="n">l_w</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf8len_tab_zero</span><span class="p">[</span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]];</span>
 
-          <span class="k">if</span> <span class="p">(</span><span class="n">l_w</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-            <span class="cm">/* Illegal utf-8 byte cannot be converted */</span>
-            <span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
-            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
-          <span class="p">}</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">unconvlenp</span> <span class="o">!=</span> <span class="nb">NULL</span> <span class="o">&amp;&amp;</span> <span class="n">l_w</span> <span class="o">&gt;</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span>
-            <span class="cm">/* Incomplete sequence at the end. */</span>
-            <span class="o">*</span><span class="n">unconvlenp</span> <span class="o">=</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span><span class="p">;</span>
-            <span class="k">break</span><span class="p">;</span>
-          <span class="p">}</span>
-          <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-          <span class="n">c</span> <span class="o">=</span> <span class="n">utf_ptr2char</span><span class="p">(</span><span class="n">ptr</span> <span class="o">+</span> <span class="n">i</span><span class="p">);</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span> <span class="o">==</span> <span class="n">CONV_TO_LATIN9</span><span class="p">)</span>
-            <span class="k">switch</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">{</span>
-              <span class="k">case</span> <span class="mh">0x20ac</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa4</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* euro */</span>
-              <span class="k">case</span> <span class="mh">0x0160</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa6</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* S hat */</span>
-              <span class="k">case</span> <span class="mh">0x0161</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xa8</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* S -hat */</span>
-              <span class="k">case</span> <span class="mh">0x017d</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xb4</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Z hat */</span>
-              <span class="k">case</span> <span class="mh">0x017e</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xb8</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Z -hat */</span>
-              <span class="k">case</span> <span class="mh">0x0152</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbc</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* OE */</span>
-              <span class="k">case</span> <span class="mh">0x0153</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbd</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* oe */</span>
-              <span class="k">case</span> <span class="mh">0x0178</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0xbe</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                     <span class="cm">/* Y */</span>
-              <span class="k">case</span> <span class="mh">0xa4</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xa6</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xa8</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xb4</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xb8</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xbc</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xbd</span><span class="o">:</span>
-              <span class="k">case</span> <span class="mh">0xbe</span><span class="o">:</span> <span class="n">c</span> <span class="o">=</span> <span class="mh">0x100</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>                   <span class="cm">/* not in latin9 */</span>
-            <span class="p">}</span>
-          <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">utf_iscomposing</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="p">{</span>              <span class="cm">/* skip composing chars */</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&lt;</span> <span class="mh">0x100</span><span class="p">)</span>
-              <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span>
-            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span><span class="p">)</span> <span class="p">{</span>
-              <span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
-              <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
-            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-              <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="mh">0xbf</span><span class="p">;</span>
-              <span class="k">if</span> <span class="p">(</span><span class="n">utf_char2cells</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="o">*</span><span class="n">d</span><span class="o">++</span> <span class="o">=</span> <span class="sc">'?'</span><span class="p">;</span>
-            <span class="p">}</span>
-          <span class="p">}</span>
-          <span class="n">i</span> <span class="o">+=</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-        <span class="p">}</span>
-      <span class="p">}</span>
-      <span class="o">*</span><span class="n">d</span> <span class="o">=</span> <span class="n">NUL</span><span class="p">;</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">lenp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
-        <span class="o">*</span><span class="n">lenp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span> <span class="o">-</span> <span class="n">retval</span><span class="p">);</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">l_w</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="cm">/* Illegal utf-8 byte cannot be converted */</span>
+<span class="w">            </span><span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">unconvlenp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">l_w</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="cm">/* Incomplete sequence at the end. */</span>
+<span class="w">            </span><span class="o">*</span><span class="n">unconvlenp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">          </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">utf_ptr2char</span><span class="p">(</span><span class="n">ptr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">CONV_TO_LATIN9</span><span class="p">)</span>
+<span class="w">            </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x20ac</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xa4</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* euro */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x0160</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xa6</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* S hat */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x0161</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xa8</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* S -hat */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x017d</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xb4</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* Z hat */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x017e</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xb8</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* Z -hat */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x0152</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xbc</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* OE */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x0153</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xbd</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* oe */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0x0178</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xbe</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* Y */</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa4</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa6</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xa8</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xb4</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xb8</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbc</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbd</span><span class="p">:</span>
+<span class="w">              </span><span class="k">case</span><span class="w"> </span><span class="mh">0xbe</span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x100</span><span class="p">;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w">                   </span><span class="cm">/* not in latin9 */</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">utf_iscomposing</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="cm">/* skip composing chars */</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">0x100</span><span class="p">)</span>
+<span class="w">              </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vcp</span><span class="o">-&gt;</span><span class="n">vc_fail</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="n">free</span><span class="p">(</span><span class="n">retval</span><span class="p">);</span>
+<span class="w">              </span><span class="k">return</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xbf</span><span class="p">;</span>
+<span class="w">              </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">utf_char2cells</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">                </span><span class="o">*</span><span class="n">d</span><span class="o">++</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'?'</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">          </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="o">*</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NUL</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lenp</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">        </span><span class="o">*</span><span class="n">lenp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">d</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">retval</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 
 <span class="cp"># ifdef USE_ICONV</span>
-    <span class="k">case</span> <span class="nl">CONV_ICONV</span><span class="p">:</span>              <span class="cm">/* conversion with output_conv.vc_fd */</span>
-      <span class="n">retval</span> <span class="o">=</span> <span class="n">iconv_string</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">unconvlenp</span><span class="p">,</span> <span class="n">lenp</span><span class="p">);</span>
-      <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">CONV_ICONV</span><span class="p">:</span><span class="w">              </span><span class="cm">/* conversion with output_conv.vc_fd */</span>
+<span class="w">      </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iconv_string</span><span class="p">(</span><span class="n">vcp</span><span class="p">,</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">unconvlenp</span><span class="p">,</span><span class="w"> </span><span class="n">lenp</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
 <span class="cp"># endif</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 
 <p>In the end it’s just a switch that looks up a conversion method by
@@ -628,9 +628,9 @@ if the data could just be written to <code>input_buffer</code> by
 the output buffer should be? It turns out iconv has this exact same
 problem:</p>
 
-<pre><code class="language-c"><span class="kt">size_t</span> <span class="nf">iconv</span> <span class="p">(</span><span class="kt">iconv_t</span> <span class="n">cd</span><span class="p">,</span>
-              <span class="kt">char</span> <span class="o">**</span><span class="kr">restrict</span> <span class="n">inbuf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="kr">restrict</span> <span class="n">inbytesleft</span><span class="p">,</span>
-              <span class="kt">char</span> <span class="o">**</span><span class="kr">restrict</span> <span class="n">outbuf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="o">*</span><span class="kr">restrict</span> <span class="n">outbytesleft</span><span class="p">);</span></code></pre>
+<pre><code class="language-c"><span class="kt">size_t</span><span class="w"> </span><span class="nf">iconv</span><span class="w"> </span><span class="p">(</span><span class="n">iconv_t</span><span class="w"> </span><span class="n">cd</span><span class="p">,</span>
+<span class="w">              </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="kr">restrict</span><span class="w"> </span><span class="n">inbuf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="kr">restrict</span><span class="w"> </span><span class="n">inbytesleft</span><span class="p">,</span>
+<span class="w">              </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="kr">restrict</span><span class="w"> </span><span class="n">outbuf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="kr">restrict</span><span class="w"> </span><span class="n">outbytesleft</span><span class="p">);</span></code></pre>
 
 <p>It has basically the interface I just described for a hypothetically
 improved <code>string_convert_ext()</code>. The solution iconv uses is to return -1
@@ -646,8 +646,8 @@ allocating a buffer twice as large as the input buffer, there would be
 no risk of receiving <code>E2BIG</code>. This is incidentally also the size passed
 to <code>xmalloc()</code> in the current incarnation of <code>string_convert_ext()</code>:</p>
 
-<pre><code class="language-c"><span class="k">case</span> <span class="nl">CONV_TO_UTF8</span><span class="p">:</span>            <span class="cm">/* latin1 to utf-8 conversion */</span>
-  <span class="n">retval</span> <span class="o">=</span> <span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span></code></pre>
+<pre><code class="language-c"><span class="k">case</span><span class="w"> </span><span class="no">CONV_TO_UTF8</span><span class="p">:</span><span class="w">            </span><span class="cm">/* latin1 to utf-8 conversion */</span>
+<span class="w">  </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xmalloc</span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span></code></pre>
 
 <p>When Vim uses iconv, the situation is more difficult since the expansion
 factor is a potential unknown. The user could choose any number of
@@ -662,9 +662,9 @@ we’re not likely to encounter <code>E2BIG</code>.</p>
 this is not the end of the story.  For the next installment, I will
 discuss file encoding.</p>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
+    <li id="fn:1" role="doc-endnote">
       <p>Code review is not only massively important for a rapidly changing
 project like Neovim, it also helps me get to grips with some internals
 that I haven’t had the pleasure to alter myself.</p>
@@ -676,9 +676,9 @@ thought, perhaps “premature” is not right. In a quickly moving
 project like Neovim it might be very useful to jumpstart a
 discussion after a lull. After all, we’re only in alpha. I’m also
 guilty of reviewing after the fact (read: merge), but for now it’s
-not causing the world to implode. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+not causing the world to implode. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2">
+    <li id="fn:2" role="doc-endnote">
       <p>After seeing all the <code>USE_ICONV</code> conditional parts in the source, I
 started to wonder when <a href="http://en.wikipedia.org/wiki/Iconv">libiconv</a> was
 actually activated and used.</p>
@@ -689,7 +689,7 @@ something happened during the migration from autoconf (Vim) to cmake
 (Neovim) and <code>USE_ICONV</code> was never set. I submitted PR
 <a href="https://github.com/neovim/neovim/pull/1370">#1370</a> to rectify this. The
 relevant source hadn’t diverged that much and no <code>USE_ICONV</code> block had
-been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:2" class="reversefootnote">↩</a></p>
+been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -716,7 +716,7 @@ been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:2
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -739,3 +739,4 @@ been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:2
         </script>
     </body>
 </html>
+

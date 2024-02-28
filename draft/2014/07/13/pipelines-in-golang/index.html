@@ -9,7 +9,7 @@
         <meta name="description" content="Presents several ways to create a processing pipeline in Go">
         <meta name="keywords" content="pipeline, golang">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 3.7.1">
+        <meta name="generator" content="nanoc 4.12.19">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Pipelines in Golang">
@@ -143,31 +143,31 @@ as the go-to solution if you want to build a Unix pipeline in Go.</p>
 <p>Why would you need a pipeline? If you want to work on a value and pass
 it from stage to stage, what could be simpler than:</p>
 
-<pre><code class="language-go"><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="nx">result</span> <span class="o">:=</span> <span class="nx">start</span><span class="p">(</span><span class="s">"my-value"</span><span class="p">)</span>  <span class="c1">// could be anything, really</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
-  <span class="p">}</span>
+<pre><code class="language-go"><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="s">"my-value"</span><span class="p">)</span><span class="w">  </span><span class="c1">// could be anything, really</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">start</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="nx">val1</span> <span class="o">:=</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span>
-  <span class="nx">val2</span> <span class="o">:=</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
-  <span class="nx">val3</span> <span class="o">:=</span> <span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nx">val3</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">val1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">val2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">val3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val3</span>
 <span class="p">}</span>
 
 <span class="c1">// dummy functions</span>
-<span class="kd">func</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">val</span> <span class="o">+</span> <span class="s">" -&gt; stage 1"</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; stage 1"</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">val</span> <span class="o">+</span> <span class="s">" -&gt; stage 2"</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; stage 2"</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage3</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">val</span> <span class="o">+</span> <span class="s">" -&gt; stage 3"</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage3</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; stage 3"</span>
 <span class="p">}</span></code></pre>
 
 <p>There’s, that’s just regular, imperative programming. It’s simple, it’s
@@ -176,29 +176,29 @@ things short, but you should definitely do that. Now, what if you want to
 run things in parallel? A first thought might be to do something like
 this:</p>
 
-<pre><code class="language-go"><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">// input and output channels for the pipeline</span>
-  <span class="nx">input</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-  <span class="nx">output</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-  <span class="k">go</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>  <span class="c1">// run start() as a goroutine</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="nx">input</span> <span class="o">&lt;-</span> <span class="s">"my-value"</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">output</span><span class="p">)</span>
-  <span class="p">}</span>
+<pre><code class="language-go"><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// input and output channels for the pipeline</span>
+<span class="w">  </span><span class="nx">input</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">output</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">  </span><span class="k">go</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">)</span><span class="w">  </span><span class="c1">// run start() as a goroutine</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"my-value"</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="c1">// close the input channel so start() will exit and can clean up after</span>
-  <span class="c1">// itself if it so wishes.</span>
-  <span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<span class="w">  </span><span class="c1">// close the input channel so start() will exit and can clean up after</span>
+<span class="w">  </span><span class="c1">// itself if it so wishes.</span>
+<span class="w">  </span><span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">output</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// will loop until input is closed</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">input</span> <span class="p">{</span>
-    <span class="nx">val1</span> <span class="o">:=</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-    <span class="nx">val2</span> <span class="o">:=</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
-    <span class="nx">val3</span> <span class="o">:=</span> <span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
-    <span class="nx">output</span> <span class="o">&lt;-</span> <span class="nx">val3</span>
-  <span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// will loop until input is closed</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">val1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">output</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">val3</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span></code></pre>
 
 <p>Whew, now we’re using goroutines and channels, two of the things Go is
@@ -220,31 +220,31 @@ use buffered channels to allow more values to be in-flight.</li>
 
 <p>Let’s apply the proposed solutions and see what we get:</p>
 
-<pre><code class="language-go"><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">// input and output channels for the pipeline</span>
-  <span class="nx">nvals</span> <span class="o">:=</span> <span class="mi">10</span>
-  <span class="nx">input</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">nvals</span><span class="p">)</span>
-  <span class="nx">output</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">nvals</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nvals</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="k">go</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
-  <span class="p">}</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nvals</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="nx">input</span> <span class="o">&lt;-</span> <span class="s">"my-value"</span>
-  <span class="p">}</span>
-  <span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nvals</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">output</span><span class="p">)</span>
-  <span class="p">}</span>
+<pre><code class="language-go"><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// input and output channels for the pipeline</span>
+<span class="w">  </span><span class="nx">nvals</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">  </span><span class="nx">input</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">nvals</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">output</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">nvals</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">nvals</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">nvals</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"my-value"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">nvals</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">output</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// will loop until input is closed</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">input</span> <span class="p">{</span>
-    <span class="nx">val1</span> <span class="o">:=</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-    <span class="nx">val2</span> <span class="o">:=</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
-    <span class="nx">val3</span> <span class="o">:=</span> <span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
-    <span class="nx">output</span> <span class="o">&lt;-</span> <span class="nx">val3</span>
-  <span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// will loop until input is closed</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">val1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">output</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">val3</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span></code></pre>
 
 <p>Now we’re calculating in parallel. However, though we can decrease the
@@ -255,45 +255,45 @@ the channel buffers, we need more goroutines to “buffer up” more values
 with an O(N)-buffer. That’s no good. Perhaps by using another go
 construct, we can do better. Enter <code>select</code>:</p>
 
-<pre><code class="language-go"><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">// input and output channels for the pipeline</span>
-  <span class="nx">nvals</span> <span class="o">:=</span> <span class="mi">10</span>
-  <span class="nx">input</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-  <span class="nx">output</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-    <span class="k">go</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
-  <span class="p">}</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nvals</span><span class="p">;</span> <span class="p">{</span>
-    <span class="k">select</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="nx">input</span> <span class="o">&lt;-</span> <span class="s">"my-value"</span><span class="p">:</span>
-      <span class="c1">// succesfully input value</span>
-    <span class="k">case</span> <span class="nx">res</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">output</span><span class="p">:</span>
-      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span>
-      <span class="nx">i</span><span class="o">++</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<pre><code class="language-go"><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// input and output channels for the pipeline</span>
+<span class="w">  </span><span class="nx">nvals</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">  </span><span class="nx">input</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">output</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">nvals</span><span class="p">;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"my-value"</span><span class="p">:</span>
+<span class="w">      </span><span class="c1">// succesfully input value</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">output</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+<span class="w">      </span><span class="nx">i</span><span class="o">++</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">output</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// will loop until input is closed</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">input</span> <span class="p">{</span>
-    <span class="nx">val1</span> <span class="o">:=</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-    <span class="nx">val2</span> <span class="o">:=</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
-    <span class="nx">val3</span> <span class="o">:=</span> <span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
-    <span class="nx">output</span> <span class="o">&lt;-</span> <span class="nx">val3</span>
-  <span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// will loop until input is closed</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">val1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">val1</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">val3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">stage3</span><span class="p">(</span><span class="nx">val2</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">output</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">val3</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span></code></pre>
 
 <p>We can vary the number of goroutines and the buffers independently (and
 measure how we get the best performance). By combining this with
 <code>runtime.GOMAXPROCS(runtime.NumCPU())</code>, all cores can be used:</p>
 
-<pre><code class="language-go"><span class="nx">cpus</span> <span class="o">:=</span> <span class="nx">runtime</span><span class="p">.</span><span class="nx">NumCPU</span><span class="p">()</span>
+<pre><code class="language-go"><span class="nx">cpus</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runtime</span><span class="p">.</span><span class="nx">NumCPU</span><span class="p">()</span>
 <span class="nx">runtime</span><span class="p">.</span><span class="nx">GOMAXPROCS</span><span class="p">(</span><span class="nx">cpus</span><span class="p">)</span>
 <span class="c1">// start as much workers as we have cpus</span>
-<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">cpus</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-  <span class="k">go</span> <span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">cpus</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">go</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">)</span>
 <span class="p">}</span></code></pre>
 
 <p>Yet, we haven’t really been focusing on the pipeline at all. What we’ve
@@ -321,61 +321,61 @@ synchronization.</p>
 <p>To turn our earlier example into a true pipeline, we need to break out
 the stages and let them run in their own worker pool:</p>
 
-<pre><code class="language-go"><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="c1">// input and output channels for the pipeline</span>
-  <span class="nx">nvals</span> <span class="o">:=</span> <span class="mi">10</span>
+<pre><code class="language-go"><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// input and output channels for the pipeline</span>
+<span class="w">  </span><span class="nx">nvals</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">10</span>
 
-  <span class="nx">ncpu</span> <span class="o">:=</span> <span class="nx">runtime</span><span class="p">.</span><span class="nx">NumCPU</span><span class="p">()</span>
-  <span class="nx">runtime</span><span class="p">.</span><span class="nx">GOMAXPROCS</span><span class="p">(</span><span class="nx">ncpu</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">ncpu</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runtime</span><span class="p">.</span><span class="nx">NumCPU</span><span class="p">()</span>
+<span class="w">  </span><span class="nx">runtime</span><span class="p">.</span><span class="nx">GOMAXPROCS</span><span class="p">(</span><span class="nx">ncpu</span><span class="p">)</span>
 
-  <span class="nx">stages</span> <span class="o">:=</span> <span class="p">[]</span><span class="kd">func</span><span class="p">(</span><span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">){</span>
-    <span class="nx">stage1</span><span class="p">,</span>
-    <span class="nx">stage2</span><span class="p">,</span>
-  <span class="p">}</span>
+<span class="w">  </span><span class="nx">stages</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kd">func</span><span class="p">(</span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">){</span>
+<span class="w">    </span><span class="nx">stage1</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">stage2</span><span class="p">,</span>
+<span class="w">  </span><span class="p">}</span>
 
-  <span class="nx">input</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-  <span class="nx">in</span> <span class="o">:=</span> <span class="nx">input</span>
-  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">stage</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">stages</span> <span class="p">{</span>
-    <span class="nx">out</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
-    <span class="k">go</span> <span class="nx">stage</span><span class="p">(</span><span class="nx">in</span><span class="p">,</span> <span class="nx">out</span><span class="p">)</span>  <span class="c1">// run start() as a goroutine</span>
-    <span class="nx">in</span> <span class="p">=</span> <span class="nx">out</span>  <span class="c1">// the output of one stage is the input of the next one</span>
-  <span class="p">}</span>
-  <span class="nx">output</span> <span class="o">:=</span> <span class="nx">in</span> <span class="c1">// the output of the last stage</span>
+<span class="w">  </span><span class="nx">input</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">in</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">input</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">stage</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">stages</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">stage</span><span class="p">(</span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="nx">out</span><span class="p">)</span><span class="w">  </span><span class="c1">// run start() as a goroutine</span>
+<span class="w">    </span><span class="nx">in</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">out</span><span class="w">  </span><span class="c1">// the output of one stage is the input of the next one</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">output</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="c1">// the output of the last stage</span>
 
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">nvals</span><span class="p">;</span> <span class="p">{</span>
-    <span class="k">select</span> <span class="p">{</span>
-    <span class="k">case</span> <span class="nx">input</span> <span class="o">&lt;-</span> <span class="s">"my-value"</span><span class="p">:</span>
-      <span class="c1">// succesfully input value</span>
-    <span class="k">case</span> <span class="nx">res</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">output</span><span class="p">:</span>
-      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span>
-      <span class="nx">i</span><span class="o">++</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">nvals</span><span class="p">;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"my-value"</span><span class="p">:</span>
+<span class="w">      </span><span class="c1">// succesfully input value</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">output</span><span class="p">:</span>
+<span class="w">      </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"The result is:"</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+<span class="w">      </span><span class="nx">i</span><span class="o">++</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">close</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage1</span><span class="p">(</span><span class="nx">input</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">output</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// propagate the closing of the input channel</span>
-  <span class="k">defer</span> <span class="nb">close</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">input</span> <span class="p">{</span>
-    <span class="nx">output</span> <span class="o">&lt;-</span> <span class="nx">stage1fn</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-  <span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage1</span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// propagate the closing of the input channel</span>
+<span class="w">  </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">output</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">stage1fn</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage2</span><span class="p">(</span><span class="nx">input</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">output</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// propagate the closing of the input channel</span>
-  <span class="k">defer</span> <span class="nb">close</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">input</span> <span class="p">{</span>
-    <span class="nx">output</span> <span class="o">&lt;-</span> <span class="nx">stage2fn</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-  <span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage2</span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="o">&lt;-</span><span class="kd">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="kd">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// propagate the closing of the input channel</span>
+<span class="w">  </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">output</span><span class="p">)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">output</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">stage2fn</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage1fn</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">val</span> <span class="o">+</span> <span class="s">" -&gt; stage 1"</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage1fn</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; stage 1"</span>
 <span class="p">}</span>
 
-<span class="kd">func</span> <span class="nx">stage2fn</span><span class="p">(</span><span class="nx">val</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">val</span> <span class="o">+</span> <span class="s">" -&gt; stage 2"</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">stage2fn</span><span class="p">(</span><span class="nx">val</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" -&gt; stage 2"</span>
 <span class="p">}</span></code></pre>
 
 <p>Very groovy. But the astute reader will notice that we’ve regressed
@@ -452,7 +452,7 @@ values from a channel)?</p>
 <ol>
   <li>Bounded parallelism: avoid spawning 1000’s of goroutines when it’s
 not necessary (you most likely don’t have 1000’s of processors).
-Goroutines are cheap, but they’re not that cheap. <sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>
+Goroutines are cheap, but they’re not that cheap. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>
 </li>
   <li>Some pipelines support cancellation, freeing you from building it
 yourself in an ad-hoc way everytime.</li>
@@ -498,12 +498,12 @@ generic, it seems like we’d have to pass <code>interface{}</code> values.</p>
 
 <p>Dimitri’s approach.</p>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
+    <li id="fn:1" role="doc-endnote">
 
       <p>At the moment of speaking (Go 1.3), creating a goroutine costs around 5000
-bytes. <a href="#fnref:1" class="reversefootnote">↩</a></p>
+bytes. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>
 </div>
@@ -530,7 +530,7 @@ bytes. <a href="#fnref:1" class="reversefootnote">↩</a></p>
               //displayIndent: "2em"
             });
         </script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -553,3 +553,4 @@ bytes. <a href="#fnref:1" class="reversefootnote">↩</a></p>
         </script>
     </body>
 </html>
+
