@@ -3,6 +3,9 @@
 # Default location for output, needs to match output_dir's value found in config.yaml
 output/
 
+# Ruby bundle files.
+.bundle/
+
 # Temporary file directory
 tmp/
 
