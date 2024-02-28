@@ -43,10 +43,10 @@ end
 include PostHelper
 include PageHelper
 
-include Nanoc3::Helpers::Blogging
-include Nanoc3::Helpers::Tagging
-include Nanoc3::Helpers::Rendering
-include Nanoc3::Helpers::LinkTo
-include Nanoc3::Helpers::XMLSitemap
+include Nanoc::Helpers::Blogging
+include Nanoc::Helpers::Tagging
+include Nanoc::Helpers::Rendering
+include Nanoc::Helpers::LinkTo
+include Nanoc::Helpers::XMLSitemap
 
 Encoding.default_internal = Encoding::UTF_8

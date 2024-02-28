@@ -7,6 +7,6 @@
             <%= yield %>
         </article>
 
-        <p>Tags: <%= tags_for(@item, { :base_url => "/tag/" }) %></p>
+        <p>Tags: <%= tags_for(@item, base_url: "/tag/") %></p>
     </div>
 <% end %>

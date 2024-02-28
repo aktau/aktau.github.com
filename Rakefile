@@ -3,11 +3,6 @@
 require 'yaml'
 
 ##
-# Load Nanoc3 tasks for additional validators
-#
-# require 'nanoc3/tasks'
-
-##
 # Configurable Constants
 #
 BASE_URL = 'http://www.aktau.be'

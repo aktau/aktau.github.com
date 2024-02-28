@@ -26,7 +26,8 @@ preprocess do
     end
 
     tags.each do |tag|
-        @items << Nanoc::Item.new("", { :tag => tag, :title => 'tag: ' + tag, :description => tag }, "/tag/#{tag}/")
+        @items.create("", { :tag => tag, :title => 'tag: ' + tag, :description => tag },
+                      Nanoc::Identifier.new("/tag/#{tag}/", type: :legacy))
     end
 
     create_sitemap
@@ -37,7 +38,12 @@ compile '/CNAME/' do
 end
 
 compile /(rss|atom)/ do
-    filter :erb unless rep.binary? # e.g. rss.png image
+    # TODO(aktau): Re-instate the rep.binary? filter:
+    #
+    #   filter :erb unless rep.binary? # e.g. rss.png image
+    #
+    # This stopped working int he nanoc4 migration.
+    filter :erb
 end
 
 compile '/stylesheets/*' do
@@ -142,7 +148,7 @@ route '/stylesheets/*' do
     end
 end
 
-route '/images/*/', :rep => :thumbnail do
+route '/images/*', :rep => :thumbnail do
     item.identifier.chop + '-small.' + item[:extension]
 end
 

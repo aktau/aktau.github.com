@@ -24,9 +24,9 @@ def create_sitemap
     end
   end
 
-  @items << Nanoc3::Item.new(
+  @items.create(
     "<%= xml_sitemap %>",
     { :extension => 'xml', :is_hidden => true },
-    '/sitemap/'
+    Nanoc::Identifier.new('/sitemap/', type: :legacy)
   )
 end
