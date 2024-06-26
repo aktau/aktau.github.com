@@ -743,7 +743,7 @@ been removed by the unifdeffening so that was a piece of cake. <a href="#fnref:
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });

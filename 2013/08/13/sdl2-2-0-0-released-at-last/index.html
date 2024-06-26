@@ -432,7 +432,7 @@ were minor (except for haptics support, which I don’t use).</p>
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });

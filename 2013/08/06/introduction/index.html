@@ -258,7 +258,7 @@ $<span class="w"> </span>open<span class="w"> </span>localhost:8080</code></pre>
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });

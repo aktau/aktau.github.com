@@ -227,7 +227,7 @@ carefully we can see that the developers of redis took the same approach in <em>
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });

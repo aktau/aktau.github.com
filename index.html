@@ -213,7 +213,7 @@ about effectively using a similar backup method with PostgreSQL.</p>
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });

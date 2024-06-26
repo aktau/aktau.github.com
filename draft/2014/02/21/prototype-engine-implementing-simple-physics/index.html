@@ -890,7 +890,7 @@ default. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a>
                 "container": "content",
                 "complete": function() {
                     // reload mathjax after a pjax load
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.typesetPromise();
                 },
                 "autoAnalytics": false
             });
