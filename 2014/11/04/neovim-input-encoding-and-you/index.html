@@ -9,7 +9,7 @@
         <meta name="description" content="Try to explain how vim and neovim handle input encoding">
         <meta name="keywords" content="neovim, vim, encoding">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 4.13.0">
+        <meta name="generator" content="nanoc 4.13.3">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="Neovim: input encoding and you">
@@ -136,7 +136,7 @@ context should hopefully make clear which one I mean.</em></p>
 <h2 id="the-impetus">The impetus</h2>
 
 <p>It all started when I was reading over the changes of PR
-<a href="https://github.com/neovim/neovim/pull/1357">#1357</a> <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. I’ve always
+<a href="https://github.com/neovim/neovim/pull/1357">#1357</a> <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>. I’ve always
 wanted to know more about how Vim does character encoding, and there was
 a commit in this PR that started me on the path: <a href="https://github.com/tarruda/neovim/commit/4fd9ee4a6b908d86815f08c8880db73d9dda13dc">input/job: process
 ctrl+c and do conversion in the read
@@ -441,7 +441,7 @@ phases:</p>
 
 <p>The fact that Vim provides some native encodings is probably why no
 Neovim user has complained up until now (iconv is temporarily disabled
-in Neovim, this is being fixed <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>). Apparently, not many use an exotic
+in Neovim, this is being fixed <sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup>). Apparently, not many use an exotic
 encoding for input. I surmise that UTF-8 is good enough for most. Point
 1 also implies that the <code>*p_tenc != NUL</code> check in
 <code>did_set_string_option()</code> is likely redundant.</p>
@@ -659,7 +659,7 @@ discuss file encoding.</p>
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p>Code review is not only massively important for a rapidly changing
 project like Neovim, it also helps me get to grips with some internals
 that I haven’t had the pleasure to alter myself.</p>
@@ -673,7 +673,7 @@ discussion after a lull. After all, we’re only in alpha. I’m also
 guilty of reviewing after the fact (read: merge), but for now it’s
 not causing the world to implode. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p>After seeing all the <code>USE_ICONV</code> conditional parts in the source, I
 started to wonder when <a href="http://en.wikipedia.org/wiki/Iconv">libiconv</a> was
 actually activated and used.</p>

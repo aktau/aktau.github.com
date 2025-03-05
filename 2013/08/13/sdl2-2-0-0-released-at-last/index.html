@@ -9,7 +9,7 @@
         <meta name="description" content="The second version of the cross-platform game development library SDL was released today. Game developers everywhere rejoice">
         <meta name="keywords" content="sdl, game-engine, open-source">
         <meta name="author" content="Nicolas Hillegeer">
-        <meta name="generator" content="nanoc 4.12.19">
+        <meta name="generator" content="nanoc 4.13.3">
         <meta name="robots" content="index,follow">
 
         <meta property="og:title" content="SDL2 (2.0.0) released at last!">
@@ -161,7 +161,7 @@ input subsystems according to different capabilities and so forth.</p>
 </ul>
 
 <p>If you develop your code with just SDL, (optionally) OpenGL and the standard
-C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>
+C or C++ library, your code is immediately portable to all the operating systems which SDL supports. That includes Android and iPhone by the way. <sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>
 So it pays off to use it, especially if you’re in the market to develop games commercially: <strong>write once, run on your toaster</strong>.</p>
 
 <p>SDL also features a drawing API, which is now hardware accelerated when possible thanks to SDL2. They worked very hard on this feature, though I
@@ -172,7 +172,7 @@ to go with SDL2 even though it was still in release candidate status. It has wor
 I keep SDL in my source tree (like redis does with its dependencies) so I manually merged the new version and found that most of the changes
 were minor (except for haptics support, which I don’t use).</p>
 
-<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></p>
+<p>And because I can’t post and article without a bit of code, here’s the <code>main()</code> method of my toy project: (yes it’s ugly, but I named it prototype so it’s ok). <sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup></p>
 
 <pre><code class="language-c"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
@@ -369,10 +369,10 @@ were minor (except for haptics support, which I don’t use).</p>
 
 <div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1" role="doc-endnote">
+    <li id="fn:1">
       <p>Okay, you might have to add a bit of effort for iPhone and Android, especially if you’re developing with OpenGL and you haven’t restricted yourself to the OpenGL ES subset. The plaforms’ respective preference for Objective-C and Java might also give some troubles, but at least SDL has been adapted to work with those. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
-    <li id="fn:2" role="doc-endnote">
+    <li id="fn:2">
       <p>I realized that as an inexperienced game developer, I was going to make a crappy engine before making a decent one. So I decided to not even give my first creation a real name. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
     </li>
   </ol>

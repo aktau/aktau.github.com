@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Clean integration of Lua and C</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="A small, self-contained tutorial for how to get your C code to talk to Lua and vice versa">
+        <meta name="keywords" content="lua, c, scripting, game-engine, ffi">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 4.13.3">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="Clean integration of Lua and C">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="http://www.aktau.be/draft/2013/08/08/clean-integration-of-lua-and-c/">
+
+        <!-- Google Fonts embed code -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&display=swap" rel="stylesheet">
+
+        
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        
+
+        <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+    </head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BPQY780BNR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Old universal analytics ID: ga('create', 'UA-37726728-1', 'aktau.be');
+      gtag('config', 'G-BPQY780BNR');
+    </script>
+    <body>
+        <nav>
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive/">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf" title="Résumé">Curriculum Vitae</a></li>
+                <li><a href="/contact/" title="Personal information">About &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
+                <li><a href="/tag/neovim">neovim (1)</a></li>
+                
+                <li><a href="/tag/vim">vim (1)</a></li>
+                
+                <li><a href="/tag/encoding">encoding (1)</a></li>
+                
+            </ul>
+            -->
+        </nav>
+
+        <main id="content">
+            
+    <div class="post">
+        <h1>Clean integration of Lua and C</h1>
+        <aside>August 8, 2013</aside>
+
+        <article>
+            <p>Ever since thinking about building my own amateur game engine, I’ve wanted to integrate
+scripting in it. Because I believe the advantages to outweigh the downsides.</p>
+
+<!-- more -->
+
+<ul>
+  <li>
+<strong>Configuration</strong>: You get a configuration format for free, you can just have your interpreter load some configuration files and then pull the necessary values
+into the host program. Moreover you can also expose the defined values to other Lua scripts, opening the floodgates for extensive modding.</li>
+  <li>
+<strong>Security</strong>: If you want, you can quite easily disable I/O and other functionality for scripts. Since you can easily load multiple Lua interpreters and they’re very lightweight, it’s a piece of cake to have both a high-privilege and low-privilege interpreter, if required.</li>
+  <li>
+<strong>Ease of use</strong>: Lua is – in comparison to other scripting languages – very easy to integrate with another language. It almost feels like a pleasure to integrate both, while it can feel like a cactus eating contest to integrate other scripting languages. After this integration, you can write all non-performance critical code in Lua, which is quite a bit easier than writing it in C all the time because you don’t have to worry about allocation, object ownership and you have access to easier to use data structures.</li>
+</ul>
+
+<h3 id="exemplary-code-with-redis">Exemplary code, with redis</h3>
+
+<p>Whenever possible, I like to look at how well-written, modern projects handle this. In this case that’s easy, <a href="http://redis.io/">redis</a> has lua scripting! Quite a lot of things in redis are small, efficient, self-contained and liberally licensed (MIT), which makes it excellent to study and learn from.</p>
+
+<p>By the way, I think it’s good practice to look for ideas in other projects. The trick is to remember some projects that you can have look at, confident that the author knows what she is doing. For me, that project is redis.</p>
+
+<p>The other side of the coin though is that it can stifle your creativity. So maybe a good middle ground is to only start looking at things if you can’t find a solution in 20 minutes or so.</p>
+
+<p>Let’s take the redis scripting code as an example:</p>
+
+<h3 id="sandboxing">Sandboxing</h3>
+
+<p>This section is based on an answer from <a href="http://stackoverflow.com/questions/966162/best-way-to-omit-lua-standard-libraries">stack overflow</a>, and if we look
+carefully we can see that the developers of redis took the same approach in <em>scripting.c</em>.</p>
+
+<p>Some other tutorials if you still have questions:</p>
+
+<ul>
+  <li><a href="http://csl.sublevel3.org/lua/">Using Lua with C++ — A short tutorial</a></li>
+  <li><a href="http://www.ibm.com/developerworks/library/l-embed-lua/">IBM DeveloperWorks - Embed Lua for scriptable apps</a></li>
+</ul>
+
+<p>Alternatives to Lua to consider, that share some of its advantages (easy integration, …):</p>
+
+<ul>
+  <li><a href="http://www.squirrel-lang.org/">Squirrel</a></li>
+  <li><a href="http://www.angelcode.com/angelscript/">AngelScript</a></li>
+</ul>
+
+<p>Suggestions, comments? Feel free to send me a mail and if possible I’ll amend the article or just write a Part II.</p>
+
+<!--
+    TODO: sandboxing, luaL_openlibs(L) opens all libraries, even IO, shouldn't do that
+    TODO: more sandboxing, separating interpreteters, one for GUI, one for AI, ...
+-->
+
+        </article>
+
+        <p>Tags: <a href="/tag/lua" rel="tag">lua</a>, <a href="/tag/c" rel="tag">c</a>, <a href="/tag/scripting" rel="tag">scripting</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/ffi" rel="tag">ffi</a></p>
+    </div>
+
+        </main>
+
+        <!-- mathjax config similar to math.stackexchange -->
+        <script>
+          window.MathJax = {
+            tex: {
+              inlineMath: [ ['$', '$'], ["\\(", "\\)"] ],
+              displayMath: [ ['$$', '$$'], ["\\[", "\\]"] ],
+              processEscapes: true,
+              autoload: {
+                color: [],
+                colorv2: ['color']
+              },
+              packages: {'[+]': ['noerrors']}
+            },
+            options: {
+              skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process'
+            },
+            chtml: {
+              scale: 1.8
+            },
+            loader: {
+              load: ['[tex]/noerrors']
+            }
+          };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    // reload mathjax after a pjax load
+                    MathJax.typesetPromise();
+                },
+                "autoAnalytics": false
+            });
+        </script>
+    </body>
+</html>
+

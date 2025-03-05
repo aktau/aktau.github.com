@@ -29,7 +29,7 @@ context should hopefully make clear which one I mean.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id="the-impetus"&gt;The impetus&lt;/h2&gt;
 
 &lt;p&gt;It all started when I was reading over the changes of PR
-&lt;a href="https://github.com/neovim/neovim/pull/1357"&gt;#1357&lt;/a&gt; &lt;sup id="fnref:1" role="doc-noteref"&gt;&lt;a href="#fn:1" class="footnote" rel="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;. I’ve always
+&lt;a href="https://github.com/neovim/neovim/pull/1357"&gt;#1357&lt;/a&gt; &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;. I’ve always
 wanted to know more about how Vim does character encoding, and there was
 a commit in this PR that started me on the path: &lt;a href="https://github.com/tarruda/neovim/commit/4fd9ee4a6b908d86815f08c8880db73d9dda13dc"&gt;input/job: process
 ctrl+c and do conversion in the read
@@ -334,7 +334,7 @@ phases:&lt;/p&gt;
 
 &lt;p&gt;The fact that Vim provides some native encodings is probably why no
 Neovim user has complained up until now (iconv is temporarily disabled
-in Neovim, this is being fixed &lt;sup id="fnref:2" role="doc-noteref"&gt;&lt;a href="#fn:2" class="footnote" rel="footnote"&gt;2&lt;/a&gt;&lt;/sup&gt;). Apparently, not many use an exotic
+in Neovim, this is being fixed &lt;sup id="fnref:2"&gt;&lt;a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref"&gt;2&lt;/a&gt;&lt;/sup&gt;). Apparently, not many use an exotic
 encoding for input. I surmise that UTF-8 is good enough for most. Point
 1 also implies that the &lt;code&gt;*p_tenc != NUL&lt;/code&gt; check in
 &lt;code&gt;did_set_string_option()&lt;/code&gt; is likely redundant.&lt;/p&gt;
@@ -552,7 +552,7 @@ discuss file encoding.&lt;/p&gt;
 
 &lt;div class="footnotes" role="doc-endnotes"&gt;
   &lt;ol&gt;
-    &lt;li id="fn:1" role="doc-endnote"&gt;
+    &lt;li id="fn:1"&gt;
       &lt;p&gt;Code review is not only massively important for a rapidly changing
 project like Neovim, it also helps me get to grips with some internals
 that I haven’t had the pleasure to alter myself.&lt;/p&gt;
@@ -566,7 +566,7 @@ discussion after a lull. After all, we’re only in alpha. I’m also
 guilty of reviewing after the fact (read: merge), but for now it’s
 not causing the world to implode. &lt;a href="#fnref:1" class="reversefootnote" role="doc-backlink"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
-    &lt;li id="fn:2" role="doc-endnote"&gt;
+    &lt;li id="fn:2"&gt;
       &lt;p&gt;After seeing all the &lt;code&gt;USE_ICONV&lt;/code&gt; conditional parts in the source, I
 started to wonder when &lt;a href="http://en.wikipedia.org/wiki/Iconv"&gt;libiconv&lt;/a&gt; was
 actually activated and used.&lt;/p&gt;
@@ -892,7 +892,7 @@ it doesn’t even require ruby anymore!&lt;/p&gt;
 
 &lt;!-- more --&gt;
 
-&lt;p&gt;After realizing the utility worked through applescript &lt;sup id="fnref:1" role="doc-noteref"&gt;&lt;a href="#fn:1" class="footnote" rel="footnote"&gt;1&lt;/a&gt;&lt;/sup&gt;, I perused
+&lt;p&gt;After realizing the utility worked through applescript &lt;sup id="fnref:1"&gt;&lt;a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref"&gt;1&lt;/a&gt;&lt;/sup&gt;, I perused
 google to find a way to circumvent the inability to send to self. Lo and
 behold, &lt;a href="http://stackoverflow.com/questions/11812184/how-to-send-an-imessage-text-with-applescript-only-in-provided-service"&gt;Stack Overflow has the
 answer&lt;/a&gt;!&lt;/p&gt;
@@ -931,7 +931,7 @@ possibilities!&lt;/p&gt;
 
 &lt;div class="footnotes" role="doc-endnotes"&gt;
   &lt;ol&gt;
-    &lt;li id="fn:1" role="doc-endnote"&gt;
+    &lt;li id="fn:1"&gt;
       &lt;p&gt;the ruby utility can be found on &lt;a href="https://github.com/chrisfsampaio/imsg"&gt;github&lt;/a&gt;. &lt;a href="#fnref:1" class="reversefootnote" role="doc-backlink"&gt;↩&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;

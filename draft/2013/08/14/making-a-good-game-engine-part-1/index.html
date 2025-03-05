@@ -1,0 +1,375 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+
+        <title>Making a good game engine (part 1)</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="In this article I write about how I finally started making my own 3D game engine, and about how much it sucks.">
+        <meta name="keywords" content="sdl, game-engine, open-source, data-driven">
+        <meta name="author" content="Nicolas Hillegeer">
+        <meta name="generator" content="nanoc 4.13.3">
+        <meta name="robots" content="index,follow">
+
+        <meta property="og:title" content="Making a good game engine (part 1)">
+        <meta property="og:site_name" content="Nicolas Hillegeer - Portfolio and personal blog">
+        <meta property="og:type" content="blog">
+        <meta property="og:url" content="http://www.aktau.be/draft/2013/08/14/making-a-good-game-engine-part-1/">
+
+        <!-- Google Fonts embed code -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&display=swap" rel="stylesheet">
+
+        
+        <link rel="stylesheet" type="text/css" href="/stylesheets/all.css">
+        
+
+        <link rel="alternate" type="application/atom+xml" title="Posts" href="/atom.xml" />
+
+        <!--[if lt IE 9]><script src="/js/html5shiv.js"></script><![endif]-->
+    </head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BPQY780BNR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // Old universal analytics ID: ga('create', 'UA-37726728-1', 'aktau.be');
+      gtag('config', 'G-BPQY780BNR');
+    </script>
+    <body>
+        <nav>
+            <h2>Nicolas Hillegeer</h2>
+            <ul>
+                <li><a href="/">Blog</a></li>
+                <li><a href="/archive/">Archive</a></li>
+                <li><a href="/cv-alt/cv.pdf" title="Résumé">Curriculum Vitae</a></li>
+                <li><a href="/contact/" title="Personal information">About &amp; Contact</a></li>
+            </ul>
+            <h2>Online presence</h2>
+            <ul>
+                <li><a href="https://github.com/Aktau/">Github</a></li>
+                <li><a href="https://twitter.com/alazyleopard">Twitter</a></li>
+                <li><a href="http://stackoverflow.com/users/558819/aktau">Stack Overflow</a></li>
+                <li><a href="https://soundcloud.com/aktau">Soundcloud</a></li>
+            </ul>
+            <!--
+            <h2>Tags</h2>
+            <ul>
+                
+                <li><a href="/tag/introduction">introduction (1)</a></li>
+                
+                <li><a href="/tag/nanoc">nanoc (1)</a></li>
+                
+                <li><a href="/tag/pygments">pygments (1)</a></li>
+                
+                <li><a href="/tag/github">github (2)</a></li>
+                
+                <li><a href="/tag/unix">unix (1)</a></li>
+                
+                <li><a href="/tag/c">c (1)</a></li>
+                
+                <li><a href="/tag/make">make (1)</a></li>
+                
+                <li><a href="/tag/linux">linux (1)</a></li>
+                
+                <li><a href="/tag/osx">osx (2)</a></li>
+                
+                <li><a href="/tag/sdl">sdl (1)</a></li>
+                
+                <li><a href="/tag/game-engine">game-engine (1)</a></li>
+                
+                <li><a href="/tag/open-source">open-source (1)</a></li>
+                
+                <li><a href="/tag/ffmpeg">ffmpeg (1)</a></li>
+                
+                <li><a href="/tag/github-release">github-release (1)</a></li>
+                
+                <li><a href="/tag/gofinance">gofinance (1)</a></li>
+                
+                <li><a href="/tag/golang">golang (1)</a></li>
+                
+                <li><a href="/tag/cross-compiling">cross-compiling (1)</a></li>
+                
+                <li><a href="/tag/imessage">imessage (1)</a></li>
+                
+                <li><a href="/tag/applescript">applescript (1)</a></li>
+                
+                <li><a href="/tag/postgres">postgres (1)</a></li>
+                
+                <li><a href="/tag/pigz">pigz (1)</a></li>
+                
+                <li><a href="/tag/rsync">rsync (1)</a></li>
+                
+                <li><a href="/tag/sysadmin">sysadmin (1)</a></li>
+                
+                <li><a href="/tag/neovim">neovim (1)</a></li>
+                
+                <li><a href="/tag/vim">vim (1)</a></li>
+                
+                <li><a href="/tag/encoding">encoding (1)</a></li>
+                
+            </ul>
+            -->
+        </nav>
+
+        <main id="content">
+            
+    <div class="post">
+        <h1>Making a good game engine (part 1)</h1>
+        <aside>August 14, 2013</aside>
+
+        <article>
+            <p>I’ve – for a very long time – wanted to make my own game engine. Worse, I want to make a good game engine. One that
+would allow me to produce nice visuals with comparatively little effort while still maintaining a good framerate. That would
+allow me to script it’s behaviour and thus change it at runtime. An engine that makes use of the latest and greates graphics
+stack (OpenGL 3.2+, for my OSX-using self). And it must have efficient and believable physics and ragdolls. Oh, and cool
+water shaders like Crysis (and by now hundreds of other games). And I’d like networking too, and elegant code, and did I mention physics?
+Basically, for my unexperienced self, I want to go to the end of the rainbow and tell it that the laws of nature don’t apply
+to me…</p>
+
+<!-- more -->
+
+<p><strong>DISCLAIMER</strong>: I’ve never written an actual game engine before. When I was young I coded up a
+<a href="http://zatacka.sourceforge.net/index.php?id=screens">Zatacka</a><sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>-clone in SDL after
+following <a href="http://sol.gfxile.net/gp/index.html">Jari Komppa</a>’s tutorial. I loved that falling snow! After that my game-making tapered
+off a bit and I can painfully remember that I couldn’t even muster up the discipline to code up a tetris-clone. I guess I liked my
+win32 wildcard filename searcher better <sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup>. It took many years before I wrote a simple 2D-game (also with SDL but this time drawing
+with OpenGL) that was supposed to teach butterfly evolution to a bunch of pre-schoolers. I learned C++ specifically for the project
+because that’s what game programmers did, or so I had read once. Needless to say, this was a mistake:
+new language + not experienced at game making = frantic coding to make up for lost time. It did provide me with a handle on C++ and a bit more
+of an idea of what it might mean to make an engine.</p>
+
+<p>But still, the idea lingered, and I wanted all those things that I wrote at the top of the page. I realized quite early that I couldn’t have all those things.
+It takes people far more experienced and likely also far smarter than me a lot of time to come up with engines like the one I want. How
+on earth am I supposed to do it then?</p>
+
+<p>Well, from my earlier experiments, I had learned two things:</p>
+
+<p>1) your first attempt(s) suck.
+2) every subsequent attempt gets better.
+3) agonizing over design is sometimes very necessary and sometimes utter crap.</p>
+
+<p>The two first points are nshrined in such common wisdom as “<em>practice makes perfect</em>”, this should come as no surprise. The third one
+seems to provide no value at all. I’ll try to clarify. For the butterfly evolution game I needed the students to play against each other:
+multiplayer. I thought about my Zatacka-clone, how I had made it and tried to add multiplayer to it after “perfecting” the singleplayer.
+And how incredibly painful that was. I just couldn’t get it to work right, after a short while my players would desync or have any of
+a million other issues. It took about a month for me to realize that Zatacka-multiplayer was unsalvageable. The game had just not been made
+with multiplayer in mind, and to shoehorn it in was the worst idea ever.</p>
+
+<p>Networking: link to John Carmack’s plan in which he lays out input/output. Link to tribes 2 networking design. Link to valve networking design.</p>
+
+<p>This is the reason I have so much respect for (f.ex) the people that made <a href="http://www.mtavc.com/">Multi Theft Auto</a>: they made a networked
+game out of a very complex, strictly singleplayer game, without having the source. My mind was blown. I couldn’t even do that for a game
+so simple a cellular automaton could have made it, and I even had the source!</p>
+
+<p>I had very little experience with socket programming and perhaps less with game design, but one thing I could foresee was
+that it would be absolute madness to shoehorn such a thing as multiplayer into a game designed as a</p>
+
+<p>Like all things, engine design is subject to certain trends and even fads. The one that’s currently (in 2013) the strongest and has been
+growing for a couple of years seems to be the \textbf{data-driven engine}. Sounds pretty generic, right? Which engine isn’t driven
+by data? What does it mean?</p>
+
+<h3 id="choosing-a-language">Choosing a language</h3>
+
+<p>C++11 looks awesome, but I find that classes distract from the true core of the data-driven religion.</p>
+
+<h3 id="the-pipeline">The pipeline</h3>
+
+<p>The point is to view your data as streaming through a pipeline</p>
+
+<p>The cache, bro.</p>
+
+<h3 id="no-more-trees">No more trees</h3>
+
+<p>Trees are bad for caches… or are they?</p>
+
+<h3 id="tooling">Tooling</h3>
+
+<p>Well, that’s a whole different can of worms. I’m not much of a tools programmer nor do I enjoy it very much. So I’ll try to reuse
+as much as humanly possible in this aspect.</p>
+
+<h3 id="d-math">3D Math</h3>
+
+<p>Any game engine will need to perform a whole lot of mathematics.
+Physics, translations, rotations, projections, skinning, …: you name it,
+the engine does it. If you’re like me, you have always had this desire
+to craft really performant code (where it matters, and sometimes
+where it doesn’t). As it happens, even when I was not busy actually
+writing a graphics engine, I was at times amusing myself by
+reading articles about it. One thing that caught my attention was
+<em>template metaprogramming</em> in C++. This was back when I still believed C++
+was a good idea, mostly because all game engines were written in it.
+It promised to deliver the
+performance-conscious programmer from the hell of temporary allocations
+and inefficient code. All this by making the compiler do all the work
+thanks to the notably Turing-complete templates C++ offers. The price,
+was a serious increase in complexity. But only on the inside, said
+the proponents of this approach. Only the templates are complex, the
+client code doesn’t have to care that it’s so complex.</p>
+
+<p>While this may be true, there are two concerns I would like to note:</p>
+
+<ol>
+  <li>I don’t particularly like using a piece of code that I couldn’t
+understand without an enormous effort. Template-based code seems to be
+very <em>write once</em> in nature. After a while, not even the author might
+understand it. (Granted, one could say the same about including LuaJIT
+in one’s codebase, but I feel that it’s somehow different. Though
+perhaps I’m just being arbitratry here).</li>
+  <li>It increases compile times a lot. C++ is already a slouch,
+espcially when you’re also using the STL, but template metaprogramming
+magic doesn’t help, at all. If there’s one thing I hate when I’m working
+on something, it’s a long edit-inspect cycle. I want to be able to see
+my changes a second after I make them. When I don’t, I tend to either
+lose my concentration or become frustrated.</li>
+</ol>
+
+<p>But is there an alternative for intrepid performance-conscious
+developers such as ourselves? Certainly, just use intrinsics, wrap them
+in a nice function and let the compiler sort it all out – quickly I
+might add! A good example of this is the incomplete but functional
+<a href="https://github.com/rikusalminen/threedee-simd">threedee-simd library</a>.
+It is small and lean and compile very quickly, produces extremely
+performant code and is (with less effor than templates) understandable.</p>
+
+<p>To understand it you’d have to get the hang of some SIMD intrinsics first,
+but after that it all becomes quite obvious. A good tip is working it
+out on paper, because all the shuffling be consusing. The actual
+difficult thing, once you get the hang of it and want to add parts to
+the library, is to get the absolute last inch of performance out of it.
+It’s one thing to be able to write correct code with intrinsics, but
+it’s another entirely for that to satisfy the CPU’s desires. There are
+many SIMD functions and some combinations are better than others. Some
+might even lead to performance no better than pure scala code. So you
+might you as well write it in a scalar fashion.</p>
+
+<p>That’s the nice thing about threedee-simd, you can just write your
+function scalar-style first if it doesn’t exist yet. If it proves
+to be oft-used, you can optimize the snot out of it and just replace the
+call from the entrypoint with your shiny new implementation. Actually,
+advanced compiler vectorizers like Clangs’
+<a href="http://llvm.org/docs/Vectorizers.html#the-slp-vectorizer">SLP vectorizer</a>
+do a pretty good job of automatically vectorizing a lot of code, if you
+give it the right nudge.</p>
+
+<p>The right nudge in this case is usually two things:</p>
+
+<ol>
+  <li>The data has to be aligned on a SIMD boundary (16 bytes = 4 floats in
+this case)</li>
+  <li>The loop in which the data is used has to have a constant number of
+iterations or be manually unrolled.</li>
+  <li>You have to tell the compiler what can change and what pointers can
+alias each other. The C99
+<a href="http://en.wikipedia.org/wiki/Restrict">restrict</a> keyword can be very
+helpful with this, in conjunction with const.</li>
+</ol>
+
+<p>After these simple things, you already have a decent chance the the
+compiler will produce some pretty performant code. These requirements
+are easy, for alignment it’s enough to use a special typedef that
+enforces alignment. If you dynamically allocate memory for these types,
+you have to tell your <code>malloc</code> variant to give you 16-byte aligned
+memory though. These are the types from threedee-simd:</p>
+
+<pre><code class="language-c"><span class="k">typedef</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">__attribute__</span><span class="p">((</span><span class="n">vector_size</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">scalar</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">mat4_t</span>
+<span class="p">{</span>
+<span class="w">      </span><span class="n">vec4</span><span class="w"> </span><span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">aligned</span><span class="p">(</span><span class="mi">16</span><span class="p">)));</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">mat4_t</span><span class="w"> </span><span class="n">mat4</span><span class="p">;</span></code></pre>
+
+<p>When you use these types, any on-stack variables with these types will
+be aligned correctly. What’s more, when you pass these variables to
+function, the compiler can assume they are aligned correctly, which
+makes it easier to vectorize.</p>
+
+<pre><code class="language-c"><span class="cm">/**</span>
+<span class="cm"> * convert an axis-angle vector to a quaternion</span>
+<span class="cm"> * angle in radians</span>
+<span class="cm"> *</span>
+<span class="cm"> * [axis.x, axis.y, axis.z, angle] =&gt; quaternion</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_shuf</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">vec4</span><span class="w"> </span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="n">vcs</span><span class="p">;</span>
+<span class="w">    </span><span class="n">vsincos</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">vcs</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">vec4</span><span class="w"> </span><span class="n">sincos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vshuffle</span><span class="p">(</span><span class="n">vsn</span><span class="p">,</span><span class="w"> </span><span class="n">vcs</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vshuffle</span><span class="p">(</span><span class="n">sincos</span><span class="p">,</span><span class="w"> </span><span class="n">sincos</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * a little bit faster, especially when you have FMA instructions, but</span>
+<span class="cm"> * less readable too</span>
+<span class="cm"> */</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">));</span>
+<span class="k">static</span><span class="w"> </span><span class="kr">inline</span><span class="w"> </span><span class="n">vec4</span><span class="w"> </span><span class="nf">quat_axisangle_clever</span><span class="p">(</span><span class="n">vec4</span><span class="w"> </span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vxyz1</span><span class="p">(</span><span class="n">axisangle</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">vsin</span><span class="p">(</span><span class="n">vmadd</span><span class="p">(</span><span class="n">vsplat</span><span class="p">(</span><span class="n">axisangle</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="n">vscalar</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">),</span><span class="w"> </span><span class="n">vec</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">M_PI_F</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">)));</span>
+<span class="p">}</span></code></pre>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1">
+      <p>Also known as “<em>Achting die Kurve!</em>” <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:2">
+      <p>Years later, I encountered <a href="http://www.voidtools.com/">everything</a>, which did what my tool did, only way better. I was just using a linked list and looped through it and he had a fancy data structure for searching! In retrospect and given my current knowledge of algorithms, my app sucked (a lot). But, even if it was poorly designed, it ran blazing fast, I never noticed any slowdown. This was because I coded it in C, and C is fast, <em>real</em> fast. This is actually what started a long lasting love affair between me and C. I guess my young self already realized that my code was a bit poor, but that C was making up for it and that I could use my app and be happy. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+
+        <p>Tags: <a href="/tag/sdl" rel="tag">sdl</a>, <a href="/tag/game-engine" rel="tag">game-engine</a>, <a href="/tag/open-source" rel="tag">open-source</a>, <a href="/tag/data-driven" rel="tag">data-driven</a></p>
+    </div>
+
+        </main>
+
+        <!-- mathjax config similar to math.stackexchange -->
+        <script>
+          window.MathJax = {
+            tex: {
+              inlineMath: [ ['$', '$'], ["\\(", "\\)"] ],
+              displayMath: [ ['$$', '$$'], ["\\[", "\\]"] ],
+              processEscapes: true,
+              autoload: {
+                color: [],
+                colorv2: ['color']
+              },
+              packages: {'[+]': ['noerrors']}
+            },
+            options: {
+              skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+              ignoreHtmlClass: 'tex2jax_ignore',
+              processHtmlClass: 'tex2jax_process'
+            },
+            chtml: {
+              scale: 1.8
+            },
+            loader: {
+              load: ['[tex]/noerrors']
+            }
+          };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+        <script src="/js/pjax-standalone.js"></script>
+        <script>
+            pjax.connect({
+                "container": "content",
+                "complete": function() {
+                    // reload mathjax after a pjax load
+                    MathJax.typesetPromise();
+                },
+                "autoAnalytics": false
+            });
+        </script>
+    </body>
+</html>
+
