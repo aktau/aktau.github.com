@@ -51,6 +51,10 @@ compile '/stylesheets/*' do
   filter :rainpress if File.basename(item[:content_filename], ".*") == 'all'
 end
 
+compile '/js/*/' do
+    # don’t filter or layout
+end
+
 compile %r{^/(google|robots|Bing)} do
     # Don't filter or layout any google files, robots.txt, error pages .
 end
