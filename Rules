@@ -53,7 +53,7 @@ end
 
 compile '/js/*/' do
     unless @config[:debug]
-        filter :uglify_js
+        filter :terser
     end
 end
 
