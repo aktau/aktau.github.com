@@ -1,12 +1,12 @@
 <% render "default" do %>
-    <div class="post">
+    <article>
         <h1><%= item[:title] %></h1>
         <aside><%= get_pretty_date(item) %></aside>
 
-        <article>
-            <%= yield %>
-        </article>
+        <%= yield %>
+    </article>
 
+    <aside>
         <p>Tags: <%= tags_for(@item, base_url: "/tag/") %></p>
-    </div>
+    </aside>
 <% end %>
