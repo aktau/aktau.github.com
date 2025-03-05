@@ -117,12 +117,11 @@
 
         <main id="content">
             
-    <div class="post">
+    <article>
         <h1>pg_dump and pigz, easy rsyncable backups with PostgreSQL</h1>
         <aside>October 23, 2014</aside>
 
-        <article>
-            <p>Some time ago, I created an ad-hoc offsite backup solution for a MySQL
+        <p>Some time ago, I created an ad-hoc offsite backup solution for a MySQL
 database after I recovered it. This happened after a client contacted me
 when one of their legacy databases blew up. The recovery process was
 quite painful because the backups that they had were corrupted and
@@ -393,10 +392,11 @@ variant, because the delta’s could be smaller (look at the <em>bytes sent</em>
 column). It depends on the churn rate and the type of data in the
 database though.</p>
 
-        </article>
+    </article>
 
+    <aside>
         <p>Tags: <a href="/tag/postgres" rel="tag">postgres</a>, <a href="/tag/pigz" rel="tag">pigz</a>, <a href="/tag/rsync" rel="tag">rsync</a>, <a href="/tag/sysadmin" rel="tag">sysadmin</a></p>
-    </div>
+    </aside>
 
         </main>
 
