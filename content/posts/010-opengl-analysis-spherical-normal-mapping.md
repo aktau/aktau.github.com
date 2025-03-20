@@ -53,4 +53,8 @@ map**.
 Research
 --------
 
-1. http://www.gamedev.net/topic/567076-difference-between-bump-mapping-and-normal-mapping/
+1. [gamedev.net forum: the differen between bump-mapping and
+   normal-mapping](http://www.gamedev.net/topic/567076-difference-between-bump-mapping-and-normal-mapping/)
+2. [poorvaj/io: exploring bump-mapping with
+   WebGL](https://apoorvaj.io/exploring-bump-mapping-with-webgl): compares
+   normal mapping and (steep) parallax mapping, with open-source assets.
