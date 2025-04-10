@@ -101,7 +101,6 @@ article ul, article ol, article dl {
 }
 
 article ul {
-    list-style-position: inside;
     padding-left: 3em;
 }
 
