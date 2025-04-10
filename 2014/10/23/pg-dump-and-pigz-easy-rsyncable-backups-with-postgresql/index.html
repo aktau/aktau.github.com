@@ -199,22 +199,22 @@ allowing much more flexibility when restoring a backup. The 4 output
 formats available at the moment of writing are (if you already know them
 you can skip the list, it’s mostly from the Postgres docs):</p>
 
-<ul>
-  <li>
-<strong>plain</strong>: like <em>mysqldump</em>, mostly SQL queries but with faster data
+<dl>
+  <dt>plain</dt>
+  <dd>Like <em>mysqldump</em>, mostly SQL queries but with faster data
 loading (no <code>INSERT</code> statements but loading from heredoc-like
 buffers). This is the default. The big advantage of this format is
-that it is human-readable.</li>
-  <li>
-<strong>custom</strong>: Output a custom-format archive suitable for input into
+that it is human-readable.</dd>
+  <dt>custom</dt>
+  <dd>Output a custom-format archive suitable for input into
 pg_restore. Together with the directory output format, this is the
 most flexible output format in that it allows manual selection and
 reordering of archived items during restore. This format is also
 compressed by default. It’s not human-readable though, unless you turn
 off compression with <code>-Z0</code>, in which case opening it in a text editor
-will allow one to make sense of a lot of things.</li>
-  <li>
-<strong>directory</strong>: Output a directory-format archive suitable for input
+will allow one to make sense of a lot of things.</dd>
+  <dt>directory</dt>
+  <dd>Output a directory-format archive suitable for input
 into <em>pg_restore</em>. This will create a directory with one file for each
 table and blob being dumped, plus a so-called Table of Contents file
 describing the dumped objects in a machine-readable format that
@@ -223,9 +223,9 @@ with standard Unix tools; for example, files in an uncompressed
 archive can be compressed with the gzip tool. This format is
 compressed by default and also supports parallel dumps. This is most
 similar to what I had been forcing <em>mysqldump</em> to do, except that with
-<em>pg_dump</em> you only need one command.</li>
-  <li>
-<strong>tar</strong>: Output a tar-format archive suitable for input into
+<em>pg_dump</em> you only need one command.</dd>
+  <dt>tar</dt>
+  <dd>Output a tar-format archive suitable for input into
 pg_restore.  The tar-format is compatible with the directory-format;
 extracting a tar-format archive produces a valid directory-format
 archive. However, the tar-format does not support compression and has
@@ -234,8 +234,8 @@ order of table data items cannot be changed during restore. try not to
 use this as can use <a href="http://serverfault.com/questions/267616/pg-dump-fails-due-to-mistaken-low-disk-space">a lot of temporary space on your
 harddrive</a>.
 This might not only wear the underlying HD out and consume needless
-space but also thrash the disk page cache.</li>
-</ul>
+space but also thrash the disk page cache.</dd>
+</dl>
 
 <p><strong>NOTE</strong>: If you’re using the directory output format the nifty flag
 <code>--jobs</code> becomes available, allowing parallel dumping.</p>

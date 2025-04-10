@@ -673,22 +673,22 @@ allowing much more flexibility when restoring a backup. The 4 output
 formats available at the moment of writing are (if you already know them
 you can skip the list, it’s mostly from the Postgres docs):&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;
-&lt;strong&gt;plain&lt;/strong&gt;: like &lt;em&gt;mysqldump&lt;/em&gt;, mostly SQL queries but with faster data
+&lt;dl&gt;
+  &lt;dt&gt;plain&lt;/dt&gt;
+  &lt;dd&gt;Like &lt;em&gt;mysqldump&lt;/em&gt;, mostly SQL queries but with faster data
 loading (no &lt;code&gt;INSERT&lt;/code&gt; statements but loading from heredoc-like
 buffers). This is the default. The big advantage of this format is
-that it is human-readable.&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;custom&lt;/strong&gt;: Output a custom-format archive suitable for input into
+that it is human-readable.&lt;/dd&gt;
+  &lt;dt&gt;custom&lt;/dt&gt;
+  &lt;dd&gt;Output a custom-format archive suitable for input into
 pg_restore. Together with the directory output format, this is the
 most flexible output format in that it allows manual selection and
 reordering of archived items during restore. This format is also
 compressed by default. It’s not human-readable though, unless you turn
 off compression with &lt;code&gt;-Z0&lt;/code&gt;, in which case opening it in a text editor
-will allow one to make sense of a lot of things.&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;directory&lt;/strong&gt;: Output a directory-format archive suitable for input
+will allow one to make sense of a lot of things.&lt;/dd&gt;
+  &lt;dt&gt;directory&lt;/dt&gt;
+  &lt;dd&gt;Output a directory-format archive suitable for input
 into &lt;em&gt;pg_restore&lt;/em&gt;. This will create a directory with one file for each
 table and blob being dumped, plus a so-called Table of Contents file
 describing the dumped objects in a machine-readable format that
@@ -697,9 +697,9 @@ with standard Unix tools; for example, files in an uncompressed
 archive can be compressed with the gzip tool. This format is
 compressed by default and also supports parallel dumps. This is most
 similar to what I had been forcing &lt;em&gt;mysqldump&lt;/em&gt; to do, except that with
-&lt;em&gt;pg_dump&lt;/em&gt; you only need one command.&lt;/li&gt;
-  &lt;li&gt;
-&lt;strong&gt;tar&lt;/strong&gt;: Output a tar-format archive suitable for input into
+&lt;em&gt;pg_dump&lt;/em&gt; you only need one command.&lt;/dd&gt;
+  &lt;dt&gt;tar&lt;/dt&gt;
+  &lt;dd&gt;Output a tar-format archive suitable for input into
 pg_restore.  The tar-format is compatible with the directory-format;
 extracting a tar-format archive produces a valid directory-format
 archive. However, the tar-format does not support compression and has
@@ -708,8 +708,8 @@ order of table data items cannot be changed during restore. try not to
 use this as can use &lt;a href="http://serverfault.com/questions/267616/pg-dump-fails-due-to-mistaken-low-disk-space"&gt;a lot of temporary space on your
 harddrive&lt;/a&gt;.
 This might not only wear the underlying HD out and consume needless
-space but also thrash the disk page cache.&lt;/li&gt;
-&lt;/ul&gt;
+space but also thrash the disk page cache.&lt;/dd&gt;
+&lt;/dl&gt;
 
 &lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;: If you’re using the directory output format the nifty flag
 &lt;code&gt;--jobs&lt;/code&gt; becomes available, allowing parallel dumping.&lt;/p&gt;
