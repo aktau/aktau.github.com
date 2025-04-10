@@ -90,18 +90,23 @@ allowing much more flexibility when restoring a backup. The 4 output
 formats available at the moment of writing are (if you already know them
 you can skip the list, it's mostly from the Postgres docs):
 
-- **plain**: like *mysqldump*, mostly SQL queries but with faster data
+plain
+: Like *mysqldump*, mostly SQL queries but with faster data
   loading (no `INSERT` statements but loading from heredoc-like
   buffers). This is the default. The big advantage of this format is
   that it is human-readable.
-- **custom**: Output a custom-format archive suitable for input into
+
+custom
+: Output a custom-format archive suitable for input into
   pg_restore. Together with the directory output format, this is the
   most flexible output format in that it allows manual selection and
   reordering of archived items during restore. This format is also
   compressed by default. It's not human-readable though, unless you turn
   off compression with `-Z0`, in which case opening it in a text editor
   will allow one to make sense of a lot of things.
-- **directory**: Output a directory-format archive suitable for input
+
+directory
+: Output a directory-format archive suitable for input
   into *pg_restore*. This will create a directory with one file for each
   table and blob being dumped, plus a so-called Table of Contents file
   describing the dumped objects in a machine-readable format that
@@ -111,7 +116,9 @@ you can skip the list, it's mostly from the Postgres docs):
   compressed by default and also supports parallel dumps. This is most
   similar to what I had been forcing *mysqldump* to do, except that with
   *pg_dump* you only need one command.
-- **tar**: Output a tar-format archive suitable for input into
+
+tar
+: Output a tar-format archive suitable for input into
   pg_restore.  The tar-format is compatible with the directory-format;
   extracting a tar-format archive produces a valid directory-format
   archive. However, the tar-format does not support compression and has

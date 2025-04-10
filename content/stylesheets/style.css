@@ -84,7 +84,6 @@ a:hover {
 }
 
 strong {
-    /* color: #5E8C6A; */
     color: #A30006;
 }
 
@@ -98,6 +97,13 @@ article ul, article ol, article dl {
     margin-bottom: 1.25em;
     list-style-position: outside;
     font-family: inherit;
+}
+
+article dt {
+    /* Render similarly to <strong>, this avoids having to add explicit bolding
+     * in definition lists. */
+    color: #A30006;
+    font-weight: bold;
 }
 
 article ul {
